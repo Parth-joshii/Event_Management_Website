@@ -9,17 +9,21 @@ import { GradientButton } from "@/components/ui/gradient-button";
 import { siteConfig } from "@/config/site";
 
 interface HeroSectionProps {
-  readonly hasHeroVideo: boolean;
+  readonly desktopVideoSrc?: string;
+  readonly mobileVideoSrc?: string;
 }
 
 /** Renders the cinematic landing hero with video or premium fallback visuals. */
-export function HeroSection({ hasHeroVideo }: HeroSectionProps): React.ReactElement {
+export function HeroSection({
+  desktopVideoSrc,
+  mobileVideoSrc
+}: HeroSectionProps): React.ReactElement {
   return (
     <section
       id="home"
       className="relative isolate flex min-h-screen overflow-hidden bg-[#2D2238] text-white"
     >
-      <ScrollVideo enabled={hasHeroVideo} src="/videos/hero-event.mp4" />
+      <ScrollVideo desktopSrc={desktopVideoSrc} mobileSrc={mobileVideoSrc} />
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(45,34,56,0.55)_0%,rgba(45,34,56,0.58)_42%,rgba(45,34,56,0.9)_100%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_24%_20%,rgba(191,162,219,0.32),transparent_30%),radial-gradient(circle_at_78%_28%,rgba(212,175,55,0.24),transparent_26%)]" />
 

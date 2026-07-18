@@ -6,20 +6,21 @@ import { cn } from "@/lib/utils";
 
 interface ScrollVideoProps {
   readonly className?: string;
-  readonly enabled: boolean;
+  readonly desktopSrc?: string;
+  readonly mobileSrc?: string;
   readonly poster?: string;
-  readonly src: string;
 }
 
 /** Connects hero video progress to scroll position when the asset is available. */
 export function ScrollVideo({
   className,
-  enabled,
+  desktopSrc,
+  mobileSrc,
   poster,
-  src
 }: ScrollVideoProps): React.ReactElement {
   const sectionRef = React.useRef<HTMLDivElement>(null);
   const videoRef = React.useRef<HTMLVideoElement>(null);
+  const enabled = Boolean(desktopSrc || mobileSrc);
   const [hasVideoError, setHasVideoError] = React.useState(!enabled);
 
   React.useEffect(() => {
@@ -49,7 +50,7 @@ export function ScrollVideo({
     return () => {
       trigger.kill();
     };
-  }, [enabled, hasVideoError]);
+  }, [desktopSrc, enabled, hasVideoError, mobileSrc]);
 
   return (
     <div ref={sectionRef} className={cn("absolute inset-0", className)}>
@@ -65,8 +66,15 @@ export function ScrollVideo({
           playsInline
           poster={poster}
           preload="metadata"
-          src={src}
-        />
+        >
+          {mobileSrc ? (
+            <source media="(max-width: 767px)" src={mobileSrc} type="video/mp4" />
+          ) : null}
+          {desktopSrc ? (
+            <source media="(min-width: 768px)" src={desktopSrc} type="video/mp4" />
+          ) : null}
+          <source src={desktopSrc ?? mobileSrc} type="video/mp4" />
+        </video>
       ) : (
         <div className="relative size-full overflow-hidden bg-[radial-gradient(circle_at_18%_22%,rgba(212,175,55,0.55),transparent_28%),radial-gradient(circle_at_80%_12%,rgba(191,162,219,0.7),transparent_30%),linear-gradient(135deg,#2D2238_0%,#6f5689_44%,#BFA2DB_100%)]">
           <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(255,255,255,0.14)_0,transparent_28%,rgba(212,175,55,0.18)_50%,transparent_74%)]" />

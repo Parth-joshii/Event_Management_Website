@@ -15,6 +15,7 @@ export function createOrganizationJsonLd(): Record<string, unknown> {
       "@type": "PostalAddress",
       ...siteConfig.address
     },
+    areaServed: siteConfig.serviceAreas,
     description: siteConfig.description,
     email: siteConfig.contact.email,
     name: siteConfig.name,
@@ -37,6 +38,7 @@ export function createHomepageJsonLd(): Record<string, unknown> {
           "@type": "PostalAddress",
           ...siteConfig.address
         },
+        areaServed: siteConfig.serviceAreas,
         description: siteConfig.description,
         email: siteConfig.contact.email,
         name: siteConfig.name,
@@ -49,7 +51,7 @@ export function createHomepageJsonLd(): Record<string, unknown> {
       {
         "@id": `${siteConfig.url}/#event-service`,
         "@type": "Service",
-        areaServed: "India",
+        areaServed: siteConfig.serviceAreas,
         category: "Luxury Event Management",
         description: siteConfig.description,
         name: `${siteConfig.name} Luxury Wedding & Event Planning`,

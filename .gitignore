@@ -29,3 +29,9 @@ pnpm-debug.log*
 # system
 .DS_Store
 Thumbs.db
+
+.vercel
+
+# local source videos and generated inspection frames
+/*.mp4
+/*.preview.jpg

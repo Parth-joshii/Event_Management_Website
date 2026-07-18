@@ -37,6 +37,7 @@ export interface SiteConfig {
   readonly keywords: readonly string[];
   readonly locale: "en_IN";
   readonly name: string;
+  readonly serviceAreas: readonly string[];
   readonly services: readonly ServiceCategory[];
   readonly social: {
     readonly facebook?: string;

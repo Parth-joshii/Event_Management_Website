@@ -14,7 +14,7 @@ import { StatsSection } from "@/components/sections/stats-section";
 import { TestimonialsSection } from "@/components/sections/testimonials-section";
 import { WhyChooseUs } from "@/components/sections/why-choose-us";
 import { siteConfig } from "@/config/site";
-import { optionalPublicAsset, publicAssetExists } from "@/lib/public-assets";
+import { optionalPublicAsset } from "@/lib/public-assets";
 import { createHomepageJsonLd } from "@/utils/seo";
 
 export const metadata: Metadata = {
@@ -42,14 +42,18 @@ export const metadata: Metadata = {
 /** Renders the complete premium landing page. */
 export default function HomePage(): React.ReactElement {
   const logoSrc = optionalPublicAsset("/logos/logo.png");
-  const hasHeroVideo = publicAssetExists("/videos/hero-event.mp4");
+  const desktopHeroVideoSrc = optionalPublicAsset("/videos/hero-desktop.mp4");
+  const mobileHeroVideoSrc = optionalPublicAsset("/videos/hero-mobile.mp4");
 
   return (
     <>
       <JsonLd data={createHomepageJsonLd()} />
       <Header logoSrc={logoSrc} />
       <main id="main-content">
-        <HeroSection hasHeroVideo={hasHeroVideo} />
+        <HeroSection
+          desktopVideoSrc={desktopHeroVideoSrc}
+          mobileVideoSrc={mobileHeroVideoSrc}
+        />
         <AboutPreview />
         <WhyChooseUs />
         <ServicesSection />

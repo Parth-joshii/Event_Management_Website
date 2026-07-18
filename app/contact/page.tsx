@@ -154,6 +154,34 @@ export default function ContactPage(): React.ReactElement {
                 </div>
               </aside>
             </div>
+            <section
+              aria-labelledby="service-areas-heading"
+              className="mt-10 rounded-lg border border-white/70 bg-white/82 p-6 shadow-sm sm:p-8"
+            >
+              <p className="text-sm font-semibold tracking-[0.18em] text-[#D4AF37] uppercase">
+                Areas We Serve
+              </p>
+              <h2
+                className="font-display mt-2 text-3xl font-semibold text-[#2D2238]"
+                id="service-areas-heading"
+              >
+                Event planning across leading cities
+              </h2>
+              <p className="mt-3 max-w-3xl text-sm leading-7 text-[#5c4b6e]">
+                We plan weddings, corporate events, private celebrations, and
+                destination experiences across these locations and nearby areas.
+              </p>
+              <ul className="mt-6 flex flex-wrap gap-2" aria-label="Service locations">
+                {siteConfig.serviceAreas.map((city) => (
+                  <li
+                    className="rounded-full border border-[#D4AF37]/30 bg-[#FAF7FF] px-4 py-2 text-sm font-medium text-[#2D2238]"
+                    key={city}
+                  >
+                    {city}
+                  </li>
+                ))}
+              </ul>
+            </section>
             <div className="mt-10 min-h-[22rem] rounded-lg border border-white/70 bg-[radial-gradient(circle_at_30%_30%,rgba(212,175,55,0.28),transparent_26%),linear-gradient(135deg,#2D2238,#7d5ea1)] p-8 text-white shadow-[0_24px_80px_rgba(45,34,56,0.16)]">
               <p className="font-display text-3xl font-semibold">Google Maps</p>
               <p className="mt-3 max-w-xl text-sm leading-7 text-white/72">
