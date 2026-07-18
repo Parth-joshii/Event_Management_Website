@@ -51,9 +51,9 @@ export function ContactPreviewSection(): React.ReactElement {
           <Reveal>
             <SectionHeading
               align="left"
-              eyebrow="Contact"
-              title="Plan A Celebration With Confidence"
-              description="Share the occasion, city, guest count, and preferred style. The team will help shape the event concept and planning direction."
+              eyebrow="Private Consultation"
+              title="Begin The Conversation"
+              description="Tell us about your occasion, destination, guest experience, and aesthetic vision. Our team will shape the first direction for a celebration that feels unmistakably yours."
             />
             <div className="mt-10 grid gap-4 sm:grid-cols-2">
               {contactItems.map((item) => {
@@ -87,13 +87,13 @@ export function ContactPreviewSection(): React.ReactElement {
               <GradientButton asChild>
                 <a href={`mailto:${siteConfig.contact.email}`}>
                   <Mail aria-hidden="true" className="size-4" />
-                  Contact Us
+                  Request A Consultation
                 </a>
               </GradientButton>
               <GradientButton asChild tone="light">
                 <Link href="#customize">
                   <Quote aria-hidden="true" className="size-4" />
-                  Get Free Quote
+                  Curate My Event
                 </Link>
               </GradientButton>
             </div>
@@ -115,7 +115,8 @@ export function ContactPreviewSection(): React.ReactElement {
                   {siteConfig.contact.location}
                 </p>
                 <p className="mt-2 max-w-xs text-sm leading-6 text-white/68">
-                  Consultations and event planning support are available by appointment.
+                  Personal consultations and destination planning are available by
+                  appointment.
                 </p>
               </div>
             </div>

@@ -16,9 +16,9 @@ export function EventCategoriesSection(): React.ReactElement {
       <Container>
         <Reveal>
           <SectionHeading
-            eyebrow="Event Categories"
-            title="Celebrations Crafted For Every Occasion"
-            description="Browse the signature categories that will later connect directly with the full gallery and event customization flows."
+            eyebrow="Signature Occasions"
+            title="Distinctive Experiences For Every Celebration"
+            description="Discover celebrations shaped with individual character—from timeless weddings and private soirées to polished corporate and cultural occasions."
           />
         </Reveal>
         <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -50,7 +50,7 @@ export function EventCategoriesSection(): React.ReactElement {
                       {category.description}
                     </p>
                     <span className="mt-5 inline-flex translate-y-3 items-center gap-2 rounded-full border border-white/25 bg-white/15 px-4 py-2 text-sm font-semibold opacity-0 backdrop-blur transition duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-                      View Gallery
+                      Discover More
                       <ArrowUpRight aria-hidden="true" className="size-4" />
                     </span>
                   </div>

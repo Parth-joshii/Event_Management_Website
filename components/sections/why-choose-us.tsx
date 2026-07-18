@@ -60,9 +60,9 @@ export function WhyChooseUs(): React.ReactElement {
       <Container>
         <Reveal>
           <SectionHeading
-            eyebrow="Why Choose Us"
-            title="Why Choose Shree Velora Event's?"
-            description="A premium celebration needs more than decor. It needs taste, planning discipline, vendor control, and a team that can protect the feeling of the day."
+            eyebrow="The Velora Standard"
+            title="The Art Of Celebrating, Masterfully Managed"
+            description="Remarkable occasions are shaped by discernment, discipline, and care. Our team brings creative vision and calm command to every detail, allowing you to remain fully present."
           />
         </Reveal>
         <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

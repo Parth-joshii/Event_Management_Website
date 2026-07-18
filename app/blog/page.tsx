@@ -134,10 +134,13 @@ export default async function BlogPage({
                   />
                 )}
                 <div className="mt-14 rounded-lg border border-white/70 bg-white/82 p-6">
-                  <h2 className="text-xl font-semibold text-[#2D2238]">Newsletter</h2>
+                  <h2 className="text-xl font-semibold text-[#2D2238]">
+                    The Velora Edit
+                  </h2>
                   <p className="mt-2 text-sm leading-7 text-[#5c4b6e]">
-                    Subscribe backend will be connected in a later phase. For now,
-                    contact the team for seasonal planning ideas.
+                    A considered collection of celebration ideas, design perspectives,
+                    and planning guidance. Contact our team for the latest seasonal
+                    inspiration.
                   </p>
                 </div>
               </div>

@@ -13,9 +13,9 @@ export function ProcessTimelineSection(): React.ReactElement {
       <Container>
         <Reveal>
           <SectionHeading
-            eyebrow="Process"
-            title="From First Conversation To Final Celebration"
-            description="A structured planning flow keeps the experience creative, clear, and beautifully executed from the first idea to the last photograph."
+            eyebrow="Our Approach"
+            title="A Seamless Journey From Vision To Celebration"
+            description="Our considered planning process brings clarity to every decision and beauty to every detail—from the first conversation to the final farewell."
           />
         </Reveal>
         <div className="relative mt-16">

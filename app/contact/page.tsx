@@ -185,8 +185,8 @@ export default function ContactPage(): React.ReactElement {
             <div className="mt-10 min-h-[22rem] rounded-lg border border-white/70 bg-[radial-gradient(circle_at_30%_30%,rgba(212,175,55,0.28),transparent_26%),linear-gradient(135deg,#2D2238,#7d5ea1)] p-8 text-white shadow-[0_24px_80px_rgba(45,34,56,0.16)]">
               <p className="font-display text-3xl font-semibold">Google Maps</p>
               <p className="mt-3 max-w-xl text-sm leading-7 text-white/72">
-                Map embed placeholder for the official Shree Velora Event's service
-                location. Add a Google Maps embed key during deployment.
+                Shree Velora offers private consultations and event planning across our
+                service destinations. Share your preferred city and venue to begin.
               </p>
             </div>
           </Container>

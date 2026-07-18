@@ -16,9 +16,9 @@ export function ServicesSection(): React.ReactElement {
       <Container>
         <Reveal>
           <SectionHeading
-            eyebrow="Services"
-            title="Services We Offer"
-            description="From intimate private celebrations to grand wedding productions, each service is designed with luxury aesthetics and operational discipline."
+            eyebrow="Our Expertise"
+            title="Curated Services For Remarkable Celebrations"
+            description="From intimate gatherings to grand-scale productions, every service is tailored with refined aesthetics, thoughtful hospitality, and flawless operational detail."
           />
         </Reveal>
         <div className="mt-14 grid gap-6 lg:grid-cols-2">
@@ -62,7 +62,7 @@ export function ServicesSection(): React.ReactElement {
                     </div>
                     <GradientButton asChild className="mt-6">
                       <Link href={service.href}>
-                        Customize Now
+                        Curate Your Event
                         <ArrowRight aria-hidden="true" className="size-4" />
                       </Link>
                     </GradientButton>

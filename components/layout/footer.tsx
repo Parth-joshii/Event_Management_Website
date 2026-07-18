@@ -54,8 +54,8 @@ export function Footer(): React.ReactElement {
             </div>
           </div>
           <p className="mt-6 max-w-sm text-sm leading-7 text-white/68">
-            Premium event planning, decor, production, and celebration management for
-            families, brands, institutions, and communities.
+            Bespoke celebrations, artful event design, and graciously managed
+            experiences for families, brands, and institutions.
           </p>
           <div className="mt-6 flex gap-2">
             {socialLinks.map((social) => {
@@ -118,8 +118,8 @@ export function Footer(): React.ReactElement {
         <div>
           <p className="font-semibold text-white">Newsletter</p>
           <p className="mt-5 text-sm leading-7 text-white/68">
-            Receive seasonal ideas for premium weddings, brand events, and signature
-            celebrations.
+            Receive curated inspiration for distinguished weddings, brand occasions, and
+            signature celebrations.
           </p>
           <form className="mt-5 flex gap-2" aria-label="Newsletter form">
             <Input

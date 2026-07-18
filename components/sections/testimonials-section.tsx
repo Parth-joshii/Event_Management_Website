@@ -12,9 +12,9 @@ export function TestimonialsSection(): React.ReactElement {
       <Container>
         <Reveal>
           <SectionHeading
-            eyebrow="Testimonials"
-            title="Loved By Families, Brands, And Celebration Hosts"
-            description="A preview of the trust Shree Velora Event's builds through detail, polish, and calm execution."
+            eyebrow="Client Stories"
+            title="Celebrations Remembered, Trust Earned"
+            description="Words from families, brands, and hosts who entrusted Shree Velora with their most meaningful occasions."
           />
         </Reveal>
         <div className="mt-14 grid gap-5 lg:grid-cols-3">

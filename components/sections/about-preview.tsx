@@ -7,21 +7,21 @@ import { LuxuryCard } from "@/components/ui/luxury-card";
 const highlights = [
   {
     description:
-      "Personalized concepts, curated timelines, and planning that respects both emotion and precision.",
+      "Every detail is thoughtfully composed around your story, personal style, and the experience you wish to create.",
     icon: Crown,
-    title: "Luxury Planning"
+    title: "Bespoke Planning"
   },
   {
     description:
-      "Premium floral, fabric, lighting, stage, and ambience details shaped around each occasion.",
+      "Layered florals, refined textures, atmospheric lighting, and statement installations create a world entirely your own.",
     icon: Gem,
-    title: "Premium Decor"
+    title: "Artful Event Design"
   },
   {
     description:
-      "A managed execution rhythm across vendors, guests, production, rituals, and last-mile details.",
+      "Discreet coordination and exacting attention ensure every transition feels effortless from arrival to farewell.",
     icon: Sparkles,
-    title: "Flawless Execution"
+    title: "Impeccable Execution"
   }
 ] as const;
 
@@ -37,8 +37,8 @@ export function AboutPreview(): React.ReactElement {
         <Reveal>
           <SectionHeading
             eyebrow="About Shree Velora"
-            title="Where Every Celebration Becomes A Signature Experience"
-            description="Shree Velora Event's is a luxury event planning and decor company specializing in weddings, corporate events, birthdays, private celebrations, religious ceremonies, and institutional functions. We combine creative concepts, premium materials, professional execution, and personalized planning to create unforgettable moments."
+            title="Where Your Vision Becomes A Signature Experience"
+            description="Shree Velora Event's curates distinguished weddings, corporate occasions, private celebrations, and cultural ceremonies. Creative direction, refined materials, trusted partners, and attentive planning come together to create moments of lasting beauty."
           />
         </Reveal>
         <div className="mt-14 grid gap-5 md:grid-cols-3">

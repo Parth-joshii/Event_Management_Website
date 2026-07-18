@@ -15,9 +15,9 @@ export function FeaturedGallerySection(): React.ReactElement {
       <Container>
         <Reveal>
           <SectionHeading
-            eyebrow="Featured Gallery"
-            title="A Preview Of Signature Event Moments"
-            description="A lightbox-ready gallery structure for wedding stages, Haldi decor, receptions, corporate setups, birthday themes, and religious celebrations."
+            eyebrow="Selected Celebrations"
+            title="Moments Of Beauty, Designed To Be Remembered"
+            description="Explore a selection of immersive stages, joyful ceremonies, elegant receptions, and thoughtfully composed celebrations brought to life by Shree Velora."
           />
         </Reveal>
         <div className="mt-14 grid auto-rows-[18rem] gap-5 md:grid-cols-3">
@@ -52,7 +52,7 @@ export function FeaturedGallerySection(): React.ReactElement {
           <GradientButton asChild>
             <Link href="#events">
               <Images aria-hidden="true" className="size-4" />
-              Explore Full Gallery
+              View Our Celebrations
             </Link>
           </GradientButton>
         </Reveal>

@@ -24,21 +24,21 @@ export function CtaSection(): React.ReactElement {
         <Reveal>
           <div className="mx-auto max-w-4xl text-center">
             <p className="text-sm font-semibold tracking-[0.24em] text-[#D4AF37] uppercase">
-              Custom Event Plan
+              Your Celebration, Beautifully Imagined
             </p>
             <h2 className="font-display mt-5 text-4xl font-semibold tracking-normal text-balance sm:text-6xl">
-              Ready To Design Your Dream Event?
+              Let Us Create Something Truly Unforgettable
             </h2>
             <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-white/74 sm:text-lg">
-              Share your vision with us and our team will create a personalized event
-              plan, budget estimate, and decor concept for your celebration.
+              Share your vision and allow our team to compose a tailored celebration
+              proposal, considered budget, and distinctive design direction.
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <MagneticButton>
                 <GradientButton asChild tone="light">
                   <Link href="#contact">
                     <WandSparkles aria-hidden="true" className="size-4" />
-                    Start Customizing
+                    Begin Your Journey
                   </Link>
                 </GradientButton>
               </MagneticButton>
