@@ -327,13 +327,32 @@ export function AdminDashboard(): React.ReactElement {
                     </div>
 
                     <div>
-                      <Label htmlFor="ev-img">Image URL / Path</Label>
+                      <Label htmlFor="ev-img">Select Photo from Computer or Paste Image URL</Label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="mt-1.5 block w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-[#EBDCFB] file:text-[#7d5ea1] hover:file:bg-[#2D2238] hover:file:text-white"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onloadend = () => setEventImageSrc(reader.result as string);
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
                       <Input
                         id="ev-img"
+                        className="mt-2"
                         onChange={(e) => setEventImageSrc(e.target.value)}
-                        placeholder="e.g. /images/gallery/wedding-stage.jpg"
+                        placeholder="Or paste URL e.g. /images/gallery/wedding-stage.jpg"
                         value={eventImageSrc}
                       />
+                      {eventImageSrc ? (
+                        <div className="mt-2 h-24 w-full overflow-hidden rounded-md border border-[#EBDCFB]">
+                          <img src={eventImageSrc} alt="Preview" className="size-full object-cover" />
+                        </div>
+                      ) : null}
                     </div>
 
                     <div>
@@ -427,7 +446,7 @@ export function AdminDashboard(): React.ReactElement {
                       Add New Photo
                     </DialogTitle>
                     <DialogDescription>
-                      Upload or specify image path for the gallery.
+                      Choose a photo file from your computer or enter an image URL.
                     </DialogDescription>
                   </DialogHeader>
 
@@ -454,13 +473,32 @@ export function AdminDashboard(): React.ReactElement {
                     </div>
 
                     <div>
-                      <Label htmlFor="ph-src">Image URL / Asset Path</Label>
+                      <Label htmlFor="ph-src">Choose Photo File from Computer</Label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="mt-1.5 block w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-[#EBDCFB] file:text-[#7d5ea1] hover:file:bg-[#2D2238] hover:file:text-white"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onloadend = () => setPhotoImageSrc(reader.result as string);
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
                       <Input
                         id="ph-src"
+                        className="mt-2"
                         onChange={(e) => setPhotoImageSrc(e.target.value)}
-                        placeholder="e.g. /images/gallery/wedding-stage.jpg"
+                        placeholder="Or paste URL e.g. /images/gallery/wedding-stage.jpg"
                         value={photoImageSrc}
                       />
+                      {photoImageSrc ? (
+                        <div className="mt-2 h-28 w-full overflow-hidden rounded-md border border-[#EBDCFB]">
+                          <img src={photoImageSrc} alt="Preview" className="size-full object-cover" />
+                        </div>
+                      ) : null}
                     </div>
 
                     <div className="flex justify-end gap-2 pt-2">
