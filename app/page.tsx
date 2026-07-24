@@ -3,7 +3,6 @@ import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
 import { JsonLd } from "@/components/layout/json-ld";
 import { AboutPreview } from "@/components/sections/about-preview";
-import { ContactPreviewSection } from "@/components/sections/contact-preview-section";
 import { CtaSection } from "@/components/sections/cta-section";
 import { HeroSection } from "@/components/sections/hero-section";
 import { ProcessTimelineSection } from "@/components/sections/process-timeline-section";
@@ -55,7 +54,6 @@ export default function HomePage(): React.ReactElement {
         <ProcessTimelineSection />
         <CtaSection />
         <TestimonialsSection />
-        <ContactPreviewSection />
       </main>
       <Footer />
     </>
