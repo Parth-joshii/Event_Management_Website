@@ -5,11 +5,9 @@ import { JsonLd } from "@/components/layout/json-ld";
 import { AboutPreview } from "@/components/sections/about-preview";
 import { ContactPreviewSection } from "@/components/sections/contact-preview-section";
 import { CtaSection } from "@/components/sections/cta-section";
-import { EventCategoriesSection } from "@/components/sections/event-categories-section";
 import { FeaturedGallerySection } from "@/components/sections/featured-gallery-section";
 import { HeroSection } from "@/components/sections/hero-section";
 import { ProcessTimelineSection } from "@/components/sections/process-timeline-section";
-import { ServicesSection } from "@/components/sections/services-section";
 import { StatsSection } from "@/components/sections/stats-section";
 import { TestimonialsSection } from "@/components/sections/testimonials-section";
 import { siteConfig } from "@/config/site";
@@ -54,8 +52,6 @@ export default function HomePage(): React.ReactElement {
           mobileVideoSrc={mobileHeroVideoSrc}
         />
         <AboutPreview />
-        <ServicesSection />
-        <EventCategoriesSection />
         <StatsSection />
         <FeaturedGallerySection />
         <ProcessTimelineSection />
