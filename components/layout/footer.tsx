@@ -49,13 +49,13 @@ export function Footer(): React.ReactElement {
       <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[1.2fr_0.8fr_0.8fr_1fr] lg:px-8">
         <div>
           <div className="flex items-center gap-3">
-            <span className="relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#D4AF37]/60 bg-white text-sm font-bold text-[#2D2238]">
+            <span className="relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-[#D4AF37] bg-white p-1 shadow-[0_10px_30px_rgba(212,175,55,0.25)] text-sm font-bold text-[#2D2238]">
               {logoSrc ? (
                 <Image
                   alt="Shree Velora Event's logo"
-                  className="object-contain p-0.5"
+                  className="size-full rounded-full object-cover"
                   fill
-                  sizes="44px"
+                  sizes="48px"
                   src={logoSrc}
                 />
               ) : (

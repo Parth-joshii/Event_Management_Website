@@ -332,9 +332,21 @@ export function AdminDashboard(): React.ReactElement {
                         type="file"
                         accept="image/*"
                         className="mt-1.5 block w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-[#EBDCFB] file:text-[#7d5ea1] hover:file:bg-[#2D2238] hover:file:text-white"
-                        onChange={(e) => {
+                        onChange={async (e) => {
                           const file = e.target.files?.[0];
                           if (file) {
+                            const formData = new FormData();
+                            formData.append("file", file);
+                            try {
+                              const res = await fetch("/api/upload", { method: "POST", body: formData });
+                              const data = await res.json();
+                              if (data.ok && data.url) {
+                                setEventImageSrc(data.url);
+                                return;
+                              }
+                            } catch {
+                              // Fallback
+                            }
                             const reader = new FileReader();
                             reader.onloadend = () => setEventImageSrc(reader.result as string);
                             reader.readAsDataURL(file);
@@ -388,7 +400,7 @@ export function AdminDashboard(): React.ReactElement {
                       alt={ev.title}
                       className="size-full object-cover transition duration-500 group-hover:scale-105"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = "/images/gallery/wedding-stage.jpg";
+                        (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80";
                       }}
                     />
                     <span className="absolute top-3 right-3 rounded-full bg-[#2D2238]/80 px-3 py-1 text-xs font-semibold text-[#D4AF37] backdrop-blur">
@@ -478,9 +490,21 @@ export function AdminDashboard(): React.ReactElement {
                         type="file"
                         accept="image/*"
                         className="mt-1.5 block w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-[#EBDCFB] file:text-[#7d5ea1] hover:file:bg-[#2D2238] hover:file:text-white"
-                        onChange={(e) => {
+                        onChange={async (e) => {
                           const file = e.target.files?.[0];
                           if (file) {
+                            const formData = new FormData();
+                            formData.append("file", file);
+                            try {
+                              const res = await fetch("/api/upload", { method: "POST", body: formData });
+                              const data = await res.json();
+                              if (data.ok && data.url) {
+                                setPhotoImageSrc(data.url);
+                                return;
+                              }
+                            } catch {
+                              // Fallback
+                            }
                             const reader = new FileReader();
                             reader.onloadend = () => setPhotoImageSrc(reader.result as string);
                             reader.readAsDataURL(file);
