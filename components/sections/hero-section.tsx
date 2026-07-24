@@ -22,7 +22,7 @@ import { EventCustomizerWizard } from "@/components/lead/event-customizer-wizard
 import { ResponsiveImage } from "@/components/ui/responsive-image";
 import { serviceOfferings } from "@/features/services/data/services";
 import { eventCategories } from "@/features/events/data/event-categories";
-import { featuredGallery } from "@/features/gallery/data/featured-gallery";
+import { useContentStore } from "@/stores/content-store";
 import { siteConfig } from "@/config/site";
 
 interface HeroSectionProps {
@@ -36,6 +36,7 @@ export function HeroSection({
   mobileVideoSrc
 }: HeroSectionProps): React.ReactElement {
   const [customizerOpen, setCustomizerOpen] = React.useState(false);
+  const { photos } = useContentStore();
 
   return (
     <section
@@ -219,19 +220,18 @@ export function HeroSection({
                   {/* Tab 3: Gallery Showcase */}
                   <TabsContent value="gallery">
                     <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                      {featuredGallery.map((item) => (
+                      {photos.map((item) => (
                         <article
-                          className="group relative h-60 overflow-hidden rounded-xl border border-white/70 bg-white shadow-md text-white text-left"
-                          key={item.title}
+                          className="group relative h-60 overflow-hidden rounded-xl border border-white/70 bg-[#2D2238] shadow-md text-white text-left"
+                          key={item.id || item.title}
                         >
-                          <ResponsiveImage
-                            alt={item.alt}
-                            className="size-full"
-                            fallbackClassName={item.fallbackClassName}
-                            imageClassName="transition duration-700 group-hover:scale-110"
-                            sizes="(min-width: 768px) 33vw, 100vw"
+                          <img
+                            alt={item.alt || item.title}
+                            className="size-full object-cover transition duration-700 group-hover:scale-110"
                             src={item.imageSrc}
-                            title={item.category}
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = "/images/gallery/wedding-stage.jpg";
+                            }}
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-[#2D2238]/85 via-transparent to-transparent opacity-90" />
                           <div className="absolute inset-x-0 bottom-0 p-4">
