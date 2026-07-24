@@ -61,14 +61,14 @@ export function HeroSection({
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             {/* Design Your Celebration Modal */}
             <Dialog onOpenChange={setCustomizerOpen} open={customizerOpen}>
-              <DialogTrigger asChild>
-                <MagneticButton>
+              <MagneticButton>
+                <DialogTrigger asChild>
                   <GradientButton type="button">
                     <WandSparkles aria-hidden="true" className="size-4" />
                     Design Your Celebration
                   </GradientButton>
-                </MagneticButton>
-              </DialogTrigger>
+                </DialogTrigger>
+              </MagneticButton>
               <DialogContent className="max-h-[90vh] w-[calc(100%-2rem)] max-w-4xl overflow-y-auto border-[#EBDCFB] bg-[#FAF7FF] p-6 text-[#2D2238] sm:p-8">
                 <DialogHeader className="mb-4">
                   <DialogTitle className="font-display text-2xl font-bold text-[#2D2238]">
@@ -84,14 +84,14 @@ export function HeroSection({
 
             {/* Explore Our Portfolio / Projects Modal */}
             <Dialog>
-              <DialogTrigger asChild>
-                <MagneticButton>
+              <MagneticButton>
+                <DialogTrigger asChild>
                   <GradientButton tone="light" type="button">
                     <Images aria-hidden="true" className="size-4" />
                     Explore Our Projects
                   </GradientButton>
-                </MagneticButton>
-              </DialogTrigger>
+                </DialogTrigger>
+              </MagneticButton>
               <DialogContent className="max-h-[90vh] w-[calc(100%-2rem)] max-w-5xl overflow-y-auto border-[#EBDCFB] bg-[#FAF7FF] p-6 text-[#2D2238] sm:p-8">
                 <DialogHeader className="mb-6 text-left">
                   <DialogTitle className="font-display text-2xl font-bold text-[#2D2238]">
