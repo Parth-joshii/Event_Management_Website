@@ -5,7 +5,6 @@ import { JsonLd } from "@/components/layout/json-ld";
 import { AboutPreview } from "@/components/sections/about-preview";
 import { ContactPreviewSection } from "@/components/sections/contact-preview-section";
 import { CtaSection } from "@/components/sections/cta-section";
-import { FeaturedGallerySection } from "@/components/sections/featured-gallery-section";
 import { HeroSection } from "@/components/sections/hero-section";
 import { ProcessTimelineSection } from "@/components/sections/process-timeline-section";
 import { StatsSection } from "@/components/sections/stats-section";
@@ -53,7 +52,6 @@ export default function HomePage(): React.ReactElement {
         />
         <AboutPreview />
         <StatsSection />
-        <FeaturedGallerySection />
         <ProcessTimelineSection />
         <CtaSection />
         <TestimonialsSection />
