@@ -12,7 +12,6 @@ import { ProcessTimelineSection } from "@/components/sections/process-timeline-s
 import { ServicesSection } from "@/components/sections/services-section";
 import { StatsSection } from "@/components/sections/stats-section";
 import { TestimonialsSection } from "@/components/sections/testimonials-section";
-import { WhyChooseUs } from "@/components/sections/why-choose-us";
 import { siteConfig } from "@/config/site";
 import { optionalPublicAsset } from "@/lib/public-assets";
 import { createHomepageJsonLd } from "@/utils/seo";
@@ -55,7 +54,6 @@ export default function HomePage(): React.ReactElement {
           mobileVideoSrc={mobileHeroVideoSrc}
         />
         <AboutPreview />
-        <WhyChooseUs />
         <ServicesSection />
         <EventCategoriesSection />
         <StatsSection />
