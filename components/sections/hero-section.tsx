@@ -31,17 +31,13 @@ export function HeroSection({
           <p className="mx-auto mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/12 px-4 py-2 text-xs font-semibold tracking-[0.24em] text-[#EBDCFB] uppercase backdrop-blur">
             Bespoke Celebrations · Impeccably Curated
           </p>
-          <h1 className="font-display text-5xl font-semibold tracking-normal text-balance sm:text-7xl lg:text-8xl">
+          <h1 className="font-display text-4xl font-semibold tracking-normal text-balance sm:text-6xl lg:text-7xl">
             {siteConfig.name}
           </h1>
           <p className="mt-5 text-xl font-medium text-balance text-[#EBDCFB] sm:text-2xl">
             {siteConfig.tagline}
           </p>
-          <p className="mx-auto mt-6 max-w-3xl text-base leading-8 text-white/78 sm:text-lg">
-            From intimate vows to magnificent gatherings, we transform your vision into
-            an extraordinary occasion through artful design, meticulous planning, and
-            gracious hospitality.
-          </p>
+
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <MagneticButton>
               <GradientButton asChild>

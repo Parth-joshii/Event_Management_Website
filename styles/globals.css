@@ -81,6 +81,7 @@
     min-width: 320px;
     scroll-behavior: auto;
     text-rendering: optimizeLegibility;
+    font-size: 92%;
   }
 
   body {

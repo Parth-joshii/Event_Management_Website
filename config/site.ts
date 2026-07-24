@@ -77,6 +77,6 @@ export const siteConfig = {
       "https://wa.me/919876543210?text=Hi%20Shree%20Velora%20Event's%2C%20I%20want%20to%20plan%20an%20event.",
     youtube: ""
   },
-  tagline: "Turning Every Occasion Into A Luxury Celebration",
+  tagline: "Where Moments Becomes the Masterpiece",
   url: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
 } as const satisfies SiteConfig;

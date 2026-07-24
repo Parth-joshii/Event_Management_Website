@@ -28,7 +28,7 @@ export function SectionHeading({
           {eyebrow}
         </Badge>
       ) : null}
-      <h2 className="font-display text-3xl font-semibold tracking-normal text-balance text-[#2D2238] sm:text-5xl">
+      <h2 className="font-display text-2xl font-semibold tracking-normal text-balance text-[#2D2238] sm:text-4xl">
         {title}
       </h2>
       {description ? (
