@@ -33,8 +33,7 @@ export const sectionIds = {
   packages: "packages",
   process: "process",
   services: "services",
-  testimonials: "testimonials",
-  why: "why-choose-us"
+  testimonials: "testimonials"
 } as const;
 
 export const primaryNavigation: readonly NavigationItem[] = [
