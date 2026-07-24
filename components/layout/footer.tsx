@@ -161,6 +161,9 @@ export function Footer(): React.ReactElement {
             <Link className="hover:text-[#D4AF37]" href="/refund-policy">
               Refund Policy
             </Link>
+            <Link className="hover:text-[#D4AF37]" href="/admin">
+              Admin Portal
+            </Link>
           </div>
         </div>
       </div>
