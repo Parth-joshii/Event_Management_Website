@@ -82,11 +82,11 @@ export function Header({
           className="flex min-w-0 items-center gap-3 rounded-md focus-visible:ring-2 focus-visible:ring-[#D4AF37] focus-visible:outline-none"
           href="#home"
         >
-          <span className="relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#D4AF37]/60 bg-[#EBDCFB]/85 text-sm font-bold text-[#2D2238] shadow-[0_10px_30px_rgba(212,175,55,0.22)]">
+          <span className="relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#D4AF37]/60 bg-white text-sm font-bold text-[#2D2238] shadow-[0_10px_30px_rgba(212,175,55,0.22)]">
             {logoSrc ? (
               <Image
                 alt="Shree Velora Event's logo"
-                className="object-cover"
+                className="object-contain p-0.5"
                 fill
                 sizes="44px"
                 src={logoSrc}

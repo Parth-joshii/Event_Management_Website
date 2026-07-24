@@ -1,25 +1,169 @@
-import { Star } from "lucide-react";
+"use client";
+
+import * as React from "react";
+import { MessageSquarePlus, Star } from "lucide-react";
 import { Reveal } from "@/components/animations/reveal";
 import { Container } from "@/components/layout/container";
 import { LuxuryCard } from "@/components/ui/luxury-card";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { testimonials } from "@/features/testimonials/data/testimonials";
+import { GradientButton } from "@/components/ui/gradient-button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { testimonials as initialTestimonials } from "@/features/testimonials/data/testimonials";
 
-/** Renders client testimonial preview cards. */
+interface ReviewItem {
+  event: string;
+  name: string;
+  rating: number;
+  review: string;
+}
+
+/** Renders client testimonials with an interactive client review submission form. */
 export function TestimonialsSection(): React.ReactElement {
+  const [reviewsList, setReviewsList] = React.useState<ReviewItem[]>(
+    Array.from(initialTestimonials)
+  );
+  const [showForm, setShowForm] = React.useState(false);
+  const [submitted, setSubmitted] = React.useState(false);
+
+  const [formName, setFormName] = React.useState("");
+  const [formEvent, setFormEvent] = React.useState("");
+  const [formRating, setFormRating] = React.useState(5);
+  const [formReview, setFormReview] = React.useState("");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formName.trim() || !formReview.trim()) return;
+
+    const newReview: ReviewItem = {
+      event: formEvent.trim() || "Luxury Celebration",
+      name: formName.trim(),
+      rating: formRating,
+      review: formReview.trim()
+    };
+
+    setReviewsList([newReview, ...reviewsList]);
+    setSubmitted(true);
+    setFormName("");
+    setFormEvent("");
+    setFormRating(5);
+    setFormReview("");
+    setTimeout(() => {
+      setSubmitted(false);
+      setShowForm(false);
+    }, 2500);
+  };
+
   return (
     <section id="testimonials" className="bg-[#FAF7FF] py-24 sm:py-28">
       <Container>
         <Reveal>
-          <SectionHeading
-            eyebrow="Client Stories"
-            title="Celebrations Remembered, Trust Earned"
-            description="Words from families, brands, and hosts who entrusted Shree Velora with their most meaningful occasions."
-          />
+          <div className="flex flex-col items-center justify-between gap-6 md:flex-row md:items-end">
+            <SectionHeading
+              align="left"
+              eyebrow="Client Stories"
+              title="Celebrations Remembered, Trust Earned"
+              description="Words from families, brands, and hosts who entrusted Shree Velora with their most meaningful occasions."
+            />
+            <GradientButton
+              onClick={() => setShowForm(!showForm)}
+              tone="dark"
+              type="button"
+            >
+              <MessageSquarePlus aria-hidden="true" className="size-4" />
+              {showForm ? "Close Form" : "Write A Review"}
+            </GradientButton>
+          </div>
         </Reveal>
-        <div className="mt-14 grid gap-5 lg:grid-cols-3">
-          {testimonials.map((testimonial, index) => (
-            <Reveal delay={index * 0.08} key={testimonial.name}>
+
+        {/* Add Review Form */}
+        {showForm ? (
+          <Reveal>
+            <form
+              onSubmit={handleSubmit}
+              className="mt-8 rounded-2xl border border-[#EBDCFB] bg-white p-6 sm:p-8 shadow-lg max-w-2xl mx-auto"
+            >
+              <h3 className="font-display text-2xl font-semibold text-[#2D2238]">
+                Share Your Experience
+              </h3>
+              <p className="mt-1 text-sm text-[#5c4b6e]">
+                We value your feedback. Let us know how your event went!
+              </p>
+
+              {submitted ? (
+                <div className="mt-6 rounded-lg bg-[#EBDCFB]/70 p-4 text-center font-medium text-[#2D2238]">
+                  Thank you! Your review has been added successfully.
+                </div>
+              ) : (
+                <div className="mt-6 grid gap-5">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <Label htmlFor="review-name">Your Name *</Label>
+                      <Input
+                        id="review-name"
+                        onChange={(e) => setFormName(e.target.value)}
+                        placeholder="e.g. Ananya Roy"
+                        required
+                        value={formName}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="review-event">Event Type</Label>
+                      <Input
+                        id="review-event"
+                        onChange={(e) => setFormEvent(e.target.value)}
+                        placeholder="e.g. Royal Wedding, Sangeet"
+                        value={formEvent}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="review-rating">Rating (1 to 5 Stars)</Label>
+                    <div className="mt-2 flex gap-2">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          className="p-1 text-[#D4AF37] focus:outline-none transition hover:scale-110"
+                          key={star}
+                          onClick={() => setFormRating(star)}
+                          type="button"
+                        >
+                          <Star
+                            className={`size-6 ${
+                              star <= formRating ? "fill-current" : "text-gray-300"
+                            }`}
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="review-msg">Your Review *</Label>
+                    <Textarea
+                      id="review-msg"
+                      onChange={(e) => setFormReview(e.target.value)}
+                      placeholder="Tell us about your celebration experience..."
+                      required
+                      rows={3}
+                      value={formReview}
+                    />
+                  </div>
+
+                  <div className="flex justify-end gap-3 pt-2">
+                    <GradientButton type="submit">Submit Review</GradientButton>
+                  </div>
+                </div>
+              )}
+            </form>
+          </Reveal>
+        ) : null}
+
+        {/* Testimonials Grid */}
+        <div className="mt-14 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          {reviewsList.map((testimonial, index) => (
+            <Reveal delay={index * 0.06} key={`${testimonial.name}-${index}`}>
               <LuxuryCard className="flex h-full flex-col">
                 <div className="flex gap-1 text-[#D4AF37]">
                   {Array.from({ length: testimonial.rating }).map((_, star) => (

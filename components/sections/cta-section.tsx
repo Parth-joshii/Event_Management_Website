@@ -1,10 +1,12 @@
 import Link from "next/link";
-import { MessageCircle, WandSparkles } from "lucide-react";
+import { Clock3, Mail, MapPin, MessageCircle, Phone, WandSparkles } from "lucide-react";
 import { MagneticButton } from "@/components/animations/magnetic-button";
 import { Reveal } from "@/components/animations/reveal";
 import { Container } from "@/components/layout/container";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { siteConfig } from "@/config/site";
+
+import type { LucideIcon } from "lucide-react";
 
 const whatsappMessage = "Hi Shree Velora Event's, I want to plan an event.";
 
@@ -12,7 +14,39 @@ const whatsappHref = `https://wa.me/${siteConfig.contact.whatsappNumber}?text=${
   whatsappMessage
 )}`;
 
-/** Renders the premium lead-generation CTA. */
+interface ContactCardItem {
+  readonly href?: string;
+  readonly icon: LucideIcon;
+  readonly label: string;
+  readonly value: string;
+}
+
+const contactCards: readonly ContactCardItem[] = [
+  {
+    href: `tel:${siteConfig.contact.phone.replace(/\s/g, "")}`,
+    icon: Phone,
+    label: "Direct Phone",
+    value: siteConfig.contact.phone
+  },
+  {
+    href: `mailto:${siteConfig.contact.email}`,
+    icon: Mail,
+    label: "Email Inquiry",
+    value: siteConfig.contact.email
+  },
+  {
+    icon: MapPin,
+    label: "Service Location",
+    value: siteConfig.contact.location
+  },
+  {
+    icon: Clock3,
+    label: "Business Hours",
+    value: siteConfig.contact.businessHours
+  }
+];
+
+/** Renders the unified luxury CTA and Private Consultation section. */
 export function CtaSection(): React.ReactElement {
   return (
     <section
@@ -50,6 +84,52 @@ export function CtaSection(): React.ReactElement {
                   </a>
                 </GradientButton>
               </MagneticButton>
+            </div>
+          </div>
+        </Reveal>
+
+        {/* Integrated Private Consultation Details */}
+        <Reveal delay={0.12}>
+          <div className="mt-20 border-t border-white/15 pt-16">
+            <div className="mx-auto max-w-2xl text-center">
+              <p className="text-xs font-semibold tracking-[0.2em] text-[#D4AF37] uppercase">
+                Private Consultation
+              </p>
+              <h3 className="font-display mt-2 text-2xl font-semibold sm:text-3xl">
+                Begin The Personal Conversation
+              </h3>
+              <p className="mt-3 text-sm text-white/70">
+                Personal consultations and destination planning are available by appointment.
+              </p>
+            </div>
+
+            <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {contactCards.map((item) => {
+                const Icon = item.icon;
+                const cardContent = (
+                  <div className="h-full rounded-xl border border-white/15 bg-white/8 p-6 text-left transition hover:border-[#D4AF37] hover:bg-white/12 backdrop-blur">
+                    <Icon aria-hidden="true" className="size-5 text-[#D4AF37]" />
+                    <p className="mt-4 text-xs font-semibold tracking-[0.16em] text-white/60 uppercase">
+                      {item.label}
+                    </p>
+                    <p className="mt-1 text-sm font-semibold text-white">
+                      {item.value}
+                    </p>
+                  </div>
+                );
+
+                return item.href ? (
+                  <a
+                    className="block focus-visible:ring-2 focus-visible:ring-[#D4AF37] focus-visible:outline-none"
+                    href={item.href}
+                    key={item.label}
+                  >
+                    {cardContent}
+                  </a>
+                ) : (
+                  <div key={item.label}>{cardContent}</div>
+                );
+              })}
             </div>
           </div>
         </Reveal>

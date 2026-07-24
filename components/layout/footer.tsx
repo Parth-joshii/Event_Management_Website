@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Mail, MessageCircle, PlayCircle, RadioTower, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -5,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { primaryNavigation } from "@/constants/routes";
 import { siteConfig } from "@/config/site";
+import { optionalPublicAsset } from "@/lib/public-assets";
 
 const footerServices = [
   "Luxury Weddings",
@@ -40,13 +42,25 @@ const socialLinks = [
 
 /** Renders the premium site footer and newsletter capture shell. */
 export function Footer(): React.ReactElement {
+  const logoSrc = optionalPublicAsset("/logos/logo.png");
+
   return (
     <footer className="bg-[#2D2238] text-white">
       <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[1.2fr_0.8fr_0.8fr_1fr] lg:px-8">
         <div>
           <div className="flex items-center gap-3">
-            <span className="flex size-11 items-center justify-center rounded-full border border-[#D4AF37]/60 bg-[#EBDCFB] text-sm font-bold text-[#2D2238]">
-              SV
+            <span className="relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#D4AF37]/60 bg-white text-sm font-bold text-[#2D2238]">
+              {logoSrc ? (
+                <Image
+                  alt="Shree Velora Event's logo"
+                  className="object-contain p-0.5"
+                  fill
+                  sizes="44px"
+                  src={logoSrc}
+                />
+              ) : (
+                "SV"
+              )}
             </span>
             <div>
               <p className="font-display text-2xl font-semibold">{siteConfig.name}</p>

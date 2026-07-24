@@ -1,4 +1,4 @@
-import { Crown, Gem, Sparkles } from "lucide-react";
+import { Crown, Gem, Handshake, Lightbulb, ShieldCheck, Sparkles } from "lucide-react";
 import { Reveal } from "@/components/animations/reveal";
 import { Container } from "@/components/layout/container";
 import { SectionHeading } from "@/components/ui/section-heading";
@@ -22,6 +22,24 @@ const highlights = [
       "Discreet coordination and exacting attention ensure every transition feels effortless from arrival to farewell.",
     icon: Sparkles,
     title: "Impeccable Execution"
+  },
+  {
+    description:
+      "Intelligent illumination, concert-grade acoustic engineering, and stage SFX for mesmerizing atmospheres.",
+    icon: Lightbulb,
+    title: "Lighting & Sound Production"
+  },
+  {
+    description:
+      "Access to an elite roster of decor masters, photographers, anchors, live bands, and hospitality specialists.",
+    icon: Handshake,
+    title: "Curated Vendor Network"
+  },
+  {
+    description:
+      "Transparent recommendations, structured line-item quotes, and budget control without design compromises.",
+    icon: ShieldCheck,
+    title: "Transparent Planning & Control"
   }
 ] as const;
 
@@ -41,20 +59,20 @@ export function AboutPreview(): React.ReactElement {
             description="Shree Velora Event's curates distinguished weddings, corporate occasions, private celebrations, and cultural ceremonies. Creative direction, refined materials, trusted partners, and attentive planning come together to create moments of lasting beauty."
           />
         </Reveal>
-        <div className="mt-14 grid gap-5 md:grid-cols-3">
+        <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {highlights.map((item, index) => {
             const Icon = item.icon;
 
             return (
-              <Reveal delay={index * 0.08} key={item.title}>
-                <LuxuryCard>
+              <Reveal delay={index * 0.06} key={item.title}>
+                <LuxuryCard className="flex h-full flex-col">
                   <div className="flex size-12 items-center justify-center rounded-full bg-[#EBDCFB] text-[#7d5ea1] transition group-hover:bg-[#D4AF37] group-hover:text-[#2D2238]">
                     <Icon aria-hidden="true" className="size-5" />
                   </div>
                   <h3 className="mt-6 text-xl font-semibold text-[#2D2238]">
                     {item.title}
                   </h3>
-                  <p className="mt-3 text-sm leading-7 text-[#5c4b6e]">
+                  <p className="mt-3 flex-1 text-sm leading-7 text-[#5c4b6e]">
                     {item.description}
                   </p>
                 </LuxuryCard>
