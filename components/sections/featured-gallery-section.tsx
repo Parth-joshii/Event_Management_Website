@@ -1,13 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { Images, Maximize2, Sparkles, X } from "lucide-react";
+import { Maximize2, X } from "lucide-react";
 import { Reveal } from "@/components/animations/reveal";
 import { Container } from "@/components/layout/container";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { useContentStore, PhotoItem } from "@/stores/content-store";
+import { useContentStore, type PhotoItem } from "@/stores/content-store";
 import { cn } from "@/lib/utils";
 
 /** Renders the dynamic featured gallery section connected to Admin store. */
@@ -73,6 +73,7 @@ export function FeaturedGallerySection(): React.ReactElement {
                 onClick={() => setActiveLightboxPhoto(item)}
                 className="group relative size-full overflow-hidden rounded-xl border border-white/80 bg-[#2D2238] shadow-[0_24px_80px_rgba(45,34,56,0.1)] cursor-pointer"
               >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   alt={item.alt || item.title}
                   className="size-full object-cover transition duration-700 group-hover:scale-110"
@@ -107,6 +108,7 @@ export function FeaturedGallerySection(): React.ReactElement {
             </DialogTitle>
             {activeLightboxPhoto ? (
               <div className="relative overflow-hidden rounded-2xl border border-white/20 bg-[#2D2238] p-4 text-center shadow-2xl">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={activeLightboxPhoto.imageSrc}
                   alt={activeLightboxPhoto.alt}

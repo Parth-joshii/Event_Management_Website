@@ -225,6 +225,7 @@ export function HeroSection({
                           className="group relative h-60 overflow-hidden rounded-xl border border-white/70 bg-[#2D2238] shadow-md text-white text-left"
                           key={item.id || item.title}
                         >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             alt={item.alt || item.title}
                             className="size-full object-cover transition duration-700 group-hover:scale-110"
