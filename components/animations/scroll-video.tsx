@@ -31,20 +31,27 @@ export function ScrollVideo({
     registerGsapPlugins();
 
     const video = videoRef.current;
-    const trigger = ScrollTrigger.create({
-      end: "bottom top",
-      onUpdate: (self) => {
-        if (Number.isFinite(video.duration) && video.duration > 0) {
-          video.currentTime = video.duration * self.progress;
-        }
-      },
-      scrub: true,
-      start: "top top",
-      trigger: sectionRef.current
-    });
+    
+    // Ensure video plays continuously on mount
+    const playPromise = video.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(() => {
+        // Auto-play was prevented; browser fallback handled
+      });
+    }
 
-    void video.play().catch(() => {
-      video.controls = false;
+    // Optional parallax fade effect on scroll down without pausing video playback
+    const trigger = ScrollTrigger.create({
+      trigger: sectionRef.current,
+      start: "top top",
+      end: "bottom top",
+      scrub: 0.5,
+      onLeave: () => {
+        video.pause();
+      },
+      onEnterBack: () => {
+        void video.play();
+      }
     });
 
     return () => {
