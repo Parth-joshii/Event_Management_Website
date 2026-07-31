@@ -49,13 +49,13 @@ export function HeroSection({
 
       <Container className="relative z-10 flex min-h-screen items-center justify-center pt-24 pb-16">
         <Reveal className="mx-auto max-w-5xl text-center">
-          <p className="mx-auto mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/12 px-4 py-2 text-xs font-semibold tracking-[0.24em] text-[#EBDCFB] uppercase backdrop-blur">
+          <p className="mx-auto mb-4 inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[10px] sm:text-xs font-semibold tracking-[0.16em] text-[#EBDCFB] uppercase backdrop-blur">
             Crafting Extraordinary Celebrations
           </p>
-          <h1 className="font-display text-4xl font-semibold tracking-normal text-balance sm:text-6xl lg:text-7xl">
+          <h1 className="font-display text-[2.75rem] font-bold leading-[1.1] tracking-tight text-balance sm:text-6xl sm:leading-tight lg:text-7xl">
             {siteConfig.name}
           </h1>
-          <p className="mt-5 text-xl font-medium text-balance text-[#EBDCFB] sm:text-2xl">
+          <p className="mt-4 text-base font-medium text-balance text-[#EBDCFB] sm:text-xl lg:text-2xl">
             {siteConfig.tagline}
           </p>
 
