@@ -38,8 +38,8 @@ export const metadata: Metadata = {
 /** Renders the complete premium landing page. */
 export default function HomePage(): React.ReactElement {
   const logoSrc = optionalPublicAsset("/logos/logo.png");
-  const desktopHeroVideoSrc = optionalPublicAsset("/videos/hero-desktop.mp4");
-  const mobileHeroVideoSrc = optionalPublicAsset("/videos/hero-mobile.mp4");
+  const desktopHeroVideoSrc = optionalPublicAsset("/videos/landing-page.mp4") ?? optionalPublicAsset("/videos/hero-desktop.mp4");
+  const mobileHeroVideoSrc = optionalPublicAsset("/videos/landing-page.mp4") ?? optionalPublicAsset("/videos/hero-mobile.mp4");
 
   return (
     <>
