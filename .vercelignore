@@ -1,0 +1,6 @@
+# Local source videos in root
+/*.mp4
+/*.preview.jpg
+
+# Development logs
+*.log
