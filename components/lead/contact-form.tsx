@@ -68,7 +68,7 @@ export function ContactForm(): React.ReactElement {
           <Input {...form.register("fullName")} placeholder="Your name" />
         </Field>
         <Field label="Phone" error={form.formState.errors.phone?.message}>
-          <Input {...form.register("phone")} placeholder="+91 98765 43210" />
+          <Input {...form.register("phone")} placeholder="+91 99770 24666" />
         </Field>
         <Field label="Email" error={form.formState.errors.email?.message}>
           <Input {...form.register("email")} placeholder="name@example.com" />
