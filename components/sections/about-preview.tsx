@@ -1,4 +1,4 @@
-import { Crown, Gem, Handshake, Lightbulb, ShieldCheck, Sparkles } from "lucide-react";
+import { Crown, Handshake, ShieldCheck, Sparkles } from "lucide-react";
 import { Reveal } from "@/components/animations/reveal";
 import { Container } from "@/components/layout/container";
 import { SectionHeading } from "@/components/ui/section-heading";
@@ -6,73 +6,57 @@ import { LuxuryCard } from "@/components/ui/luxury-card";
 
 const highlights = [
   {
-    description:
-      "Every detail is thoughtfully composed around your story, personal style, and the experience you wish to create.",
+    description: "Tailored themes, atmospheric lighting, and luxury stage installations.",
     icon: Crown,
-    title: "Bespoke Planning"
+    title: "Bespoke Design"
   },
   {
-    description:
-      "Layered florals, refined textures, atmospheric lighting, and statement installations create a world entirely your own.",
-    icon: Gem,
-    title: "Artful Event Design"
-  },
-  {
-    description:
-      "Discreet coordination and exacting attention ensure every transition feels effortless from arrival to farewell.",
+    description: "Seamless vendor management and attentive on-day coordination.",
     icon: Sparkles,
-    title: "Impeccable Execution"
+    title: "Flawless Execution"
   },
   {
-    description:
-      "Intelligent illumination, concert-grade acoustic engineering, and stage SFX for mesmerizing atmospheres.",
-    icon: Lightbulb,
-    title: "Lighting & Sound Production"
-  },
-  {
-    description:
-      "Access to an elite roster of decor masters, photographers, anchors, live bands, and hospitality specialists.",
+    description: "Exclusive access to top-tier venues, artists, and production masters.",
     icon: Handshake,
-    title: "Curated Vendor Network"
+    title: "Curated Network"
   },
   {
-    description:
-      "Transparent recommendations, structured line-item quotes, and budget control without design compromises.",
+    description: "Clear line-item quotes and real-time budget management.",
     icon: ShieldCheck,
-    title: "Transparent Planning & Control"
+    title: "Transparent Pricing"
   }
 ] as const;
 
-/** Renders the brand introduction and premium highlight cards. */
+/** Renders the concise brand introduction and highlight cards. */
 export function AboutPreview(): React.ReactElement {
   return (
     <section
       id="about"
-      className="relative overflow-hidden bg-[#FAF7FF] py-24 sm:py-28"
+      className="relative overflow-hidden bg-[#FAF7FF] py-12 sm:py-16"
     >
-      <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-[#2D2238] to-transparent opacity-10" />
+      <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[#2D2238] to-transparent opacity-10" />
       <Container>
         <Reveal>
           <SectionHeading
             eyebrow="About Shree Velora"
-            title="Where Your Vision Becomes A Signature Experience"
-            description="Shree Velora Event's curates distinguished weddings, corporate occasions, private celebrations, and cultural ceremonies. Creative direction, refined materials, trusted partners, and attentive planning come together to create moments of lasting beauty."
+            title="Signature Events, Flawlessly Executed"
+            description="Shree Velora Event's brings creative direction, luxury decor, and seamless coordination to royal weddings and grand celebrations."
           />
         </Reveal>
-        <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {highlights.map((item, index) => {
             const Icon = item.icon;
 
             return (
-              <Reveal delay={index * 0.06} key={item.title}>
-                <LuxuryCard className="flex h-full flex-col">
-                  <div className="flex size-12 items-center justify-center rounded-full bg-[#EBDCFB] text-[#7d5ea1] transition group-hover:bg-[#D4AF37] group-hover:text-[#2D2238]">
-                    <Icon aria-hidden="true" className="size-5" />
+              <Reveal delay={index * 0.05} key={item.title}>
+                <LuxuryCard className="flex h-full flex-col p-5">
+                  <div className="flex size-10 items-center justify-center rounded-full bg-[#EBDCFB] text-[#7d5ea1] transition group-hover:bg-[#D4AF37] group-hover:text-[#2D2238]">
+                    <Icon aria-hidden="true" className="size-4" />
                   </div>
-                  <h3 className="mt-6 text-xl font-semibold text-[#2D2238]">
+                  <h3 className="mt-4 text-base font-bold text-[#2D2238]">
                     {item.title}
                   </h3>
-                  <p className="mt-3 flex-1 text-sm leading-7 text-[#5c4b6e]">
+                  <p className="mt-2 flex-1 text-xs leading-5 text-[#5c4b6e]">
                     {item.description}
                   </p>
                 </LuxuryCard>
