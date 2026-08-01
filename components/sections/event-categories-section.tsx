@@ -7,7 +7,7 @@ import { Reveal } from "@/components/animations/reveal";
 import { Container } from "@/components/layout/container";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { useContentStore, EventItem, PhotoItem } from "@/stores/content-store";
+import { useContentStore, type EventItem, type PhotoItem } from "@/stores/content-store";
 
 /** Renders interactive event category preview cards synced with Admin store & MongoDB. */
 export function EventCategoriesSection(): React.ReactElement {
