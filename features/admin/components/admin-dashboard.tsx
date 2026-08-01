@@ -75,6 +75,8 @@ export function AdminDashboard(): React.ReactElement {
   // New Photo Form state
   const [photoTitle, setPhotoTitle] = React.useState("");
   const [photoCategory, setPhotoCategory] = React.useState("Wedding Stage");
+  const [selectedEventId, setSelectedEventId] = React.useState("");
+  const [photoImagesList, setPhotoImagesList] = React.useState<string[]>([]);
   const [photoImageSrc, setPhotoImageSrc] = React.useState("/images/gallery/wedding-stage.jpg");
 
   // New Video Form state
@@ -114,18 +116,38 @@ export function AdminDashboard(): React.ReactElement {
     setAddEventOpen(false);
   };
 
+  // Handle single or bulk photo submission
   const handleAddPhotoSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!photoTitle.trim()) return;
+    const matchedEvent = events.find((ev) => ev.id === selectedEventId);
+    const targetEventTitle = matchedEvent ? matchedEvent.title : "";
 
-    await addPhoto({
-      title: photoTitle.trim(),
-      category: photoCategory,
-      imageSrc: photoImageSrc.trim() || "/images/gallery/wedding-stage.jpg",
-      alt: photoTitle.trim()
-    });
+    if (photoImagesList.length > 1) {
+      const bulkItems = photoImagesList.map((src, idx) => ({
+        title: photoTitle ? `${photoTitle} #${idx + 1}` : matchedEvent ? `${matchedEvent.title} Photo #${idx + 1}` : `Photo #${idx + 1}`,
+        category: photoCategory || matchedEvent?.category || "General",
+        eventId: selectedEventId,
+        eventTitle: targetEventTitle,
+        imageSrc: src,
+        alt: photoTitle || targetEventTitle || "Event Photo"
+      }));
+      await useContentStore.getState().addMultiplePhotos(bulkItems);
+    } else {
+      const src = photoImagesList[0] || photoImageSrc || "/images/gallery/wedding-stage.jpg";
+      const title = photoTitle.trim() || matchedEvent?.title || "Event Photo";
+      await addPhoto({
+        title,
+        category: photoCategory || matchedEvent?.category || "General",
+        eventId: selectedEventId,
+        eventTitle: targetEventTitle,
+        imageSrc: src,
+        alt: title
+      });
+    }
 
     setPhotoTitle("");
+    setPhotoImagesList([]);
+    setSelectedEventId("");
     setAddPhotoOpen(false);
   };
 
@@ -500,12 +522,32 @@ export function AdminDashboard(): React.ReactElement {
 
                   <form onSubmit={handleAddPhotoSubmit} className="space-y-4 mt-2">
                     <div>
-                      <Label htmlFor="ph-title">Photo Title *</Label>
+                      <Label htmlFor="ph-event">Assign to Specific Event</Label>
+                      <select
+                        id="ph-event"
+                        onChange={(e) => {
+                          setSelectedEventId(e.target.value);
+                          const ev = events.find((item) => item.id === e.target.value);
+                          if (ev && !photoTitle) setPhotoTitle(`${ev.title} Photo`);
+                        }}
+                        value={selectedEventId}
+                        className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
+                      >
+                        <option value="">-- General Gallery (No Specific Event) --</option>
+                        {events.map((ev) => (
+                          <option key={ev.id} value={ev.id}>
+                            📌 {ev.title} ({ev.category})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="ph-title">Photo Title / Caption</Label>
                       <Input
                         id="ph-title"
                         onChange={(e) => setPhotoTitle(e.target.value)}
-                        placeholder="e.g. Royal Wedding Mandap"
-                        required
+                        placeholder="e.g. Royal Stage Lighting / Bridal Entry"
                         value={photoTitle}
                       />
                     </div>
@@ -521,33 +563,50 @@ export function AdminDashboard(): React.ReactElement {
                     </div>
 
                     <div>
-                      <Label htmlFor="ph-src">Choose Photo File from Computer</Label>
+                      <Label htmlFor="ph-src">Select Photos from Computer (Select Multiple Files)</Label>
                       <input
                         type="file"
                         accept="image/*"
+                        multiple
                         className="mt-1.5 block w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-[#EBDCFB] file:text-[#7d5ea1] hover:file:bg-[#2D2238] hover:file:text-white"
                         onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            const reader = new FileReader();
-                            reader.onloadend = () => {
-                              if (typeof reader.result === "string") {
-                                setPhotoImageSrc(reader.result);
-                              }
-                            };
-                            reader.readAsDataURL(file);
+                          const files = Array.from(e.target.files || []);
+                          if (files.length > 0) {
+                            const dataUrls: string[] = [];
+                            let count = 0;
+                            files.forEach((file) => {
+                              const reader = new FileReader();
+                              reader.onloadend = () => {
+                                if (typeof reader.result === "string") {
+                                  dataUrls.push(reader.result);
+                                }
+                                count++;
+                                if (count === files.length) {
+                                  setPhotoImagesList(dataUrls);
+                                  if (dataUrls[0]) setPhotoImageSrc(dataUrls[0]);
+                                }
+                              };
+                              reader.readAsDataURL(file);
+                            });
                           }
                         }}
                       />
-                      <Input
-                        id="ph-src"
-                        className="mt-2"
-                        onChange={(e) => setPhotoImageSrc(e.target.value)}
-                        placeholder="Or paste URL e.g. /images/gallery/wedding-stage.jpg"
-                        value={photoImageSrc}
-                      />
+                      {photoImagesList.length > 0 ? (
+                        <p className="mt-1.5 text-xs font-semibold text-emerald-600">
+                          ✓ {photoImagesList.length} photos selected ready to upload
+                        </p>
+                      ) : (
+                        <Input
+                          id="ph-src"
+                          className="mt-2"
+                          onChange={(e) => setPhotoImageSrc(e.target.value)}
+                          placeholder="Or paste URL e.g. /images/gallery/wedding-stage.jpg"
+                          value={photoImageSrc}
+                        />
+                      )}
+
                       {photoImageSrc ? (
-                        <div className="mt-2 h-28 w-full overflow-hidden rounded-md border border-[#EBDCFB]">
+                        <div className="mt-2 h-24 w-full overflow-hidden rounded-md border border-[#EBDCFB]">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img src={photoImageSrc} alt="Preview" className="size-full object-cover" />
                         </div>
@@ -555,7 +614,11 @@ export function AdminDashboard(): React.ReactElement {
                     </div>
 
                     <div className="flex justify-end gap-2 pt-2">
-                      <GradientButton type="submit">Upload & Save Photo</GradientButton>
+                      <GradientButton type="submit">
+                        {photoImagesList.length > 1
+                          ? `Upload ${photoImagesList.length} Photos to Event`
+                          : "Upload & Save Photo"}
+                      </GradientButton>
                     </div>
                   </form>
                 </DialogContent>
@@ -584,7 +647,7 @@ export function AdminDashboard(): React.ReactElement {
                   <div className="p-4 flex items-center justify-between">
                     <div>
                       <p className="text-xs font-semibold tracking-wider text-[#D4AF37] uppercase">
-                        {ph.category}
+                        {ph.eventTitle ? `📌 Event: ${ph.eventTitle}` : ph.category}
                       </p>
                       <h4 className="font-semibold text-[#2D2238]">{ph.title}</h4>
                     </div>

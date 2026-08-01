@@ -31,6 +31,8 @@ export async function GET(): Promise<NextResponse> {
       id: String(p._id),
       title: p.title,
       category: p.category,
+      eventId: p.eventId || "",
+      eventTitle: p.eventTitle || "",
       imageSrc: p.imageSrc,
       alt: p.alt || p.title
     }));
@@ -42,12 +44,29 @@ export async function GET(): Promise<NextResponse> {
   }
 }
 
-/** POST /api/photos - Add new photo to MongoDB */
+/** POST /api/photos - Add new single photo or multiple photos array to MongoDB */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const db = await connectToDatabase();
     const body = await request.json();
 
+    // Handle array of photos
+    if (Array.isArray(body)) {
+      if (db) {
+        const docs = body.map((item) => ({
+          title: item.title || "Gallery Photo",
+          category: item.category || "General",
+          eventId: item.eventId || "",
+          eventTitle: item.eventTitle || "",
+          imageSrc: item.imageSrc,
+          alt: item.alt || item.title || "Gallery Photo"
+        }));
+        await PhotoModel.insertMany(docs);
+      }
+      return NextResponse.json({ ok: true, message: "Multiple photos uploaded successfully" });
+    }
+
+    // Handle single photo
     if (!body.title || !body.imageSrc) {
       return NextResponse.json({ ok: false, message: "Title and imageSrc are required" }, { status: 400 });
     }
@@ -57,6 +76,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       const newPhoto = await PhotoModel.create({
         title: body.title,
         category: body.category || "General",
+        eventId: body.eventId || "",
+        eventTitle: body.eventTitle || "",
         imageSrc: body.imageSrc,
         alt: body.alt || body.title
       });
@@ -69,6 +90,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         id: createdId,
         title: body.title,
         category: body.category || "General",
+        eventId: body.eventId || "",
+        eventTitle: body.eventTitle || "",
         imageSrc: body.imageSrc,
         alt: body.alt || body.title
       }

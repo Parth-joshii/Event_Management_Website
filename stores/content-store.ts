@@ -18,6 +18,8 @@ export interface PhotoItem {
   id: string;
   title: string;
   category: string;
+  eventId?: string;
+  eventTitle?: string;
   imageSrc: string;
   alt: string;
 }
@@ -66,6 +68,7 @@ interface ContentState {
 
   // Photo management
   addPhoto: (photo: Omit<PhotoItem, "id">) => Promise<void>;
+  addMultiplePhotos: (photosList: Omit<PhotoItem, "id">[]) => Promise<void>;
   updatePhoto: (id: string, photo: Partial<PhotoItem>) => void;
   deletePhoto: (id: string) => Promise<void>;
 
@@ -231,6 +234,26 @@ export const useContentStore = create<ContentState>()(
           }
         } catch (e) {
           console.error("Failed to persist photo to MongoDB:", e);
+        } finally {
+          await get().fetchFromDatabase();
+        }
+      },
+
+      addMultiplePhotos: async (photosList) => {
+        const tempNewPhotos: PhotoItem[] = photosList.map((p, idx) => ({
+          ...p,
+          id: `photo-${Date.now()}-${idx}`
+        }));
+        set({ photos: [...tempNewPhotos, ...get().photos] });
+
+        try {
+          await fetch("/api/photos", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(photosList)
+          });
+        } catch (e) {
+          console.error("Failed to persist bulk photos to MongoDB:", e);
         } finally {
           await get().fetchFromDatabase();
         }
