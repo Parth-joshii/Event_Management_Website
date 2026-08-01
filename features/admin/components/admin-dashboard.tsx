@@ -374,23 +374,15 @@ export function AdminDashboard(): React.ReactElement {
                         type="file"
                         accept="image/*"
                         className="mt-1.5 block w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-[#EBDCFB] file:text-[#7d5ea1] hover:file:bg-[#2D2238] hover:file:text-white"
-                        onChange={async (e) => {
+                        onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (file) {
-                            const formData = new FormData();
-                            formData.append("file", file);
-                            try {
-                              const res = await fetch("/api/upload", { method: "POST", body: formData });
-                              const data = await res.json();
-                              if (data.ok && data.url) {
-                                setEventImageSrc(data.url);
-                                return;
-                              }
-                            } catch {
-                              // Fallback
-                            }
                             const reader = new FileReader();
-                            reader.onloadend = () => setEventImageSrc(reader.result as string);
+                            reader.onloadend = () => {
+                              if (typeof reader.result === "string") {
+                                setEventImageSrc(reader.result);
+                              }
+                            };
                             reader.readAsDataURL(file);
                           }
                         }}
@@ -534,23 +526,15 @@ export function AdminDashboard(): React.ReactElement {
                         type="file"
                         accept="image/*"
                         className="mt-1.5 block w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-[#EBDCFB] file:text-[#7d5ea1] hover:file:bg-[#2D2238] hover:file:text-white"
-                        onChange={async (e) => {
+                        onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (file) {
-                            const formData = new FormData();
-                            formData.append("file", file);
-                            try {
-                              const res = await fetch("/api/upload", { method: "POST", body: formData });
-                              const data = await res.json();
-                              if (data.ok && data.url) {
-                                setPhotoImageSrc(data.url);
-                                return;
-                              }
-                            } catch {
-                              // Fallback
-                            }
                             const reader = new FileReader();
-                            reader.onloadend = () => setPhotoImageSrc(reader.result as string);
+                            reader.onloadend = () => {
+                              if (typeof reader.result === "string") {
+                                setPhotoImageSrc(reader.result);
+                              }
+                            };
                             reader.readAsDataURL(file);
                           }
                         }}
