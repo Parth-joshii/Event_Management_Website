@@ -8,6 +8,8 @@ import { saveInquiryToGoogleSheets } from "@/services/server/google-sheets.serve
 import type { InquiryResponse } from "@/types/inquiry";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
 
 function getIpAddress(request: NextRequest): string {
   return (

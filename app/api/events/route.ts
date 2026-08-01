@@ -4,6 +4,8 @@ import { EventModel } from "@/models/Event";
 import { eventCategories } from "@/features/events/data/event-categories";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
 
 /** GET /api/events - Fetch all events from MongoDB with auto-seeding if empty */
 export async function GET(): Promise<NextResponse> {

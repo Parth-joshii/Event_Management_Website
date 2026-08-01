@@ -247,11 +247,15 @@ export const useContentStore = create<ContentState>()(
         set({ photos: [...tempNewPhotos, ...get().photos] });
 
         try {
-          await fetch("/api/photos", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(photosList)
-          });
+          await Promise.all(
+            photosList.map((item) =>
+              fetch("/api/photos", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(item)
+              })
+            )
+          );
         } catch (e) {
           console.error("Failed to persist bulk photos to MongoDB:", e);
         } finally {

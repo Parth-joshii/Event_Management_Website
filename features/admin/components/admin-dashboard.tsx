@@ -33,8 +33,8 @@ import {
 } from "@/components/ui/dialog";
 import { siteConfig } from "@/config/site";
 
-/** Compresses image files to high-performance WebP base64 payloads to fit within cloud serverless limits. */
-function compressImageFile(file: File, maxWidth = 1200, quality = 0.8): Promise<string> {
+/** Preserves Ultra-HD 2400px crisp image resolution & 95% pristine quality while optimizing for cloud storage. */
+function compressImageFile(file: File, maxWidth = 2400, quality = 0.95): Promise<string> {
   return new Promise((resolve) => {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -50,8 +50,10 @@ function compressImageFile(file: File, maxWidth = 1200, quality = 0.8): Promise<
         canvas.height = height;
         const ctx = canvas.getContext("2d");
         if (ctx) {
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = "high";
           ctx.drawImage(img, 0, 0, width, height);
-          resolve(canvas.toDataURL("image/webp", quality));
+          resolve(canvas.toDataURL("image/jpeg", quality));
         } else {
           resolve((e.target?.result as string) || "");
         }

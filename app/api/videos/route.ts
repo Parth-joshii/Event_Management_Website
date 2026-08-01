@@ -3,6 +3,8 @@ import { connectToDatabase } from "@/lib/mongodb";
 import { VideoModel } from "@/models/Video";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
 
 const defaultSeedVideos = [
   {

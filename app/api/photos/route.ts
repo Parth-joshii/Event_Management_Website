@@ -4,6 +4,8 @@ import { PhotoModel } from "@/models/Photo";
 import { featuredGallery } from "@/features/gallery/data/featured-gallery";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
 
 /** GET /api/photos - Fetch all photos from MongoDB with auto-seeding if empty */
 export async function GET(): Promise<NextResponse> {
