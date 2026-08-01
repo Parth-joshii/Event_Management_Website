@@ -33,6 +33,36 @@ import {
 } from "@/components/ui/dialog";
 import { siteConfig } from "@/config/site";
 
+/** Compresses image files to high-performance WebP base64 payloads to fit within cloud serverless limits. */
+function compressImageFile(file: File, maxWidth = 1200, quality = 0.8): Promise<string> {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let { width, height } = img;
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL("image/webp", quality));
+        } else {
+          resolve((e.target?.result as string) || "");
+        }
+      };
+      img.onerror = () => resolve((e.target?.result as string) || "");
+      img.src = (e.target?.result as string) || "";
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 export function AdminDashboard(): React.ReactElement {
   const {
     isAuthenticated,
@@ -569,25 +599,14 @@ export function AdminDashboard(): React.ReactElement {
                         accept="image/*"
                         multiple
                         className="mt-1.5 block w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-[#EBDCFB] file:text-[#7d5ea1] hover:file:bg-[#2D2238] hover:file:text-white"
-                        onChange={(e) => {
+                        onChange={async (e) => {
                           const files = Array.from(e.target.files || []);
                           if (files.length > 0) {
-                            const dataUrls: string[] = [];
-                            let count = 0;
-                            files.forEach((file) => {
-                              const reader = new FileReader();
-                              reader.onloadend = () => {
-                                if (typeof reader.result === "string") {
-                                  dataUrls.push(reader.result);
-                                }
-                                count++;
-                                if (count === files.length) {
-                                  setPhotoImagesList(dataUrls);
-                                  if (dataUrls[0]) setPhotoImageSrc(dataUrls[0]);
-                                }
-                              };
-                              reader.readAsDataURL(file);
-                            });
+                            const compressedUrls = await Promise.all(
+                              files.map((file) => compressImageFile(file))
+                            );
+                            setPhotoImagesList(compressedUrls);
+                            if (compressedUrls[0]) setPhotoImageSrc(compressedUrls[0]);
                           }
                         }}
                       />
