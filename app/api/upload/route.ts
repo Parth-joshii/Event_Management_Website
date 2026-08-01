@@ -4,7 +4,7 @@ import { join } from "node:path";
 
 export const runtime = "nodejs";
 
-/** Handles image file uploads and saves them to public/images/gallery. */
+/** Handles image and video file uploads. */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const formData = await request.formData();
@@ -19,7 +19,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     // Sanitize filename
     const safeName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
-    const uploadDir = join(process.cwd(), "public", "images", "gallery");
+    const isVideo = file.type.startsWith("video/") || file.name.endsWith(".mp4") || file.name.endsWith(".webm");
+
+    const subDir = isVideo ? ["public", "videos", "portfolio"] : ["public", "images", "gallery"];
+    const uploadDir = join(process.cwd(), ...subDir);
     
     // Ensure directory exists
     await mkdir(uploadDir, { recursive: true });
@@ -27,11 +30,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const filePath = join(uploadDir, safeName);
     await writeFile(filePath, buffer);
 
-    const publicUrl = `/images/gallery/${safeName}`;
+    const publicUrl = isVideo ? `/videos/portfolio/${safeName}` : `/images/gallery/${safeName}`;
 
     return NextResponse.json({
       ok: true,
       url: publicUrl,
+      isVideo,
       message: "File uploaded successfully"
     });
   } catch (error) {

@@ -4,7 +4,6 @@ import * as React from "react";
 import Link from "next/link";
 import {
   Calendar,
-  CheckCircle,
   ExternalLink,
   Image as ImageIcon,
   Plus,
@@ -15,9 +14,9 @@ import {
   Phone,
   Sparkles,
   UserCheck,
-  Building
+  Video as VideoIcon
 } from "lucide-react";
-import { useContentStore, EventItem, PhotoItem, InquiryItem } from "@/stores/content-store";
+import { useContentStore, EventItem, PhotoItem, VideoItem, InquiryItem } from "@/stores/content-store";
 import { Container } from "@/components/layout/container";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { Input } from "@/components/ui/input";
@@ -41,11 +40,15 @@ export function AdminDashboard(): React.ReactElement {
     logout,
     events,
     photos,
+    videos,
     inquiries,
+    fetchFromDatabase,
     addEvent,
     deleteEvent,
     addPhoto,
     deletePhoto,
+    addVideo,
+    deleteVideo,
     updateInquiryStatus,
     deleteInquiry
   } = useContentStore();
@@ -54,6 +57,12 @@ export function AdminDashboard(): React.ReactElement {
   const [loginError, setLoginError] = React.useState(false);
   const [addEventOpen, setAddEventOpen] = React.useState(false);
   const [addPhotoOpen, setAddPhotoOpen] = React.useState(false);
+  const [addVideoOpen, setAddVideoOpen] = React.useState(false);
+
+  // Sync from DB on mount
+  React.useEffect(() => {
+    void fetchFromDatabase();
+  }, [fetchFromDatabase]);
 
   // New Event Form state
   const [eventTitle, setEventTitle] = React.useState("");
@@ -68,6 +77,12 @@ export function AdminDashboard(): React.ReactElement {
   const [photoCategory, setPhotoCategory] = React.useState("Wedding Stage");
   const [photoImageSrc, setPhotoImageSrc] = React.useState("/images/gallery/wedding-stage.jpg");
 
+  // New Video Form state
+  const [videoTitle, setVideoTitle] = React.useState("");
+  const [videoCategory, setVideoCategory] = React.useState("Portfolio");
+  const [videoSrc, setVideoSrc] = React.useState("/videos/landing-page.mp4");
+  const [videoDescription, setVideoDescription] = React.useState("");
+
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const success = login(passwordInput);
@@ -79,11 +94,11 @@ export function AdminDashboard(): React.ReactElement {
     }
   };
 
-  const handleAddEventSubmit = (e: React.FormEvent) => {
+  const handleAddEventSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!eventTitle.trim() || !eventDescription.trim()) return;
 
-    addEvent({
+    await addEvent({
       title: eventTitle.trim(),
       category: eventCategory,
       description: eventDescription.trim(),
@@ -99,11 +114,11 @@ export function AdminDashboard(): React.ReactElement {
     setAddEventOpen(false);
   };
 
-  const handleAddPhotoSubmit = (e: React.FormEvent) => {
+  const handleAddPhotoSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!photoTitle.trim()) return;
 
-    addPhoto({
+    await addPhoto({
       title: photoTitle.trim(),
       category: photoCategory,
       imageSrc: photoImageSrc.trim() || "/images/gallery/wedding-stage.jpg",
@@ -112,6 +127,22 @@ export function AdminDashboard(): React.ReactElement {
 
     setPhotoTitle("");
     setAddPhotoOpen(false);
+  };
+
+  const handleAddVideoSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!videoTitle.trim()) return;
+
+    await addVideo({
+      title: videoTitle.trim(),
+      category: videoCategory,
+      videoSrc: videoSrc.trim() || "/videos/landing-page.mp4",
+      description: videoDescription.trim()
+    });
+
+    setVideoTitle("");
+    setVideoDescription("");
+    setAddVideoOpen(false);
   };
 
   // If not authenticated, show login UI
@@ -181,7 +212,7 @@ export function AdminDashboard(): React.ReactElement {
               <h1 className="font-display text-lg font-bold leading-none">
                 {siteConfig.name} Admin
               </h1>
-              <p className="text-[10px] text-white/60">Event & Content Management</p>
+              <p className="text-[10px] text-white/60">MongoDB Powered Admin Panel</p>
             </div>
           </div>
 
@@ -191,13 +222,13 @@ export function AdminDashboard(): React.ReactElement {
               target="_blank"
               className="hidden items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white/20 sm:inline-flex"
             >
-              View Live Website
+              View Live Client Website
               <ExternalLink className="size-3.5" />
             </Link>
             <button
               onClick={logout}
               type="button"
-              className="inline-flex items-center gap-1.5 rounded-full border border-rose-400/40 bg-rose-500/20 px-3 py-1.5 text-xs font-semibold text-rose-200 transition hover:bg-rose-500/30"
+              className="inline-flex items-center gap-1.5 rounded-full border border-rose-400/40 bg-rose-500/20 px-3 py-1.5 text-xs font-semibold text-rose-200 transition hover:bg-rose-500/30 cursor-pointer"
             >
               <LogOut className="size-3.5" />
               Logout
@@ -209,7 +240,7 @@ export function AdminDashboard(): React.ReactElement {
       {/* Main Content Container */}
       <Container className="py-8">
         {/* Quick Stats Bar */}
-        <div className="grid gap-4 sm:grid-cols-3 mb-8">
+        <div className="grid gap-4 sm:grid-cols-4 mb-8">
           <div className="rounded-xl border border-[#EBDCFB] bg-white p-5 shadow-sm">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold uppercase tracking-wider text-[#7d5ea1]">
@@ -227,7 +258,17 @@ export function AdminDashboard(): React.ReactElement {
               </span>
               <ImageIcon className="size-5 text-[#D4AF37]" />
             </div>
-            <p className="font-display mt-3 text-3xl font-bold">{photos.length}</p>
+            <p className="font-display mt-3 text-[#2D2238] text-3xl font-bold">{photos.length}</p>
+          </div>
+
+          <div className="rounded-xl border border-[#EBDCFB] bg-white p-5 shadow-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-wider text-[#7d5ea1]">
+                Videos
+              </span>
+              <VideoIcon className="size-5 text-[#D4AF37]" />
+            </div>
+            <p className="font-display mt-3 text-[#2D2238] text-3xl font-bold">{videos.length}</p>
           </div>
 
           <div className="rounded-xl border border-[#EBDCFB] bg-white p-5 shadow-sm">
@@ -246,6 +287,7 @@ export function AdminDashboard(): React.ReactElement {
           <TabsList className="mb-6 bg-[#EBDCFB]/60 p-1">
             <TabsTrigger value="events">Manage Events</TabsTrigger>
             <TabsTrigger value="photos">Manage Photos</TabsTrigger>
+            <TabsTrigger value="videos">Manage Videos</TabsTrigger>
             <TabsTrigger value="inquiries">Client Inquiries</TabsTrigger>
           </TabsList>
 
@@ -255,7 +297,7 @@ export function AdminDashboard(): React.ReactElement {
               <div>
                 <h2 className="font-display text-2xl font-bold text-[#2D2238]">Events List</h2>
                 <p className="text-sm text-[#5c4b6e]">
-                  Add, edit, or remove events displayed across the platform.
+                  Add or remove events stored in MongoDB and displayed on the client website.
                 </p>
               </div>
 
@@ -272,7 +314,7 @@ export function AdminDashboard(): React.ReactElement {
                       Add New Event
                     </DialogTitle>
                     <DialogDescription>
-                      Fill in the event details to feature it on the website.
+                      Fill in the event details to store in MongoDB and feature on the site.
                     </DialogDescription>
                   </DialogHeader>
 
@@ -327,7 +369,7 @@ export function AdminDashboard(): React.ReactElement {
                     </div>
 
                     <div>
-                      <Label htmlFor="ev-img">Select Photo from Computer or Paste Image URL</Label>
+                      <Label htmlFor="ev-img">Select Photo File or Image URL</Label>
                       <input
                         type="file"
                         accept="image/*"
@@ -362,6 +404,7 @@ export function AdminDashboard(): React.ReactElement {
                       />
                       {eventImageSrc ? (
                         <div className="mt-2 h-24 w-full overflow-hidden rounded-md border border-[#EBDCFB]">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img src={eventImageSrc} alt="Preview" className="size-full object-cover" />
                         </div>
                       ) : null}
@@ -395,6 +438,7 @@ export function AdminDashboard(): React.ReactElement {
                   className="group flex flex-col overflow-hidden rounded-xl border border-[#EBDCFB] bg-white shadow-sm transition hover:shadow-md"
                 >
                   <div className="relative h-48 w-full overflow-hidden bg-gray-100">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={ev.imageSrc}
                       alt={ev.title}
@@ -419,9 +463,9 @@ export function AdminDashboard(): React.ReactElement {
                     <div className="mt-4 flex items-center justify-between border-t border-[#EBDCFB] pt-4 text-xs text-[#7d5ea1]">
                       <span>📍 {ev.location || "India"}</span>
                       <button
-                        onClick={() => deleteEvent(ev.id)}
+                        onClick={() => void deleteEvent(ev.id)}
                         type="button"
-                        className="inline-flex items-center gap-1 font-semibold text-rose-600 hover:text-rose-800"
+                        className="inline-flex items-center gap-1 font-semibold text-rose-600 hover:text-rose-800 cursor-pointer"
                       >
                         <Trash2 className="size-3.5" />
                         Remove Event
@@ -441,7 +485,7 @@ export function AdminDashboard(): React.ReactElement {
                   Website Photos & Assets
                 </h2>
                 <p className="text-sm text-[#5c4b6e]">
-                  Add or remove website photos and stage gallery images.
+                  Add or remove website photos stored in MongoDB.
                 </p>
               </div>
 
@@ -520,6 +564,7 @@ export function AdminDashboard(): React.ReactElement {
                       />
                       {photoImageSrc ? (
                         <div className="mt-2 h-28 w-full overflow-hidden rounded-md border border-[#EBDCFB]">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img src={photoImageSrc} alt="Preview" className="size-full object-cover" />
                         </div>
                       ) : null}
@@ -541,6 +586,7 @@ export function AdminDashboard(): React.ReactElement {
                   className="group relative overflow-hidden rounded-xl border border-[#EBDCFB] bg-white shadow-sm"
                 >
                   <div className="h-56 w-full overflow-hidden bg-gray-100">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={ph.imageSrc}
                       alt={ph.alt}
@@ -560,9 +606,9 @@ export function AdminDashboard(): React.ReactElement {
                     </div>
 
                     <button
-                      onClick={() => deletePhoto(ph.id)}
+                      onClick={() => void deletePhoto(ph.id)}
                       type="button"
-                      className="p-2 text-rose-600 hover:text-rose-800 transition"
+                      className="p-2 text-rose-600 hover:text-rose-800 transition cursor-pointer"
                       title="Delete photo"
                     >
                       <Trash2 className="size-4" />
@@ -573,12 +619,158 @@ export function AdminDashboard(): React.ReactElement {
             </div>
           </TabsContent>
 
-          {/* TAB 3: CLIENT INQUIRIES */}
+          {/* TAB 3: MANAGE VIDEOS */}
+          <TabsContent value="videos" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="font-display text-2xl font-bold text-[#2D2238]">
+                  Website Videos & Cinematic Assets
+                </h2>
+                <p className="text-sm text-[#5c4b6e]">
+                  Upload video files or add video links stored in MongoDB for the hero background and portfolio showcases.
+                </p>
+              </div>
+
+              <Dialog open={addVideoOpen} onOpenChange={setAddVideoOpen}>
+                <DialogTrigger asChild>
+                  <GradientButton type="button">
+                    <Plus className="size-4" />
+                    Add New Video
+                  </GradientButton>
+                </DialogTrigger>
+                <DialogContent className="max-w-md bg-white border-[#EBDCFB] text-[#2D2238]">
+                  <DialogHeader>
+                    <DialogTitle className="font-display text-2xl font-bold">
+                      Add New Video
+                    </DialogTitle>
+                    <DialogDescription>
+                      Select a video file from your computer or enter a video URL.
+                    </DialogDescription>
+                  </DialogHeader>
+
+                  <form onSubmit={handleAddVideoSubmit} className="space-y-4 mt-2">
+                    <div>
+                      <Label htmlFor="vd-title">Video Title *</Label>
+                      <Input
+                        id="vd-title"
+                        onChange={(e) => setVideoTitle(e.target.value)}
+                        placeholder="e.g. Royal Wedding Highlights"
+                        required
+                        value={videoTitle}
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="vd-cat">Category Tag</Label>
+                      <Input
+                        id="vd-cat"
+                        onChange={(e) => setVideoCategory(e.target.value)}
+                        placeholder="e.g. Hero, Portfolio, Wedding"
+                        value={videoCategory}
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="vd-file">Choose Video File from Computer</Label>
+                      <input
+                        type="file"
+                        accept="video/*"
+                        className="mt-1.5 block w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-[#EBDCFB] file:text-[#7d5ea1] hover:file:bg-[#2D2238] hover:file:text-white"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const formData = new FormData();
+                            formData.append("file", file);
+                            try {
+                              const res = await fetch("/api/upload", { method: "POST", body: formData });
+                              const data = await res.json();
+                              if (data.ok && data.url) {
+                                setVideoSrc(data.url);
+                                return;
+                              }
+                            } catch {
+                              // Fallback
+                            }
+                            const reader = new FileReader();
+                            reader.onloadend = () => setVideoSrc(reader.result as string);
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                      <Input
+                        id="vd-src"
+                        className="mt-2"
+                        onChange={(e) => setVideoSrc(e.target.value)}
+                        placeholder="Or paste video URL e.g. /videos/landing-page.mp4"
+                        value={videoSrc}
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="vd-desc">Description</Label>
+                      <Textarea
+                        id="vd-desc"
+                        onChange={(e) => setVideoDescription(e.target.value)}
+                        placeholder="Short description of this video asset..."
+                        rows={2}
+                        value={videoDescription}
+                      />
+                    </div>
+
+                    <div className="flex justify-end gap-2 pt-2">
+                      <GradientButton type="submit">Upload & Save Video</GradientButton>
+                    </div>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            {/* Videos Grid */}
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {videos.map((v) => (
+                <div
+                  key={v.id}
+                  className="group relative overflow-hidden rounded-xl border border-[#EBDCFB] bg-white shadow-sm"
+                >
+                  <div className="h-56 w-full overflow-hidden bg-black">
+                    <video
+                      src={v.videoSrc}
+                      controls
+                      className="size-full object-cover"
+                    />
+                  </div>
+
+                  <div className="p-4 flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-semibold tracking-wider text-[#D4AF37] uppercase">
+                        {v.category}
+                      </p>
+                      <h4 className="font-semibold text-[#2D2238]">{v.title}</h4>
+                      {v.description ? (
+                        <p className="text-xs text-[#5c4b6e] mt-1">{v.description}</p>
+                      ) : null}
+                    </div>
+
+                    <button
+                      onClick={() => void deleteVideo(v.id)}
+                      type="button"
+                      className="p-2 text-rose-600 hover:text-rose-800 transition cursor-pointer"
+                      title="Delete video"
+                    >
+                      <Trash2 className="size-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* TAB 4: CLIENT INQUIRIES */}
           <TabsContent value="inquiries" className="space-y-6">
             <div>
               <h2 className="font-display text-2xl font-bold text-[#2D2238]">Client Inquiries</h2>
               <p className="text-sm text-[#5c4b6e]">
-                Inquiries and customizer submissions submitted by potential clients.
+                Inquiries submitted by potential clients stored in MongoDB.
               </p>
             </div>
 
@@ -617,7 +809,7 @@ export function AdminDashboard(): React.ReactElement {
                         <select
                           value={inq.status}
                           onChange={(e) =>
-                            updateInquiryStatus(inq.id, e.target.value as InquiryItem["status"])
+                            void updateInquiryStatus(inq.id, e.target.value as InquiryItem["status"])
                           }
                           className="rounded-md border border-gray-300 bg-white px-2 py-1 text-xs font-semibold focus:outline-none"
                         >
@@ -628,9 +820,9 @@ export function AdminDashboard(): React.ReactElement {
                       </td>
                       <td className="px-5 py-4">
                         <button
-                          onClick={() => deleteInquiry(inq.id)}
+                          onClick={() => void deleteInquiry(inq.id)}
                           type="button"
-                          className="text-rose-600 hover:text-rose-800 transition"
+                          className="text-rose-600 hover:text-rose-800 transition cursor-pointer"
                         >
                           <Trash2 className="size-4" />
                         </button>
