@@ -1,10 +1,11 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { PhotoModel } from "@/models/Photo";
+import { featuredGallery } from "@/features/gallery/data/featured-gallery";
 
 export const runtime = "nodejs";
 
-/** GET /api/photos - Fetch all photos from MongoDB */
+/** GET /api/photos - Fetch all photos from MongoDB with auto-seeding if empty */
 export async function GET(): Promise<NextResponse> {
   try {
     const db = await connectToDatabase();
@@ -12,7 +13,20 @@ export async function GET(): Promise<NextResponse> {
       return NextResponse.json({ ok: false, data: [] }, { status: 200 });
     }
 
-    const photos = await PhotoModel.find({}).sort({ createdAt: -1 }).lean();
+    let photos = await PhotoModel.find({}).sort({ createdAt: -1 }).lean();
+
+    // Auto-seed initial photos if database collection is empty
+    if (photos.length === 0 && featuredGallery.length > 0) {
+      const seedData = featuredGallery.map((item) => ({
+        title: item.title,
+        category: item.category,
+        imageSrc: item.imageSrc,
+        alt: item.alt
+      }));
+      await PhotoModel.insertMany(seedData);
+      photos = await PhotoModel.find({}).sort({ createdAt: -1 }).lean();
+    }
+
     const formatted = photos.map((p) => ({
       id: String(p._id),
       title: p.title,

@@ -1,10 +1,11 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { EventModel } from "@/models/Event";
+import { eventCategories } from "@/features/events/data/event-categories";
 
 export const runtime = "nodejs";
 
-/** GET /api/events - Fetch all events from MongoDB */
+/** GET /api/events - Fetch all events from MongoDB with auto-seeding if empty */
 export async function GET(): Promise<NextResponse> {
   try {
     const db = await connectToDatabase();
@@ -12,13 +13,29 @@ export async function GET(): Promise<NextResponse> {
       return NextResponse.json({ ok: false, data: [] }, { status: 200 });
     }
 
-    const events = await EventModel.find({}).sort({ createdAt: -1 }).lean();
+    let events = await EventModel.find({}).sort({ createdAt: -1 }).lean();
+
+    // Auto-seed initial events if database collection is empty
+    if (events.length === 0 && eventCategories.length > 0) {
+      const seedData = eventCategories.map((item) => ({
+        title: item.title,
+        category: item.title,
+        description: item.description,
+        date: "2026-08-15",
+        location: "India",
+        imageSrc: item.imageSrc,
+        imageAlt: item.imageAlt
+      }));
+      await EventModel.insertMany(seedData);
+      events = await EventModel.find({}).sort({ createdAt: -1 }).lean();
+    }
+
     const formatted = events.map((ev) => ({
       id: String(ev._id),
       title: ev.title,
       category: ev.category,
       description: ev.description,
-      date: ev.date || "2026-09-01",
+      date: ev.date || "2026-08-15",
       location: ev.location || "India",
       imageSrc: ev.imageSrc,
       imageAlt: ev.imageAlt || ev.title

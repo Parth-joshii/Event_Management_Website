@@ -4,7 +4,17 @@ import { VideoModel } from "@/models/Video";
 
 export const runtime = "nodejs";
 
-/** GET /api/videos - Fetch all videos from MongoDB */
+const defaultSeedVideos = [
+  {
+    title: "Luxury Event Celebration Hero",
+    category: "Hero",
+    videoSrc: "/videos/landing-page.mp4",
+    posterSrc: "",
+    description: "Main background video for landing page hero section"
+  }
+];
+
+/** GET /api/videos - Fetch all videos from MongoDB with auto-seeding if empty */
 export async function GET(): Promise<NextResponse> {
   try {
     const db = await connectToDatabase();
@@ -12,7 +22,14 @@ export async function GET(): Promise<NextResponse> {
       return NextResponse.json({ ok: false, data: [] }, { status: 200 });
     }
 
-    const videos = await VideoModel.find({}).sort({ createdAt: -1 }).lean();
+    let videos = await VideoModel.find({}).sort({ createdAt: -1 }).lean();
+
+    // Auto-seed initial videos if database collection is empty
+    if (videos.length === 0 && defaultSeedVideos.length > 0) {
+      await VideoModel.insertMany(defaultSeedVideos);
+      videos = await VideoModel.find({}).sort({ createdAt: -1 }).lean();
+    }
+
     const formatted = videos.map((v) => ({
       id: String(v._id),
       title: v.title,
