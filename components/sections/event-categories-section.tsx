@@ -1,13 +1,21 @@
+"use client";
+
+import * as React from "react";
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Sparkles } from "lucide-react";
 import { Reveal } from "@/components/animations/reveal";
 import { Container } from "@/components/layout/container";
-import { ResponsiveImage } from "@/components/ui/responsive-image";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { eventCategories } from "@/features/events/data/event-categories";
+import { useContentStore } from "@/stores/content-store";
 
-/** Renders interactive event category preview cards. */
+/** Renders interactive event category preview cards synced with Admin store & MongoDB. */
 export function EventCategoriesSection(): React.ReactElement {
+  const { events, fetchFromDatabase } = useContentStore();
+
+  React.useEffect(() => {
+    void fetchFromDatabase();
+  }, [fetchFromDatabase]);
+
   return (
     <section
       id="events"
@@ -22,42 +30,42 @@ export function EventCategoriesSection(): React.ReactElement {
           />
         </Reveal>
         <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {eventCategories.map((category, index) => {
-            const Icon = category.icon;
-
-            return (
-              <Reveal delay={index * 0.05} key={category.title}>
-                <Link
-                  className="group relative block overflow-hidden rounded-lg border border-white/20 shadow-[0_26px_90px_rgba(45,34,56,0.18)] focus-visible:ring-2 focus-visible:ring-[#D4AF37] focus-visible:outline-none"
-                  href={category.href}
-                >
-                  <ResponsiveImage
-                    alt={category.imageAlt}
-                    className="h-80"
-                    fallbackClassName={category.fallbackClassName}
-                    imageClassName="transition duration-700 group-hover:scale-110"
-                    sizes="(min-width: 1024px) 33vw, 100vw"
+          {events.map((category, index) => (
+            <Reveal delay={index * 0.05} key={category.id || category.title}>
+              <div
+                className="group relative block overflow-hidden rounded-lg border border-white/20 shadow-[0_26px_90px_rgba(45,34,56,0.18)]"
+              >
+                <div className="h-80 w-full overflow-hidden bg-[#2D2238]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    alt={category.imageAlt || category.title}
+                    className="size-full object-cover transition duration-700 group-hover:scale-110"
                     src={category.imageSrc}
-                    title={category.title}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "/images/gallery/wedding-stage.jpg";
+                    }}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#2D2238]/88 via-[#2D2238]/22 to-transparent" />
-                  <div className="absolute inset-x-0 bottom-0 p-6 text-white">
-                    <div className="mb-4 flex size-11 items-center justify-center rounded-full border border-white/25 bg-white/16 backdrop-blur">
-                      <Icon aria-hidden="true" className="size-5" />
-                    </div>
-                    <h3 className="text-2xl font-semibold">{category.title}</h3>
-                    <p className="mt-2 text-sm leading-6 text-white/76">
-                      {category.description}
-                    </p>
-                    <span className="mt-5 inline-flex translate-y-3 items-center gap-2 rounded-full border border-white/25 bg-white/15 px-4 py-2 text-sm font-semibold opacity-0 backdrop-blur transition duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-                      Discover More
-                      <ArrowUpRight aria-hidden="true" className="size-4" />
-                    </span>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-[#2D2238]/88 via-[#2D2238]/22 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 p-6 text-white">
+                  <div className="mb-4 flex size-11 items-center justify-center rounded-full border border-white/25 bg-white/16 backdrop-blur text-[#D4AF37]">
+                    <Sparkles aria-hidden="true" className="size-5" />
                   </div>
-                </Link>
-              </Reveal>
-            );
-          })}
+                  <h3 className="text-2xl font-semibold font-display">{category.title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-white/76 line-clamp-2">
+                    {category.description}
+                  </p>
+                  <Link
+                    href="#contact"
+                    className="mt-5 inline-flex translate-y-3 items-center gap-2 rounded-full border border-white/25 bg-white/15 px-4 py-2 text-sm font-semibold opacity-0 backdrop-blur transition duration-300 group-hover:translate-y-0 group-hover:opacity-100"
+                  >
+                    Plan Event
+                    <ArrowUpRight aria-hidden="true" className="size-4" />
+                  </Link>
+                </div>
+              </div>
+            </Reveal>
+          ))}
         </div>
       </Container>
     </section>
