@@ -1,50 +1,25 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
-import { Maximize2, Plus, X } from "lucide-react";
+import { Maximize2, X } from "lucide-react";
 import { Reveal } from "@/components/animations/reveal";
 import { Container } from "@/components/layout/container";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { GradientButton } from "@/components/ui/gradient-button";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useContentStore, type PhotoItem } from "@/stores/content-store";
 import { cn } from "@/lib/utils";
 
 /** Renders the dynamic featured gallery section connected to Admin store. */
 export function FeaturedGallerySection(): React.ReactElement {
-  const { photos, isAuthenticated, addPhoto, fetchFromDatabase } = useContentStore();
+  const { photos, fetchFromDatabase } = useContentStore();
   const [selectedCategory, setSelectedCategory] = React.useState<string>("All");
   const [activeLightboxPhoto, setActiveLightboxPhoto] = React.useState<PhotoItem | null>(null);
-  const [addPhotoModalOpen, setAddPhotoModalOpen] = React.useState(false);
 
   // Sync latest MongoDB data on client mount
   React.useEffect(() => {
     void fetchFromDatabase();
   }, [fetchFromDatabase]);
-
-  // New Photo State
-  const [photoTitle, setPhotoTitle] = React.useState("");
-  const [photoCategory, setPhotoCategory] = React.useState("Wedding Stage");
-  const [photoImageSrc, setPhotoImageSrc] = React.useState("/images/gallery/wedding-stage.jpg");
-
-  const handleAddPhotoSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!photoTitle.trim()) return;
-
-    addPhoto({
-      title: photoTitle.trim(),
-      category: photoCategory,
-      imageSrc: photoImageSrc.trim() || "/images/gallery/wedding-stage.jpg",
-      alt: photoTitle.trim()
-    });
-
-    setPhotoTitle("");
-    setAddPhotoModalOpen(false);
-  };
 
   // Extract unique categories
   const categories = React.useMemo(() => {
@@ -70,7 +45,7 @@ export function FeaturedGallerySection(): React.ReactElement {
           />
         </Reveal>
 
-        {/* Category Filters & Admin Action */}
+        {/* Category Filters */}
         <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
           {categories.map((cat) => (
             <button
@@ -87,111 +62,6 @@ export function FeaturedGallerySection(): React.ReactElement {
               {cat}
             </button>
           ))}
-
-          {/* Quick Admin Photo Add Button */}
-          <Dialog open={addPhotoModalOpen} onOpenChange={setAddPhotoModalOpen}>
-            <DialogTrigger asChild>
-              <button
-                type="button"
-                className="inline-flex items-center gap-1.5 rounded-full border border-[#D4AF37] bg-[#2D2238] px-4 py-2 text-xs font-semibold text-[#D4AF37] transition hover:bg-[#2D2238]/90 cursor-pointer shadow-sm"
-              >
-                <Plus className="size-3.5" />
-                {isAuthenticated ? "Add Photo (Admin)" : "Admin Upload"}
-              </button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md bg-white border-[#EBDCFB] text-[#2D2238]">
-              <DialogHeader>
-                <DialogTitle className="font-display text-2xl font-bold">
-                  Add Photo to Gallery
-                </DialogTitle>
-                <DialogDescription>
-                  {isAuthenticated
-                    ? "Choose a photo from your computer or paste an image URL to publish."
-                    : "Please log in to the Admin Panel to publish new photos."}
-                </DialogDescription>
-              </DialogHeader>
-
-              {isAuthenticated ? (
-                <form onSubmit={handleAddPhotoSubmit} className="space-y-4 mt-2">
-                  <div>
-                    <Label htmlFor="gal-title">Photo Title *</Label>
-                    <Input
-                      id="gal-title"
-                      onChange={(e) => setPhotoTitle(e.target.value)}
-                      placeholder="e.g. Royal Stage Lighting"
-                      required
-                      value={photoTitle}
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="gal-cat">Category Tag</Label>
-                    <Input
-                      id="gal-cat"
-                      onChange={(e) => setPhotoCategory(e.target.value)}
-                      placeholder="e.g. Stage Decor, Haldi, Reception"
-                      value={photoCategory}
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="gal-src">Select Photo File from Computer</Label>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="mt-1.5 block w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-[#EBDCFB] file:text-[#7d5ea1] hover:file:bg-[#2D2238] hover:file:text-white cursor-pointer"
-                      onChange={async (e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          const formData = new FormData();
-                          formData.append("file", file);
-                          try {
-                            const res = await fetch("/api/upload", { method: "POST", body: formData });
-                            const data = await res.json();
-                            if (data.ok && data.url) {
-                              setPhotoImageSrc(data.url);
-                              return;
-                            }
-                          } catch {
-                            // Fallback to data URL
-                          }
-                          const reader = new FileReader();
-                          reader.onloadend = () => setPhotoImageSrc(reader.result as string);
-                          reader.readAsDataURL(file);
-                        }
-                      }}
-                    />
-                    <Input
-                      id="gal-src"
-                      className="mt-2"
-                      onChange={(e) => setPhotoImageSrc(e.target.value)}
-                      placeholder="Or paste URL e.g. /images/gallery/wedding-stage.jpg"
-                      value={photoImageSrc}
-                    />
-                    {photoImageSrc ? (
-                      <div className="mt-2 h-28 w-full overflow-hidden rounded-md border border-[#EBDCFB]">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={photoImageSrc} alt="Preview" className="size-full object-cover" />
-                      </div>
-                    ) : null}
-                  </div>
-
-                  <div className="flex justify-end gap-2 pt-2">
-                    <GradientButton type="submit">Publish Photo</GradientButton>
-                  </div>
-                </form>
-              ) : (
-                <div className="py-4 text-center space-y-4">
-                  <p className="text-sm text-[#5c4b6e]">
-                    You need to log in to the Admin Dashboard to manage and add photos.
-                  </p>
-                  <GradientButton asChild className="w-full justify-center">
-                    <Link href="/admin">Go to Admin Login (/admin)</Link>
-                  </GradientButton>
-                </div>
-              )}
-            </DialogContent>
-          </Dialog>
         </div>
 
         {/* Photo Gallery Grid */}
