@@ -1,6 +1,16 @@
 import mongoose from "mongoose";
+import dns from "node:dns";
 
-const MONGODB_URI = process.env.MONGODB_URI;
+// Ensure DNS SRV resolution works across Windows & Cloud Serverless environments
+try {
+  dns.setServers(["8.8.8.8", "1.1.1.1"]);
+} catch {
+  // Fallback to system default DNS if setServers is restricted
+}
+
+const MONGODB_URI =
+  process.env.MONGODB_URI ||
+  "mongodb+srv://parthadmin:parthjoshi.com@cluster0.t06n2zp.mongodb.net/codiotic-technology";
 
 interface MongooseCache {
   conn: typeof mongoose | null;
@@ -23,8 +33,7 @@ if (!globalThis.mongooseCache) {
 /** Establishes a cached connection to MongoDB using Mongoose. */
 export async function connectToDatabase(): Promise<typeof mongoose | null> {
   if (!MONGODB_URI) {
-    // If MONGODB_URI is not set, log warning and return null for fallback handling
-    console.warn("MONGODB_URI environment variable is not defined. Operating with fallback storage.");
+    console.warn("MONGODB_URI is not defined.");
     return null;
   }
 
@@ -35,10 +44,11 @@ export async function connectToDatabase(): Promise<typeof mongoose | null> {
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
-      serverSelectionTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 8000,
     };
 
     cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongooseInstance) => {
+      console.log("Successfully connected to MongoDB Cluster");
       return mongooseInstance;
     });
   }
