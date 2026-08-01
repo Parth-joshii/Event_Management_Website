@@ -142,16 +142,16 @@ export const useContentStore = create<ContentState>()(
             fetch("/api/inquiries").then((r) => r.json()).catch(() => null)
           ]);
 
-          if (photosRes?.ok && Array.isArray(photosRes.data) && photosRes.data.length > 0) {
+          if (photosRes?.ok && Array.isArray(photosRes.data)) {
             set({ photos: photosRes.data });
           }
-          if (videosRes?.ok && Array.isArray(videosRes.data) && videosRes.data.length > 0) {
+          if (videosRes?.ok && Array.isArray(videosRes.data)) {
             set({ videos: videosRes.data });
           }
-          if (eventsRes?.ok && Array.isArray(eventsRes.data) && eventsRes.data.length > 0) {
+          if (eventsRes?.ok && Array.isArray(eventsRes.data)) {
             set({ events: eventsRes.data });
           }
-          if (inquiriesRes?.ok && Array.isArray(inquiriesRes.data) && inquiriesRes.data.length > 0) {
+          if (inquiriesRes?.ok && Array.isArray(inquiriesRes.data)) {
             set({ inquiries: inquiriesRes.data });
           }
         } catch (e) {
@@ -190,6 +190,8 @@ export const useContentStore = create<ContentState>()(
           }
         } catch (e) {
           console.error("Failed to persist event to MongoDB:", e);
+        } finally {
+          await get().fetchFromDatabase();
         }
       },
 
@@ -205,6 +207,8 @@ export const useContentStore = create<ContentState>()(
           await fetch(`/api/events?id=${encodeURIComponent(id)}`, { method: "DELETE" });
         } catch (e) {
           console.error("Failed to delete event from MongoDB:", e);
+        } finally {
+          await get().fetchFromDatabase();
         }
       },
 
@@ -227,6 +231,8 @@ export const useContentStore = create<ContentState>()(
           }
         } catch (e) {
           console.error("Failed to persist photo to MongoDB:", e);
+        } finally {
+          await get().fetchFromDatabase();
         }
       },
 
@@ -242,6 +248,8 @@ export const useContentStore = create<ContentState>()(
           await fetch(`/api/photos?id=${encodeURIComponent(id)}`, { method: "DELETE" });
         } catch (e) {
           console.error("Failed to delete photo from MongoDB:", e);
+        } finally {
+          await get().fetchFromDatabase();
         }
       },
 
@@ -264,6 +272,8 @@ export const useContentStore = create<ContentState>()(
           }
         } catch (e) {
           console.error("Failed to persist video to MongoDB:", e);
+        } finally {
+          await get().fetchFromDatabase();
         }
       },
 
@@ -273,6 +283,8 @@ export const useContentStore = create<ContentState>()(
           await fetch(`/api/videos?id=${encodeURIComponent(id)}`, { method: "DELETE" });
         } catch (e) {
           console.error("Failed to delete video from MongoDB:", e);
+        } finally {
+          await get().fetchFromDatabase();
         }
       },
 
@@ -300,6 +312,8 @@ export const useContentStore = create<ContentState>()(
           });
         } catch (e) {
           console.error("Failed to update inquiry status in MongoDB:", e);
+        } finally {
+          await get().fetchFromDatabase();
         }
       },
 
@@ -309,6 +323,8 @@ export const useContentStore = create<ContentState>()(
           await fetch(`/api/inquiries?id=${encodeURIComponent(id)}`, { method: "DELETE" });
         } catch (e) {
           console.error("Failed to delete inquiry from MongoDB:", e);
+        } finally {
+          await get().fetchFromDatabase();
         }
       }
     }),
