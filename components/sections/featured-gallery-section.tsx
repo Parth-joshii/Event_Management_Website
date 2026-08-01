@@ -16,10 +16,15 @@ import { cn } from "@/lib/utils";
 
 /** Renders the dynamic featured gallery section connected to Admin store. */
 export function FeaturedGallerySection(): React.ReactElement {
-  const { photos, isAuthenticated, addPhoto } = useContentStore();
+  const { photos, isAuthenticated, addPhoto, fetchFromDatabase } = useContentStore();
   const [selectedCategory, setSelectedCategory] = React.useState<string>("All");
   const [activeLightboxPhoto, setActiveLightboxPhoto] = React.useState<PhotoItem | null>(null);
   const [addPhotoModalOpen, setAddPhotoModalOpen] = React.useState(false);
+
+  // Sync latest MongoDB data on client mount
+  React.useEffect(() => {
+    void fetchFromDatabase();
+  }, [fetchFromDatabase]);
 
   // New Photo State
   const [photoTitle, setPhotoTitle] = React.useState("");
