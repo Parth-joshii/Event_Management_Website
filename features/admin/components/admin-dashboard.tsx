@@ -448,7 +448,7 @@ export function AdminDashboard(): React.ReactElement {
                     </div>
 
                     <div>
-                      <Label htmlFor="ev-img">Select Photo File or Image URL</Label>
+                      <Label htmlFor="ev-img">Event Cover Photo (Card Thumbnail) *</Label>
                       <input
                         type="file"
                         accept="image/*"
@@ -519,6 +519,9 @@ export function AdminDashboard(): React.ReactElement {
                         (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80";
                       }}
                     />
+                    <span className="absolute top-3 left-3 rounded-full bg-[#2D2238]/80 px-2.5 py-1 text-[10px] font-semibold text-[#D4AF37] backdrop-blur">
+                      🖼️ Event Cover Photo
+                    </span>
                     <span className="absolute top-3 right-3 rounded-full bg-[#2D2238]/80 px-3 py-1 text-xs font-semibold text-[#D4AF37] backdrop-blur">
                       {ev.category}
                     </span>
@@ -636,19 +639,6 @@ export function AdminDashboard(): React.ReactElement {
                       />
                     </div>
 
-                    <div className="flex items-center gap-2 pt-1">
-                      <input
-                        id="ph-featured-chk"
-                        type="checkbox"
-                        checked={isFeaturedPhoto}
-                        onChange={(e) => setIsFeaturedPhoto(e.target.checked)}
-                        className="size-4 rounded border-gray-300 text-[#D4AF37] focus:ring-[#D4AF37] cursor-pointer"
-                      />
-                      <Label htmlFor="ph-featured-chk" className="text-xs font-semibold text-[#2D2238] cursor-pointer">
-                        ⭐ Display First on Screen (Set Cover Photo)
-                      </Label>
-                    </div>
-
                     <div>
                       <Label htmlFor="ph-src">Select Photos from Computer (Select Multiple Files)</Label>
                       <input
@@ -729,31 +719,14 @@ export function AdminDashboard(): React.ReactElement {
                       <h4 className="font-semibold text-[#2D2238]">{ph.title}</h4>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => void toggleFeaturedPhoto(ph.id, !ph.isFeatured)}
-                        type="button"
-                        className={cn(
-                          "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold transition cursor-pointer border",
-                          ph.isFeatured
-                            ? "bg-[#D4AF37] border-[#D4AF37] text-[#2D2238] shadow-sm"
-                            : "bg-gray-100 border-gray-200 text-gray-600 hover:bg-gray-200"
-                        )}
-                        title="Click to display this photo first on screen"
-                      >
-                        <Star className="size-3 fill-current text-[#D4AF37]" />
-                        {ph.isFeatured ? "Displays First" : "Set Cover"}
-                      </button>
-
-                      <button
-                        onClick={() => void deletePhoto(ph.id)}
-                        type="button"
-                        className="p-1.5 text-rose-600 hover:text-rose-800 transition cursor-pointer"
-                        title="Delete photo"
-                      >
-                        <Trash2 className="size-4" />
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => void deletePhoto(ph.id)}
+                      type="button"
+                      className="p-1.5 text-rose-600 hover:text-rose-800 transition cursor-pointer"
+                      title="Delete photo"
+                    >
+                      <Trash2 className="size-4" />
+                    </button>
                   </div>
                 </div>
               ))}
