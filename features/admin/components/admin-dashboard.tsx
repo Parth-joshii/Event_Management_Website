@@ -79,6 +79,7 @@ export function AdminDashboard(): React.ReactElement {
     deleteEvent,
     addPhoto,
     deletePhoto,
+    deleteAllPhotos,
     addVideo,
     deleteVideo,
     updateInquiryStatus,
@@ -535,13 +536,29 @@ export function AdminDashboard(): React.ReactElement {
                 </p>
               </div>
 
-              <Dialog open={addPhotoOpen} onOpenChange={setAddPhotoOpen}>
-                <DialogTrigger asChild>
-                  <GradientButton type="button">
-                    <Plus className="size-4" />
-                    Add New Photo
-                  </GradientButton>
-                </DialogTrigger>
+              <div className="flex items-center gap-3">
+                {photos.length > 0 ? (
+                  <button
+                    onClick={async () => {
+                      if (confirm("Are you sure you want to delete ALL photos from the gallery?")) {
+                        await deleteAllPhotos();
+                      }
+                    }}
+                    type="button"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-rose-400/40 bg-rose-500/10 px-4 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-500/20 transition cursor-pointer"
+                  >
+                    <Trash2 className="size-3.5" />
+                    Clear All Photos ({photos.length})
+                  </button>
+                ) : null}
+
+                <Dialog open={addPhotoOpen} onOpenChange={setAddPhotoOpen}>
+                  <DialogTrigger asChild>
+                    <GradientButton type="button">
+                      <Plus className="size-4" />
+                      Add New Photo
+                    </GradientButton>
+                  </DialogTrigger>
                 <DialogContent className="max-w-md bg-white border-[#EBDCFB] text-[#2D2238]">
                   <DialogHeader>
                     <DialogTitle className="font-display text-2xl font-bold">
@@ -644,6 +661,7 @@ export function AdminDashboard(): React.ReactElement {
                   </form>
                 </DialogContent>
               </Dialog>
+              </div>
             </div>
 
             {/* Photos Grid */}

@@ -1,13 +1,12 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { PhotoModel } from "@/models/Photo";
-import { featuredGallery } from "@/features/gallery/data/featured-gallery";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
-/** GET /api/photos - Fetch all photos from MongoDB with auto-seeding if empty */
+/** GET /api/photos - Fetch all photos from MongoDB */
 export async function GET(): Promise<NextResponse> {
   try {
     const db = await connectToDatabase();
@@ -15,19 +14,7 @@ export async function GET(): Promise<NextResponse> {
       return NextResponse.json({ ok: false, data: [] }, { status: 200 });
     }
 
-    let photos = await PhotoModel.find({}).sort({ createdAt: -1 }).lean();
-
-    // Auto-seed initial photos if database collection is empty
-    if (photos.length === 0 && featuredGallery.length > 0) {
-      const seedData = featuredGallery.map((item) => ({
-        title: item.title,
-        category: item.category,
-        imageSrc: item.imageSrc,
-        alt: item.alt
-      }));
-      await PhotoModel.insertMany(seedData);
-      photos = await PhotoModel.find({}).sort({ createdAt: -1 }).lean();
-    }
+    const photos = await PhotoModel.find({}).sort({ createdAt: -1 }).lean();
 
     const formatted = photos.map((p) => ({
       id: String(p._id),
@@ -104,17 +91,24 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   }
 }
 
-/** DELETE /api/photos?id=xyz - Delete photo from MongoDB */
+/** DELETE /api/photos?id=xyz OR DELETE /api/photos?all=true - Delete photo(s) from MongoDB */
 export async function DELETE(request: NextRequest): Promise<NextResponse> {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
+    const deleteAll = searchParams.get("all") === "true";
+
+    const db = await connectToDatabase();
+
+    if (deleteAll && db) {
+      await PhotoModel.deleteMany({});
+      return NextResponse.json({ ok: true, message: "All photos deleted successfully" });
+    }
 
     if (!id) {
       return NextResponse.json({ ok: false, message: "Photo ID required" }, { status: 400 });
     }
 
-    const db = await connectToDatabase();
     if (db && id.match(/^[0-9a-fA-F]{24}$/)) {
       await PhotoModel.findByIdAndDelete(id);
     }

@@ -71,6 +71,7 @@ interface ContentState {
   addMultiplePhotos: (photosList: Omit<PhotoItem, "id">[]) => Promise<void>;
   updatePhoto: (id: string, photo: Partial<PhotoItem>) => void;
   deletePhoto: (id: string) => Promise<void>;
+  deleteAllPhotos: () => Promise<void>;
 
   // Video management
   addVideo: (video: Omit<VideoItem, "id">) => Promise<void>;
@@ -93,13 +94,7 @@ const defaultEvents: EventItem[] = eventCategories.map((item, idx) => ({
   imageAlt: item.imageAlt
 }));
 
-const defaultPhotos: PhotoItem[] = featuredGallery.map((item, idx) => ({
-  id: `photo-${idx + 1}`,
-  title: item.title,
-  category: item.category,
-  imageSrc: item.imageSrc,
-  alt: item.alt
-}));
+const defaultPhotos: PhotoItem[] = [];
 
 const defaultVideos: VideoItem[] = [
   {
@@ -275,6 +270,17 @@ export const useContentStore = create<ContentState>()(
           await fetch(`/api/photos?id=${encodeURIComponent(id)}`, { method: "DELETE" });
         } catch (e) {
           console.error("Failed to delete photo from MongoDB:", e);
+        } finally {
+          await get().fetchFromDatabase();
+        }
+      },
+
+      deleteAllPhotos: async () => {
+        set({ photos: [] });
+        try {
+          await fetch("/api/photos?all=true", { method: "DELETE" });
+        } catch (e) {
+          console.error("Failed to delete all photos from MongoDB:", e);
         } finally {
           await get().fetchFromDatabase();
         }
