@@ -368,7 +368,7 @@ export function AdminDashboard(): React.ReactElement {
                 {events.length > 0 ? (
                   <button
                     onClick={async () => {
-                      if (confirm("Are you sure you want to delete ALL events from the dashboard?")) {
+                      if (confirm("Are you sure you want to delete ALL events?")) {
                         await deleteAllEvents();
                       }
                     }}
