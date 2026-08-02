@@ -356,7 +356,8 @@ export const useContentStore = create<ContentState>()(
       }
     }),
     {
-      name: "velora-admin-content-storage"
+      name: "velora-admin-content-storage",
+      partialize: (state) => ({ isAuthenticated: state.isAuthenticated })
     }
   )
 );
