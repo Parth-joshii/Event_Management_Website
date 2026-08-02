@@ -66,6 +66,7 @@ interface ContentState {
   addEvent: (event: Omit<EventItem, "id">) => Promise<void>;
   updateEvent: (id: string, event: Partial<EventItem>) => void;
   deleteEvent: (id: string) => Promise<void>;
+  deleteAllEvents: () => Promise<void>;
 
   // Photo management
   addPhoto: (photo: Omit<PhotoItem, "id">) => Promise<void>;
@@ -85,16 +86,7 @@ interface ContentState {
   deleteInquiry: (id: string) => Promise<void>;
 }
 
-const defaultEvents: EventItem[] = eventCategories.map((item, idx) => ({
-  id: `event-${idx + 1}`,
-  title: item.title,
-  category: item.title,
-  description: item.description,
-  date: "2026-08-15",
-  location: "India",
-  imageSrc: item.imageSrc,
-  imageAlt: item.imageAlt
-}));
+const defaultEvents: EventItem[] = [];
 
 const defaultPhotos: PhotoItem[] = [];
 
@@ -207,6 +199,17 @@ export const useContentStore = create<ContentState>()(
           await fetch(`/api/events?id=${encodeURIComponent(id)}`, { method: "DELETE" });
         } catch (e) {
           console.error("Failed to delete event from MongoDB:", e);
+        } finally {
+          await get().fetchFromDatabase();
+        }
+      },
+
+      deleteAllEvents: async () => {
+        set({ events: [] });
+        try {
+          await fetch("/api/events?all=true", { method: "DELETE" });
+        } catch (e) {
+          console.error("Failed to delete all events from MongoDB:", e);
         } finally {
           await get().fetchFromDatabase();
         }

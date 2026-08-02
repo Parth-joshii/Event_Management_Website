@@ -1,13 +1,12 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { EventModel } from "@/models/Event";
-import { eventCategories } from "@/features/events/data/event-categories";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
-/** GET /api/events - Fetch all events from MongoDB with auto-seeding if empty */
+/** GET /api/events - Fetch all events from MongoDB */
 export async function GET(): Promise<NextResponse> {
   try {
     const db = await connectToDatabase();
@@ -15,22 +14,7 @@ export async function GET(): Promise<NextResponse> {
       return NextResponse.json({ ok: false, data: [] }, { status: 200 });
     }
 
-    let events = await EventModel.find({}).sort({ createdAt: -1 }).lean();
-
-    // Auto-seed initial events if database collection is empty
-    if (events.length === 0 && eventCategories.length > 0) {
-      const seedData = eventCategories.map((item) => ({
-        title: item.title,
-        category: item.title,
-        description: item.description,
-        date: "2026-08-15",
-        location: "India",
-        imageSrc: item.imageSrc,
-        imageAlt: item.imageAlt
-      }));
-      await EventModel.insertMany(seedData);
-      events = await EventModel.find({}).sort({ createdAt: -1 }).lean();
-    }
+    const events = await EventModel.find({}).sort({ createdAt: -1 }).lean();
 
     const formatted = events.map((ev) => ({
       id: String(ev._id),
@@ -96,17 +80,24 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   }
 }
 
-/** DELETE /api/events?id=xyz - Delete event from MongoDB */
+/** DELETE /api/events?id=xyz OR DELETE /api/events?all=true - Delete event(s) from MongoDB */
 export async function DELETE(request: NextRequest): Promise<NextResponse> {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
+    const deleteAll = searchParams.get("all") === "true";
+
+    const db = await connectToDatabase();
+
+    if (deleteAll && db) {
+      await EventModel.deleteMany({});
+      return NextResponse.json({ ok: true, message: "All events deleted successfully" });
+    }
 
     if (!id) {
       return NextResponse.json({ ok: false, message: "Event ID required" }, { status: 400 });
     }
 
-    const db = await connectToDatabase();
     if (db && id.match(/^[0-9a-fA-F]{24}$/)) {
       await EventModel.findByIdAndDelete(id);
     }

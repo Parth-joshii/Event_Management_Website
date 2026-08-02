@@ -79,6 +79,7 @@ export function AdminDashboard(): React.ReactElement {
     fetchFromDatabase,
     addEvent,
     deleteEvent,
+    deleteAllEvents,
     addPhoto,
     deletePhoto,
     deleteAllPhotos,
@@ -363,13 +364,29 @@ export function AdminDashboard(): React.ReactElement {
                 </p>
               </div>
 
-              <Dialog open={addEventOpen} onOpenChange={setAddEventOpen}>
-                <DialogTrigger asChild>
-                  <GradientButton type="button">
-                    <Plus className="size-4" />
-                    Add New Event
-                  </GradientButton>
-                </DialogTrigger>
+              <div className="flex items-center gap-3">
+                {events.length > 0 ? (
+                  <button
+                    onClick={async () => {
+                      if (confirm("Are you sure you want to delete ALL events from the dashboard?")) {
+                        await deleteAllEvents();
+                      }
+                    }}
+                    type="button"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-rose-400/40 bg-rose-500/10 px-4 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-500/20 transition cursor-pointer"
+                  >
+                    <Trash2 className="size-3.5" />
+                    Clear All Events ({events.length})
+                  </button>
+                ) : null}
+
+                <Dialog open={addEventOpen} onOpenChange={setAddEventOpen}>
+                  <DialogTrigger asChild>
+                    <GradientButton type="button">
+                      <Plus className="size-4" />
+                      Add New Event
+                    </GradientButton>
+                  </DialogTrigger>
                 <DialogContent className="max-w-lg bg-white border-[#EBDCFB] text-[#2D2238]">
                   <DialogHeader>
                     <DialogTitle className="font-display text-2xl font-bold">
@@ -482,6 +499,7 @@ export function AdminDashboard(): React.ReactElement {
                   </form>
                 </DialogContent>
               </Dialog>
+              </div>
             </div>
 
             {/* Events Grid */}
