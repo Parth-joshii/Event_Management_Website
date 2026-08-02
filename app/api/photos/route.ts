@@ -6,7 +6,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
-/** GET /api/photos - Fetch all photos from MongoDB */
+/** GET /api/photos - Fetch all photos from MongoDB, sorted by featured status first */
 export async function GET(): Promise<NextResponse> {
   try {
     const db = await connectToDatabase();
@@ -14,7 +14,7 @@ export async function GET(): Promise<NextResponse> {
       return NextResponse.json({ ok: false, data: [] }, { status: 200 });
     }
 
-    const photos = await PhotoModel.find({}).sort({ createdAt: -1 }).lean();
+    const photos = await PhotoModel.find({}).sort({ isFeatured: -1, createdAt: -1 }).lean();
 
     const formatted = photos.map((p) => ({
       id: String(p._id),
@@ -22,6 +22,7 @@ export async function GET(): Promise<NextResponse> {
       category: p.category,
       eventId: p.eventId || "",
       eventTitle: p.eventTitle || "",
+      isFeatured: Boolean(p.isFeatured),
       imageSrc: p.imageSrc,
       alt: p.alt || p.title
     }));
@@ -47,6 +48,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           category: item.category || "General",
           eventId: item.eventId || "",
           eventTitle: item.eventTitle || "",
+          isFeatured: Boolean(item.isFeatured),
           imageSrc: item.imageSrc,
           alt: item.alt || item.title || "Gallery Photo"
         }));
@@ -67,6 +69,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         category: body.category || "General",
         eventId: body.eventId || "",
         eventTitle: body.eventTitle || "",
+        isFeatured: Boolean(body.isFeatured),
         imageSrc: body.imageSrc,
         alt: body.alt || body.title
       });
@@ -81,12 +84,35 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         category: body.category || "General",
         eventId: body.eventId || "",
         eventTitle: body.eventTitle || "",
+        isFeatured: Boolean(body.isFeatured),
         imageSrc: body.imageSrc,
         alt: body.alt || body.title
       }
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to create photo";
+    return NextResponse.json({ ok: false, message }, { status: 500 });
+  }
+}
+
+/** PUT /api/photos - Update photo featured/cover status in MongoDB */
+export async function PUT(request: NextRequest): Promise<NextResponse> {
+  try {
+    const body = await request.json();
+    const { id, isFeatured } = body;
+
+    if (!id) {
+      return NextResponse.json({ ok: false, message: "Photo ID required" }, { status: 400 });
+    }
+
+    const db = await connectToDatabase();
+    if (db && id.match(/^[0-9a-fA-F]{24}$/)) {
+      await PhotoModel.findByIdAndUpdate(id, { isFeatured: Boolean(isFeatured) });
+    }
+
+    return NextResponse.json({ ok: true, message: "Photo featured status updated" });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to update photo";
     return NextResponse.json({ ok: false, message }, { status: 500 });
   }
 }

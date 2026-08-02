@@ -5,6 +5,7 @@ export interface IPhoto extends Document {
   category: string;
   eventId?: string;
   eventTitle?: string;
+  isFeatured?: boolean;
   imageSrc: string;
   alt: string;
   createdAt: Date;
@@ -16,6 +17,7 @@ const PhotoSchema = new Schema<IPhoto>(
     category: { type: String, required: true, trim: true, default: "General" },
     eventId: { type: String, default: "" },
     eventTitle: { type: String, default: "" },
+    isFeatured: { type: Boolean, default: false },
     imageSrc: { type: String, required: true },
     alt: { type: String, default: "" }
   },

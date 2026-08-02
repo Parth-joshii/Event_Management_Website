@@ -7,6 +7,7 @@ import {
   ExternalLink,
   Image as ImageIcon,
   Plus,
+  Star,
   Trash2,
   Lock,
   LogOut,
@@ -32,6 +33,7 @@ import {
   DialogTrigger
 } from "@/components/ui/dialog";
 import { siteConfig } from "@/config/site";
+import { cn } from "@/lib/utils";
 
 /** Preserves Ultra-HD 2400px crisp image resolution & 95% pristine quality while optimizing for cloud storage. */
 function compressImageFile(file: File, maxWidth = 2400, quality = 0.95): Promise<string> {
@@ -80,6 +82,7 @@ export function AdminDashboard(): React.ReactElement {
     addPhoto,
     deletePhoto,
     deleteAllPhotos,
+    toggleFeaturedPhoto,
     addVideo,
     deleteVideo,
     updateInquiryStatus,
@@ -109,6 +112,7 @@ export function AdminDashboard(): React.ReactElement {
   const [photoTitle, setPhotoTitle] = React.useState("");
   const [photoCategory, setPhotoCategory] = React.useState("Wedding Stage");
   const [selectedEventId, setSelectedEventId] = React.useState("");
+  const [isFeaturedPhoto, setIsFeaturedPhoto] = React.useState(false);
   const [photoImagesList, setPhotoImagesList] = React.useState<string[]>([]);
   const [photoImageSrc, setPhotoImageSrc] = React.useState("/images/gallery/wedding-stage.jpg");
 
@@ -161,6 +165,7 @@ export function AdminDashboard(): React.ReactElement {
         category: photoCategory || matchedEvent?.category || "General",
         eventId: selectedEventId,
         eventTitle: targetEventTitle,
+        isFeatured: isFeaturedPhoto && idx === 0,
         imageSrc: src,
         alt: photoTitle || targetEventTitle || "Event Photo"
       }));
@@ -173,6 +178,7 @@ export function AdminDashboard(): React.ReactElement {
         category: photoCategory || matchedEvent?.category || "General",
         eventId: selectedEventId,
         eventTitle: targetEventTitle,
+        isFeatured: isFeaturedPhoto,
         imageSrc: src,
         alt: title
       });
@@ -181,6 +187,7 @@ export function AdminDashboard(): React.ReactElement {
     setPhotoTitle("");
     setPhotoImagesList([]);
     setSelectedEventId("");
+    setIsFeaturedPhoto(false);
     setAddPhotoOpen(false);
   };
 
@@ -611,6 +618,19 @@ export function AdminDashboard(): React.ReactElement {
                       />
                     </div>
 
+                    <div className="flex items-center gap-2 pt-1">
+                      <input
+                        id="ph-featured-chk"
+                        type="checkbox"
+                        checked={isFeaturedPhoto}
+                        onChange={(e) => setIsFeaturedPhoto(e.target.checked)}
+                        className="size-4 rounded border-gray-300 text-[#D4AF37] focus:ring-[#D4AF37] cursor-pointer"
+                      />
+                      <Label htmlFor="ph-featured-chk" className="text-xs font-semibold text-[#2D2238] cursor-pointer">
+                        ⭐ Display First on Screen (Set Cover Photo)
+                      </Label>
+                    </div>
+
                     <div>
                       <Label htmlFor="ph-src">Select Photos from Computer (Select Multiple Files)</Label>
                       <input
@@ -691,14 +711,31 @@ export function AdminDashboard(): React.ReactElement {
                       <h4 className="font-semibold text-[#2D2238]">{ph.title}</h4>
                     </div>
 
-                    <button
-                      onClick={() => void deletePhoto(ph.id)}
-                      type="button"
-                      className="p-2 text-rose-600 hover:text-rose-800 transition cursor-pointer"
-                      title="Delete photo"
-                    >
-                      <Trash2 className="size-4" />
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => void toggleFeaturedPhoto(ph.id, !ph.isFeatured)}
+                        type="button"
+                        className={cn(
+                          "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold transition cursor-pointer border",
+                          ph.isFeatured
+                            ? "bg-[#D4AF37] border-[#D4AF37] text-[#2D2238] shadow-sm"
+                            : "bg-gray-100 border-gray-200 text-gray-600 hover:bg-gray-200"
+                        )}
+                        title="Click to display this photo first on screen"
+                      >
+                        <Star className="size-3 fill-current text-[#D4AF37]" />
+                        {ph.isFeatured ? "Displays First" : "Set Cover"}
+                      </button>
+
+                      <button
+                        onClick={() => void deletePhoto(ph.id)}
+                        type="button"
+                        className="p-1.5 text-rose-600 hover:text-rose-800 transition cursor-pointer"
+                        title="Delete photo"
+                      >
+                        <Trash2 className="size-4" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}

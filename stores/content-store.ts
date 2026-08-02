@@ -20,6 +20,7 @@ export interface PhotoItem {
   category: string;
   eventId?: string;
   eventTitle?: string;
+  isFeatured?: boolean;
   imageSrc: string;
   alt: string;
 }
@@ -70,6 +71,7 @@ interface ContentState {
   addPhoto: (photo: Omit<PhotoItem, "id">) => Promise<void>;
   addMultiplePhotos: (photosList: Omit<PhotoItem, "id">[]) => Promise<void>;
   updatePhoto: (id: string, photo: Partial<PhotoItem>) => void;
+  toggleFeaturedPhoto: (id: string, isFeatured: boolean) => Promise<void>;
   deletePhoto: (id: string) => Promise<void>;
   deleteAllPhotos: () => Promise<void>;
 
@@ -262,6 +264,24 @@ export const useContentStore = create<ContentState>()(
         set({
           photos: get().photos.map((ph) => (ph.id === id ? { ...ph, ...updatedData } : ph))
         });
+      },
+
+      toggleFeaturedPhoto: async (id, isFeatured) => {
+        set({
+          photos: get().photos.map((ph) => (ph.id === id ? { ...ph, isFeatured } : ph))
+        });
+
+        try {
+          await fetch("/api/photos", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id, isFeatured })
+          });
+        } catch (e) {
+          console.error("Failed to update featured photo status in MongoDB:", e);
+        } finally {
+          await get().fetchFromDatabase();
+        }
       },
 
       deletePhoto: async (id) => {
