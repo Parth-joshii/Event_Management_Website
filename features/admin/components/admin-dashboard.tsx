@@ -260,9 +260,10 @@ export function AdminDashboard(): React.ReactElement {
                   setPasswordInput(e.target.value);
                   setLoginError(false);
                 }}
-                placeholder="Enter password (default: admin123)"
+                placeholder="Enter admin password"
                 required
                 type="password"
+                autoComplete="current-password"
                 value={passwordInput}
                 className="mt-2 border-white/20 bg-white/10 text-white placeholder:text-white/40"
               />
@@ -270,7 +271,7 @@ export function AdminDashboard(): React.ReactElement {
 
             {loginError ? (
               <p className="text-xs font-semibold text-rose-400">
-                Invalid password. Please try again (Password: admin123).
+                Invalid password. Access denied.
               </p>
             ) : null}
 
