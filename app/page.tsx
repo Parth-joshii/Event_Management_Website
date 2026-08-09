@@ -6,7 +6,6 @@ import { AboutPreview } from "@/components/sections/about-preview";
 import { CtaSection } from "@/components/sections/cta-section";
 import { FeaturedGallerySection } from "@/components/sections/featured-gallery-section";
 import { HeroSection } from "@/components/sections/hero-section";
-import { StatsSection } from "@/components/sections/stats-section";
 import { TestimonialsSection } from "@/components/sections/testimonials-section";
 import { siteConfig } from "@/config/site";
 import { optionalPublicAsset } from "@/lib/public-assets";
@@ -50,7 +49,6 @@ export default function HomePage(): React.ReactElement {
           mobileVideoSrc={mobileHeroVideoSrc}
         />
         <AboutPreview />
-        <StatsSection />
         <FeaturedGallerySection />
         <CtaSection />
         <TestimonialsSection />
