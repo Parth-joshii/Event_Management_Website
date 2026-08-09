@@ -33,7 +33,9 @@ export const defaultMetadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/logos/logo.png", type: "image/png" }
+      { url: "/logos/logo.png", type: "image/png" },
+      { url: "/icon.png", type: "image/png" },
+      { url: "/favicon.ico" }
     ],
     shortcut: "/logos/logo.png",
     apple: "/logos/logo.png"
