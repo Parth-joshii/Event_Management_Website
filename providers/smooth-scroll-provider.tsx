@@ -7,7 +7,7 @@ interface SmoothScrollProviderProps {
   readonly children: React.ReactNode;
 }
 
-/** Provides Lenis smooth scrolling while honoring reduced-motion preferences. */
+/** Provides ultra-smooth Lenis momentum scrolling while honoring reduced-motion preferences. */
 export function SmoothScrollProvider({
   children
 }: SmoothScrollProviderProps): React.ReactElement {
@@ -21,9 +21,11 @@ export function SmoothScrollProvider({
     }
 
     const lenis = new Lenis({
-      duration: 1.05,
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
-      wheelMultiplier: 0.85
+      wheelMultiplier: 0.95,
+      touchMultiplier: 1.2
     });
 
     let frameId = 0;
@@ -35,11 +37,28 @@ export function SmoothScrollProvider({
 
     frameId = requestAnimationFrame(raf);
 
+    // Smooth scroll for anchor clicks
+    const handleAnchorClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const anchor = target.closest("a");
+      if (anchor && anchor.hash && anchor.origin === window.location.origin) {
+        const targetElement = document.querySelector(anchor.hash);
+        if (targetElement) {
+          e.preventDefault();
+          lenis.scrollTo(targetElement as HTMLElement, { offset: -60, duration: 1.4 });
+        }
+      }
+    };
+
+    document.addEventListener("click", handleAnchorClick);
+
     return () => {
       cancelAnimationFrame(frameId);
+      document.removeEventListener("click", handleAnchorClick);
       lenis.destroy();
     };
   }, []);
 
   return <>{children}</>;
 }
+
