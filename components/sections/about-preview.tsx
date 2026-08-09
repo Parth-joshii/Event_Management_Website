@@ -1,56 +1,48 @@
 "use client";
 
-import { Crown, Handshake, ShieldCheck, Sparkles } from "lucide-react";
 import { Reveal } from "@/components/animations/reveal";
 import { Container } from "@/components/layout/container";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { LuxuryCard } from "@/components/ui/luxury-card";
 import { useContentStore } from "@/stores/content-store";
 
-const cardIconsMap: Record<string, typeof Crown> = {
-  "bespoke-design": Crown,
-  "flawless-execution": Sparkles,
-  "curated-network": Handshake,
-  "transparent-pricing": ShieldCheck
-};
-
 const defaultHighlights = [
   {
     id: "bespoke-design",
+    number: "01",
     description: "Tailored themes, atmospheric lighting, and luxury stage installations.",
-    icon: Crown,
     title: "Bespoke Design"
   },
   {
     id: "flawless-execution",
+    number: "02",
     description: "Seamless vendor management and attentive on-day coordination.",
-    icon: Sparkles,
     title: "Flawless Execution"
   },
   {
     id: "curated-network",
+    number: "03",
     description: "Exclusive access to top-tier venues, artists, and production masters.",
-    icon: Handshake,
     title: "Curated Network"
   },
   {
     id: "transparent-pricing",
+    number: "04",
     description: "Clear line-item quotes and real-time budget management.",
-    icon: ShieldCheck,
     title: "Transparent Pricing"
   }
 ];
 
-/** Renders the concise brand introduction and highlight cards with customizable background images. */
+/** Renders the concise brand introduction and highlight cards with customizable background images & ultra-premium layout. */
 export function AboutPreview(): React.ReactElement {
   const { aboutCards } = useContentStore();
 
   return (
     <section
       id="about"
-      className="relative overflow-hidden bg-[#FAF7FF] py-12 sm:py-16"
+      className="relative overflow-hidden bg-[linear-gradient(180deg,#FAF7FF_0%,#F5EDFF_100%)] py-16 sm:py-24"
     >
-      <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[#2D2238] to-transparent opacity-10" />
+      <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[#2D2238] to-transparent opacity-10" />
       <Container>
         <Reveal>
           <SectionHeading
@@ -59,18 +51,17 @@ export function AboutPreview(): React.ReactElement {
             description="Shree Velora Event's brings creative direction, luxury decor, and seamless coordination to royal weddings and grand celebrations."
           />
         </Reveal>
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {defaultHighlights.map((defaultItem, index) => {
             const storeCard = aboutCards?.find((c) => c.id === defaultItem.id);
             const title = storeCard?.title || defaultItem.title;
             const description = storeCard?.description || defaultItem.description;
             const bgImage = storeCard?.imageSrc;
-            const Icon = cardIconsMap[defaultItem.id] || Crown;
 
             return (
               <Reveal delay={index * 0.05} key={defaultItem.id}>
                 <LuxuryCard
-                  className="group relative flex h-full min-h-[220px] flex-col overflow-hidden p-5 transition-all duration-300 hover:scale-[1.02]"
+                  className="group relative flex h-full min-h-[240px] flex-col justify-between overflow-hidden rounded-xl border-t-2 border-t-[#D4AF37]/80 border-x border-b border-purple-900/10 bg-white/90 p-7 shadow-[0_16px_50px_rgba(45,34,56,0.06)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1.5 hover:border-t-[#D4AF37] hover:shadow-[0_24px_70px_rgba(212,175,55,0.2)]"
                   style={
                     bgImage
                       ? {
@@ -83,28 +74,40 @@ export function AboutPreview(): React.ReactElement {
                 >
                   {/* Overlay if background image exists */}
                   {bgImage && (
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#1b1424]/90 via-[#1b1424]/70 to-[#1b1424]/40 backdrop-brightness-90 transition-opacity duration-300 group-hover:from-[#1b1424]/95 group-hover:via-[#1b1424]/80" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#1b1424]/95 via-[#1b1424]/75 to-[#1b1424]/45 backdrop-brightness-90 transition-opacity duration-300 group-hover:from-[#1b1424]/98 group-hover:via-[#1b1424]/85" />
                   )}
 
-                  <div className="relative z-10 flex h-full flex-col">
-                    <div
-                      className={`flex size-10 items-center justify-center rounded-full transition duration-300 ${
+                  {/* Header / Number Tag */}
+                  <div className="relative z-10 flex items-center justify-between">
+                    <span
+                      className={`font-display text-2xl font-bold tracking-widest transition-colors duration-300 ${
                         bgImage
-                          ? "bg-[#D4AF37] text-[#2D2238] group-hover:scale-110"
-                          : "bg-[#EBDCFB] text-[#7d5ea1] group-hover:bg-[#D4AF37] group-hover:text-[#2D2238]"
+                          ? "text-[#D4AF37]"
+                          : "text-[#D4AF37]/60 group-hover:text-[#D4AF37]"
                       }`}
                     >
-                      <Icon aria-hidden="true" className="size-4" />
-                    </div>
+                      {defaultItem.number}
+                    </span>
+                    <span
+                      className={`h-0.5 w-6 rounded-full transition-all duration-300 group-hover:w-12 ${
+                        bgImage ? "bg-[#D4AF37]" : "bg-[#D4AF37]/50 group-hover:bg-[#D4AF37]"
+                      }`}
+                    />
+                  </div>
+
+                  {/* Content (Title & Description) */}
+                  <div className="relative z-10 mt-6 flex flex-1 flex-col justify-end">
                     <h3
-                      className={`mt-4 text-base font-bold transition duration-300 ${
-                        bgImage ? "text-white drop-shadow-sm" : "text-[#2D2238]"
+                      className={`font-display text-xl font-bold tracking-wide transition-colors duration-300 ${
+                        bgImage
+                          ? "text-white drop-shadow-md"
+                          : "text-[#2D2238] group-hover:text-[#2D2238]"
                       }`}
                     >
                       {title}
                     </h3>
                     <p
-                      className={`mt-2 flex-1 text-xs leading-5 transition duration-300 ${
+                      className={`mt-3 text-xs leading-6 tracking-wide transition-colors duration-300 ${
                         bgImage ? "text-zinc-200" : "text-[#5c4b6e]"
                       }`}
                     >
@@ -120,4 +123,5 @@ export function AboutPreview(): React.ReactElement {
     </section>
   );
 }
+
 
