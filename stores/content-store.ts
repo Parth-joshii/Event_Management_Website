@@ -47,11 +47,19 @@ export interface InquiryItem {
   status: "New" | "Contacted" | "Confirmed";
 }
 
+export interface AboutCardItem {
+  id: string;
+  title: string;
+  description: string;
+  imageSrc?: string;
+}
+
 interface ContentState {
   events: EventItem[];
   photos: PhotoItem[];
   videos: VideoItem[];
   inquiries: InquiryItem[];
+  aboutCards: AboutCardItem[];
   isAuthenticated: boolean;
   isDbSyncing: boolean;
 
@@ -61,6 +69,9 @@ interface ContentState {
   // Authentication actions
   login: (password: string) => boolean;
   logout: () => void;
+
+  // About cards management
+  updateAboutCardImage: (id: string, imageSrc: string) => void;
 
   // Event management
   addEvent: (event: Omit<EventItem, "id">) => Promise<void>;
@@ -85,6 +96,33 @@ interface ContentState {
   updateInquiryStatus: (id: string, status: InquiryItem["status"]) => Promise<void>;
   deleteInquiry: (id: string) => Promise<void>;
 }
+
+const defaultAboutCards: AboutCardItem[] = [
+  {
+    id: "bespoke-design",
+    title: "Bespoke Design",
+    description: "Tailored themes, atmospheric lighting, and luxury stage installations.",
+    imageSrc: ""
+  },
+  {
+    id: "flawless-execution",
+    title: "Flawless Execution",
+    description: "Seamless vendor management and attentive on-day coordination.",
+    imageSrc: ""
+  },
+  {
+    id: "curated-network",
+    title: "Curated Network",
+    description: "Exclusive access to top-tier venues, artists, and production masters.",
+    imageSrc: ""
+  },
+  {
+    id: "transparent-pricing",
+    title: "Transparent Pricing",
+    description: "Clear line-item quotes and real-time budget management.",
+    imageSrc: ""
+  }
+];
 
 const defaultEvents: EventItem[] = [];
 
@@ -121,8 +159,17 @@ export const useContentStore = create<ContentState>()(
           status: "New"
         }
       ],
+      aboutCards: defaultAboutCards,
       isAuthenticated: false,
       isDbSyncing: false,
+
+      updateAboutCardImage: (id: string, imageSrc: string) => {
+        set({
+          aboutCards: get().aboutCards.map((card) =>
+            card.id === id ? { ...card, imageSrc } : card
+          )
+        });
+      },
 
       fetchFromDatabase: async () => {
         set({ isDbSyncing: true });
@@ -386,7 +433,10 @@ export const useContentStore = create<ContentState>()(
     }),
     {
       name: "velora-admin-content-storage",
-      partialize: (state) => ({ isAuthenticated: state.isAuthenticated })
+      partialize: (state) => ({
+        isAuthenticated: state.isAuthenticated,
+        aboutCards: state.aboutCards
+      })
     }
   )
 );

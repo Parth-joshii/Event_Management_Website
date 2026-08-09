@@ -62,14 +62,25 @@ export async function saveInquiryToGoogleSheets(
     });
     const sheets = google.sheets({ auth, version: "v4" });
 
-    await sheets.spreadsheets.values.append({
-      range: "Inquiries!A:R",
-      requestBody: {
-        values: [[...row]]
-      },
-      spreadsheetId: env.GOOGLE_SHEETS_SPREADSHEET_ID,
-      valueInputOption: "USER_ENTERED"
-    });
+    try {
+      await sheets.spreadsheets.values.append({
+        range: "Inquiries!A:R",
+        requestBody: {
+          values: [[...row]]
+        },
+        spreadsheetId: env.GOOGLE_SHEETS_SPREADSHEET_ID,
+        valueInputOption: "USER_ENTERED"
+      });
+    } catch {
+      await sheets.spreadsheets.values.append({
+        range: "A:R",
+        requestBody: {
+          values: [[...row]]
+        },
+        spreadsheetId: env.GOOGLE_SHEETS_SPREADSHEET_ID,
+        valueInputOption: "USER_ENTERED"
+      });
+    }
 
     return "saved";
   }

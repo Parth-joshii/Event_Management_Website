@@ -76,6 +76,8 @@ export function AdminDashboard(): React.ReactElement {
     photos,
     videos,
     inquiries,
+    aboutCards,
+    updateAboutCardImage,
     fetchFromDatabase,
     addEvent,
     deleteEvent,
@@ -347,10 +349,11 @@ export function AdminDashboard(): React.ReactElement {
 
         {/* Tabbed Admin Interface */}
         <Tabs defaultValue="events" className="w-full">
-          <TabsList className="mb-6 bg-[#EBDCFB]/60 p-1">
+          <TabsList className="mb-6 bg-[#EBDCFB]/60 p-1 flex-wrap">
             <TabsTrigger value="events">Manage Events</TabsTrigger>
             <TabsTrigger value="photos">Manage Photos</TabsTrigger>
             <TabsTrigger value="videos">Manage Videos</TabsTrigger>
+            <TabsTrigger value="about-cards">About Cards Photos</TabsTrigger>
             <TabsTrigger value="inquiries">Client Inquiries</TabsTrigger>
           </TabsList>
 
@@ -945,6 +948,97 @@ export function AdminDashboard(): React.ReactElement {
                   ))}
                 </tbody>
               </table>
+            </div>
+          </TabsContent>
+
+          {/* TAB 5: MANAGE ABOUT CARDS */}
+          <TabsContent value="about-cards" className="space-y-6">
+            <div>
+              <h2 className="font-display text-2xl font-bold text-[#2D2238]">
+                About Shree Velora Cards Background Photos
+              </h2>
+              <p className="text-sm text-[#5c4b6e]">
+                Upload or set background photos for each of the 4 signature cards displayed in the &quot;About Shree Velora&quot; section on the client website.
+              </p>
+            </div>
+
+            <div className="grid gap-6 sm:grid-cols-2">
+              {(aboutCards || []).map((card) => (
+                <div
+                  key={card.id}
+                  className="flex flex-col justify-between rounded-xl border border-[#EBDCFB] bg-white p-6 shadow-sm"
+                >
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-bold text-[#2D2238]">{card.title}</h3>
+                      <span className="rounded-full bg-[#EBDCFB] px-2.5 py-1 text-xs font-semibold text-[#7d5ea1]">
+                        {card.id}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-xs text-[#5c4b6e]">{card.description}</p>
+
+                    {/* Background Image Preview */}
+                    <div className="relative mt-4 flex h-44 w-full items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
+                      {card.imageSrc ? (
+                        <img
+                          src={card.imageSrc}
+                          alt={card.title}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="p-4 text-center text-slate-400">
+                          <ImageIcon className="mx-auto mb-1 size-8 opacity-40" />
+                          <span className="text-xs font-medium">No background photo set</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="mt-5 space-y-3">
+                    <div>
+                      <Label className="text-xs font-semibold text-slate-700">
+                        Upload Photo File
+                      </Label>
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        className="mt-1 text-xs cursor-pointer"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const compressed = await compressImageFile(file);
+                            updateAboutCardImage(card.id, compressed);
+                          }
+                        }}
+                      />
+                    </div>
+
+                    <div>
+                      <Label className="text-xs font-semibold text-slate-700">
+                        Or Image URL
+                      </Label>
+                      <div className="mt-1 flex gap-2">
+                        <Input
+                          type="text"
+                          placeholder="https://... or /images/..."
+                          value={card.imageSrc || ""}
+                          onChange={(e) => updateAboutCardImage(card.id, e.target.value)}
+                          className="text-xs"
+                        />
+                        {card.imageSrc ? (
+                          <button
+                            type="button"
+                            onClick={() => updateAboutCardImage(card.id, "")}
+                            className="rounded-md border border-rose-200 bg-rose-50 px-3 py-1 text-xs font-medium text-rose-600 hover:bg-rose-100 transition cursor-pointer"
+                          >
+                            Remove
+                          </button>
+                        ) : null}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </TabsContent>
         </Tabs>

@@ -31,6 +31,13 @@ export const defaultMetadata: Metadata = {
     type: "website",
     url: siteConfig.url
   },
+  icons: {
+    icon: [
+      { url: "/logos/logo.png", type: "image/png" }
+    ],
+    shortcut: "/logos/logo.png",
+    apple: "/logos/logo.png"
+  },
   title: {
     default: siteConfig.name,
     template: `%s | ${siteConfig.name}`

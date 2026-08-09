@@ -6,7 +6,6 @@ import { AboutPreview } from "@/components/sections/about-preview";
 import { CtaSection } from "@/components/sections/cta-section";
 import { FeaturedGallerySection } from "@/components/sections/featured-gallery-section";
 import { HeroSection } from "@/components/sections/hero-section";
-import { ProcessTimelineSection } from "@/components/sections/process-timeline-section";
 import { StatsSection } from "@/components/sections/stats-section";
 import { TestimonialsSection } from "@/components/sections/testimonials-section";
 import { siteConfig } from "@/config/site";
@@ -53,7 +52,6 @@ export default function HomePage(): React.ReactElement {
         <AboutPreview />
         <StatsSection />
         <FeaturedGallerySection />
-        <ProcessTimelineSection />
         <CtaSection />
         <TestimonialsSection />
       </main>
