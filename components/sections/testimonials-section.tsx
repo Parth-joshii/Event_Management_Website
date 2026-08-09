@@ -10,20 +10,11 @@ import { GradientButton } from "@/components/ui/gradient-button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { testimonials as initialTestimonials } from "@/features/testimonials/data/testimonials";
+import { useContentStore } from "@/stores/content-store";
 
-interface ReviewItem {
-  event: string;
-  name: string;
-  rating: number;
-  review: string;
-}
-
-/** Renders client testimonials with an interactive client review submission form. */
+/** Renders client testimonials connected directly to MongoDB reviews collection. */
 export function TestimonialsSection(): React.ReactElement {
-  const [reviewsList, setReviewsList] = React.useState<ReviewItem[]>(
-    Array.from(initialTestimonials)
-  );
+  const { reviews, addReview, fetchFromDatabase } = useContentStore();
   const [showForm, setShowForm] = React.useState(false);
   const [submitted, setSubmitted] = React.useState(false);
 
@@ -32,18 +23,21 @@ export function TestimonialsSection(): React.ReactElement {
   const [formRating, setFormRating] = React.useState(5);
   const [formReview, setFormReview] = React.useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  React.useEffect(() => {
+    void fetchFromDatabase();
+  }, [fetchFromDatabase]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formName.trim() || !formReview.trim()) return;
 
-    const newReview: ReviewItem = {
-      event: formEvent.trim() || "Luxury Celebration",
-      name: formName.trim(),
+    await addReview({
+      authorName: formName.trim(),
+      roleOrEvent: formEvent.trim() || "Luxury Celebration Client",
       rating: formRating,
-      review: formReview.trim()
-    };
+      comment: formReview.trim()
+    });
 
-    setReviewsList([newReview, ...reviewsList]);
     setSubmitted(true);
     setFormName("");
     setFormEvent("");
@@ -88,12 +82,12 @@ export function TestimonialsSection(): React.ReactElement {
                 Share Your Experience
               </h3>
               <p className="mt-1 text-sm text-[#5c4b6e]">
-                We value your feedback. Let us know how your event went!
+                We value your feedback. Let us know how your event went! Your review will be saved in our database.
               </p>
 
               {submitted ? (
                 <div className="mt-6 rounded-lg bg-[#EBDCFB]/70 p-4 text-center font-medium text-[#2D2238]">
-                  Thank you! Your review has been added successfully.
+                  Thank you! Your review has been saved to MongoDB successfully.
                 </div>
               ) : (
                 <div className="mt-6 grid gap-5">
@@ -124,7 +118,7 @@ export function TestimonialsSection(): React.ReactElement {
                     <div className="mt-2 flex gap-2">
                       {[1, 2, 3, 4, 5].map((star) => (
                         <button
-                          className="p-1 text-[#D4AF37] focus:outline-none transition hover:scale-110"
+                          className="p-1 text-[#D4AF37] focus:outline-none transition hover:scale-110 cursor-pointer"
                           key={star}
                           onClick={() => setFormRating(star)}
                           type="button"
@@ -162,11 +156,11 @@ export function TestimonialsSection(): React.ReactElement {
 
         {/* Testimonials Grid */}
         <div className="mt-14 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {reviewsList.map((testimonial, index) => (
-            <Reveal delay={index * 0.06} key={`${testimonial.name}-${index}`}>
-              <LuxuryCard className="flex h-full flex-col">
+          {(reviews || []).map((testimonial, index) => (
+            <Reveal delay={index * 0.06} key={testimonial.id || index}>
+              <LuxuryCard className="flex h-full flex-col p-6">
                 <div className="flex gap-1 text-[#D4AF37]">
-                  {Array.from({ length: testimonial.rating }).map((_, star) => (
+                  {Array.from({ length: testimonial.rating || 5 }).map((_, star) => (
                     <Star
                       aria-hidden="true"
                       className="size-4 fill-current"
@@ -175,11 +169,11 @@ export function TestimonialsSection(): React.ReactElement {
                   ))}
                 </div>
                 <p className="mt-6 flex-1 text-sm leading-7 text-[#5c4b6e]">
-                  "{testimonial.review}"
+                  &quot;{testimonial.comment}&quot;
                 </p>
                 <div className="mt-7 border-t border-[#EBDCFB] pt-5">
-                  <p className="font-semibold text-[#2D2238]">{testimonial.name}</p>
-                  <p className="mt-1 text-sm text-[#7d5ea1]">{testimonial.event}</p>
+                  <p className="font-semibold text-[#2D2238]">{testimonial.authorName}</p>
+                  <p className="mt-1 text-sm text-[#7d5ea1]">{testimonial.roleOrEvent}</p>
                 </div>
               </LuxuryCard>
             </Reveal>
@@ -189,3 +183,4 @@ export function TestimonialsSection(): React.ReactElement {
     </section>
   );
 }
+

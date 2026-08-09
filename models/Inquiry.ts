@@ -24,6 +24,7 @@ const InquirySchema = new Schema<IInquiry>(
     status: { type: String, enum: ["New", "Contacted", "Confirmed"], default: "New" }
   },
   {
+    collection: "inquiries",
     timestamps: true
   }
 );

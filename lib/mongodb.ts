@@ -10,7 +10,7 @@ try {
 
 const MONGODB_URI =
   process.env.MONGODB_URI ||
-  "mongodb+srv://parthadmin:parthjoshi.com@cluster0.t06n2zp.mongodb.net/codiotic-technology";
+  "mongodb+srv://parthadmin:parthjoshi.com@cluster0.t06n2zp.mongodb.net/Event_management?retryWrites=true&w=majority";
 
 interface MongooseCache {
   conn: typeof mongoose | null;

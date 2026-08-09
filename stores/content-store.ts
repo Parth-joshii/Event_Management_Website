@@ -54,11 +54,22 @@ export interface AboutCardItem {
   imageSrc?: string;
 }
 
+export interface ReviewItem {
+  id: string;
+  authorName: string;
+  roleOrEvent: string;
+  rating: number;
+  comment: string;
+  avatarSrc?: string;
+  createdAt?: string;
+}
+
 interface ContentState {
   events: EventItem[];
   photos: PhotoItem[];
   videos: VideoItem[];
   inquiries: InquiryItem[];
+  reviews: ReviewItem[];
   aboutCards: AboutCardItem[];
   isAuthenticated: boolean;
   isDbSyncing: boolean;
@@ -72,6 +83,10 @@ interface ContentState {
 
   // About cards management
   updateAboutCardImage: (id: string, imageSrc: string) => void;
+
+  // Review management
+  addReview: (review: Omit<ReviewItem, "id">) => Promise<void>;
+  deleteReview: (id: string) => Promise<void>;
 
   // Event management
   addEvent: (event: Omit<EventItem, "id">) => Promise<void>;
@@ -159,6 +174,24 @@ export const useContentStore = create<ContentState>()(
           status: "New"
         }
       ],
+      reviews: [
+        {
+          id: "rev-1",
+          authorName: "Vikram & Ananya Mehta",
+          roleOrEvent: "Royal Wedding Client, Udaipur",
+          rating: 5,
+          comment: "Shree Velora transformed our wedding into an absolute fairytale. Every decor detail and stage execution was regal beyond words.",
+          avatarSrc: "/images/testimonials-[#1].jpg"
+        },
+        {
+          id: "rev-2",
+          authorName: "Sanjay Singhania",
+          roleOrEvent: "Corporate Gala Host, Mumbai",
+          rating: 5,
+          comment: "Flawless professionalism, magnificent venue lighting, and seamless coordination. Our high-profile corporate delegates were deeply impressed.",
+          avatarSrc: "/images/testimonials-[#2].jpg"
+        }
+      ],
       aboutCards: defaultAboutCards,
       isAuthenticated: false,
       isDbSyncing: false,
@@ -171,14 +204,50 @@ export const useContentStore = create<ContentState>()(
         });
       },
 
+      addReview: async (reviewData) => {
+        const localId = `rev-${Date.now()}`;
+        const newReview: ReviewItem = { ...reviewData, id: localId };
+        set({ reviews: [newReview, ...get().reviews] });
+
+        try {
+          const res = await fetch("/api/reviews", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(reviewData)
+          });
+          const data = await res.json();
+          if (data.ok && data.data?.id) {
+            set({
+              reviews: get().reviews.map((r) => (r.id === localId ? { ...r, id: data.data.id } : r))
+            });
+          }
+        } catch (e) {
+          console.error("Failed to persist review to MongoDB:", e);
+        } finally {
+          await get().fetchFromDatabase();
+        }
+      },
+
+      deleteReview: async (id) => {
+        set({ reviews: get().reviews.filter((r) => r.id !== id) });
+        try {
+          await fetch(`/api/reviews?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+        } catch (e) {
+          console.error("Failed to delete review from MongoDB:", e);
+        } finally {
+          await get().fetchFromDatabase();
+        }
+      },
+
       fetchFromDatabase: async () => {
         set({ isDbSyncing: true });
         try {
-          const [photosRes, videosRes, eventsRes, inquiriesRes] = await Promise.all([
+          const [photosRes, videosRes, eventsRes, inquiriesRes, reviewsRes] = await Promise.all([
             fetch("/api/photos").then((r) => r.json()).catch(() => null),
             fetch("/api/videos").then((r) => r.json()).catch(() => null),
             fetch("/api/events").then((r) => r.json()).catch(() => null),
-            fetch("/api/inquiries").then((r) => r.json()).catch(() => null)
+            fetch("/api/inquiries").then((r) => r.json()).catch(() => null),
+            fetch("/api/reviews").then((r) => r.json()).catch(() => null)
           ]);
 
           if (photosRes?.ok && Array.isArray(photosRes.data)) {
@@ -192,6 +261,9 @@ export const useContentStore = create<ContentState>()(
           }
           if (inquiriesRes?.ok && Array.isArray(inquiriesRes.data)) {
             set({ inquiries: inquiriesRes.data });
+          }
+          if (reviewsRes?.ok && Array.isArray(reviewsRes.data)) {
+            set({ reviews: reviewsRes.data });
           }
         } catch (e) {
           console.error("Failed to sync store with MongoDB API:", e);

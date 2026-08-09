@@ -76,6 +76,9 @@ export function AdminDashboard(): React.ReactElement {
     photos,
     videos,
     inquiries,
+    reviews,
+    addReview,
+    deleteReview,
     aboutCards,
     updateAboutCardImage,
     fetchFromDatabase,
@@ -97,6 +100,29 @@ export function AdminDashboard(): React.ReactElement {
   const [addEventOpen, setAddEventOpen] = React.useState(false);
   const [addPhotoOpen, setAddPhotoOpen] = React.useState(false);
   const [addVideoOpen, setAddVideoOpen] = React.useState(false);
+  const [addReviewOpen, setAddReviewOpen] = React.useState(false);
+
+  // New Review Form state
+  const [revAuthorName, setRevAuthorName] = React.useState("");
+  const [revRole, setRevRole] = React.useState("Luxury Event Client");
+  const [revRating, setRevRating] = React.useState(5);
+  const [revComment, setRevComment] = React.useState("");
+
+  const handleAddReviewSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!revAuthorName.trim() || !revComment.trim()) return;
+
+    await addReview({
+      authorName: revAuthorName.trim(),
+      roleOrEvent: revRole.trim() || "Luxury Event Client",
+      rating: revRating,
+      comment: revComment.trim()
+    });
+
+    setRevAuthorName("");
+    setRevComment("");
+    setAddReviewOpen(false);
+  };
 
   // Sync from DB on mount
   React.useEffect(() => {
@@ -354,6 +380,7 @@ export function AdminDashboard(): React.ReactElement {
             <TabsTrigger value="photos">Manage Photos</TabsTrigger>
             <TabsTrigger value="videos">Manage Videos</TabsTrigger>
             <TabsTrigger value="about-cards">About Cards Photos</TabsTrigger>
+            <TabsTrigger value="reviews">Manage Reviews</TabsTrigger>
             <TabsTrigger value="inquiries">Client Inquiries</TabsTrigger>
           </TabsList>
 
@@ -1036,6 +1063,128 @@ export function AdminDashboard(): React.ReactElement {
                         ) : null}
                       </div>
                     </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* TAB 6: MANAGE REVIEWS */}
+          <TabsContent value="reviews" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="font-display text-2xl font-bold text-[#2D2238]">Client Reviews & Testimonials</h2>
+                <p className="text-sm text-[#5c4b6e]">
+                  Manage reviews stored in MongoDB &quot;reviews&quot; collection displayed on the client website.
+                </p>
+              </div>
+
+              <Dialog open={addReviewOpen} onOpenChange={setAddReviewOpen}>
+                <DialogTrigger asChild>
+                  <GradientButton type="button">
+                    <Plus className="size-4" />
+                    Add Review
+                  </GradientButton>
+                </DialogTrigger>
+                <DialogContent className="border-[#EBDCFB] bg-[#FAF7FF] text-[#2D2238] sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle className="font-display text-2xl font-bold">Add Client Review</DialogTitle>
+                    <DialogDescription className="text-[#5c4b6e]">
+                      Add a new client review to MongoDB &quot;reviews&quot; collection.
+                    </DialogDescription>
+                  </DialogHeader>
+
+                  <form onSubmit={handleAddReviewSubmit} className="space-y-4 mt-4">
+                    <div>
+                      <Label htmlFor="rev-author">Client / Author Name *</Label>
+                      <Input
+                        id="rev-author"
+                        value={revAuthorName}
+                        onChange={(e) => setRevAuthorName(e.target.value)}
+                        placeholder="e.g. Vikram & Ananya Mehta"
+                        required
+                        className="mt-1"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="rev-role">Role or Event *</Label>
+                      <Input
+                        id="rev-role"
+                        value={revRole}
+                        onChange={(e) => setRevRole(e.target.value)}
+                        placeholder="e.g. Royal Wedding Client, Udaipur"
+                        required
+                        className="mt-1"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="rev-rating">Rating (1 to 5 Stars)</Label>
+                      <select
+                        id="rev-rating"
+                        value={revRating}
+                        onChange={(e) => setRevRating(Number(e.target.value))}
+                        className="mt-1 w-full rounded-md border border-[#EBDCFB] bg-white p-2 text-sm text-[#2D2238]"
+                      >
+                        <option value={5}>5 Stars (★★★★★)</option>
+                        <option value={4}>4 Stars (★★★★☆)</option>
+                        <option value={3}>3 Stars (★★★☆☆)</option>
+                        <option value={2}>2 Stars (★★☆☆☆)</option>
+                        <option value={1}>1 Star (★☆☆☆☆)</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="rev-comment">Review Comment *</Label>
+                      <Textarea
+                        id="rev-comment"
+                        value={revComment}
+                        onChange={(e) => setRevComment(e.target.value)}
+                        placeholder="Enter client testimonial comment..."
+                        required
+                        rows={3}
+                        className="mt-1"
+                      />
+                    </div>
+
+                    <div className="flex justify-end gap-3 pt-2">
+                      <GradientButton type="submit">Save to Database</GradientButton>
+                    </div>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {(reviews || []).map((rev) => (
+                <div
+                  key={rev.id}
+                  className="flex flex-col justify-between rounded-xl border border-[#EBDCFB] bg-white p-6 shadow-sm"
+                >
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex text-[#D4AF37]">
+                        {Array.from({ length: rev.rating || 5 }).map((_, i) => (
+                          <Star key={i} className="size-4 fill-current" />
+                        ))}
+                      </div>
+                      <button
+                        onClick={() => void deleteReview(rev.id)}
+                        type="button"
+                        className="text-rose-600 hover:text-rose-800 transition cursor-pointer p-1"
+                      >
+                        <Trash2 className="size-4" />
+                      </button>
+                    </div>
+                    <p className="mt-4 text-xs leading-6 text-[#5c4b6e] italic">
+                      &quot;{rev.comment}&quot;
+                    </p>
+                  </div>
+
+                  <div className="mt-6 border-t border-[#EBDCFB] pt-4">
+                    <h4 className="font-bold text-sm text-[#2D2238]">{rev.authorName}</h4>
+                    <p className="text-xs text-[#7d5ea1] mt-0.5">{rev.roleOrEvent}</p>
                   </div>
                 </div>
               ))}

@@ -22,6 +22,7 @@ const EventSchema = new Schema<IEvent>(
     imageAlt: { type: String, default: "" }
   },
   {
+    collection: "events",
     timestamps: true
   }
 );

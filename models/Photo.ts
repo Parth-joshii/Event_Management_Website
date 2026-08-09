@@ -22,6 +22,7 @@ const PhotoSchema = new Schema<IPhoto>(
     alt: { type: String, default: "" }
   },
   {
+    collection: "photos",
     timestamps: true
   }
 );

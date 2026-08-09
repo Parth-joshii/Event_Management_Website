@@ -18,6 +18,7 @@ const VideoSchema = new Schema<IVideo>(
     description: { type: String, default: "" }
   },
   {
+    collection: "videos",
     timestamps: true
   }
 );
