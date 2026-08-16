@@ -6,7 +6,6 @@ import { AboutPreview } from "@/components/sections/about-preview";
 import { CtaSection } from "@/components/sections/cta-section";
 import { FeaturedGallerySection } from "@/components/sections/featured-gallery-section";
 import { HeroSection } from "@/components/sections/hero-section";
-import { ScrollMarqueeBanner } from "@/components/sections/scroll-marquee-banner";
 import { TestimonialsSection } from "@/components/sections/testimonials-section";
 import { siteConfig } from "@/config/site";
 import { optionalPublicAsset } from "@/lib/public-assets";
@@ -49,7 +48,6 @@ export default function HomePage(): React.ReactElement {
           desktopVideoSrc={desktopHeroVideoSrc}
           mobileVideoSrc={mobileHeroVideoSrc}
         />
-        <ScrollMarqueeBanner />
         <AboutPreview />
         <FeaturedGallerySection />
         <CtaSection />
