@@ -39,3 +39,30 @@ export function convertDriveUrlToDirectLink(url: string): string {
 
   return trimmed;
 }
+
+/**
+ * Extracts multiple Google Drive or external image URLs from bulk pasted text (e.g. from Google Drive folder/files).
+ */
+export function extractDriveUrlsFromText(text: string): string[] {
+  if (!text) return [];
+  const parts = text.split(/[\n,;\s]+/);
+  const result: string[] = [];
+
+  for (const part of parts) {
+    const trimmed = part.trim();
+    if (!trimmed) continue;
+
+    if (
+      trimmed.includes("drive.google.com") ||
+      trimmed.includes("googleusercontent.com") ||
+      trimmed.startsWith("http")
+    ) {
+      const converted = convertDriveUrlToDirectLink(trimmed);
+      if (converted && !result.includes(converted)) {
+        result.push(converted);
+      }
+    }
+  }
+
+  return result;
+}

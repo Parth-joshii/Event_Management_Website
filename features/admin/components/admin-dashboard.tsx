@@ -34,7 +34,7 @@ import {
   DialogTrigger
 } from "@/components/ui/dialog";
 import { siteConfig } from "@/config/site";
-import { convertDriveUrlToDirectLink } from "@/lib/utils";
+import { convertDriveUrlToDirectLink, extractDriveUrlsFromText } from "@/lib/utils";
 
 /** Compresses images to ultra-light 1000px, 68% JPEG format (~100KB) ensuring instant uploads that never hit Vercel payload limits. */
 function compressImageFile(file: File, maxWidth = 1000, quality = 0.68): Promise<string> {
@@ -779,7 +779,7 @@ export function AdminDashboard(): React.ReactElement {
                     </div>
 
                     <div>
-                      <Label htmlFor="ph-src">Select Photos from Computer (Select Multiple Files)</Label>
+                      <Label htmlFor="ph-src">Option A: Select Photos from Computer (Multiple Files)</Label>
                       <input
                         type="file"
                         accept="image/*"
@@ -796,21 +796,43 @@ export function AdminDashboard(): React.ReactElement {
                           }
                         }}
                       />
-                      {photoImagesList.length > 0 ? (
-                        <p className="mt-1.5 text-xs font-semibold text-emerald-600">
-                          ✓ {photoImagesList.length} photos selected ready to upload
-                        </p>
-                      ) : (
-                        <Input
-                          id="ph-src"
-                          className="mt-2"
-                          onChange={(e) => setPhotoImageSrc(convertDriveUrlToDirectLink(e.target.value))}
-                          placeholder="Paste image URL or Google Drive link (e.g. https://drive.google.com/...)"
-                          value={photoImageSrc}
-                        />
-                      )}
+                    </div>
 
-                      {photoImageSrc ? (
+                    <div className="pt-1">
+                      <Label htmlFor="ph-bulk-drive">
+                        Option B: Bulk Paste Google Drive Photo Links (Paste All Links from Event Folder)
+                      </Label>
+                      <p className="text-[11px] text-[#7d5ea1] mb-1">
+                        💡 Tip: In Google Drive, select all photos $\to$ Copy links $\to$ Paste below!
+                      </p>
+                      <Textarea
+                        id="ph-bulk-drive"
+                        rows={3}
+                        placeholder="Paste single or multiple Google Drive links here (one per line)..."
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          const extracted = extractDriveUrlsFromText(val);
+                          if (extracted.length > 0) {
+                            setPhotoImagesList(extracted);
+                            setPhotoImageSrc(extracted[0] || "");
+                          } else if (val.trim()) {
+                            const single = convertDriveUrlToDirectLink(val.trim());
+                            setPhotoImageSrc(single);
+                            setPhotoImagesList([single]);
+                          } else {
+                            setPhotoImagesList([]);
+                            setPhotoImageSrc("/images/gallery/wedding-stage.jpg");
+                          }
+                        }}
+                      />
+
+                      {photoImagesList.length > 0 ? (
+                        <p className="mt-1.5 text-xs font-bold text-emerald-600">
+                          ✓ {photoImagesList.length} photos ready to publish to Event!
+                        </p>
+                      ) : null}
+
+                      {photoImageSrc && photoImagesList.length <= 1 ? (
                         <div className="mt-2 h-24 w-full overflow-hidden rounded-md border border-[#EBDCFB]">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img src={photoImageSrc} alt="Preview" className="size-full object-cover" />
