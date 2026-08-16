@@ -97,6 +97,7 @@ export function AdminDashboard(): React.ReactElement {
 
   const [passwordInput, setPasswordInput] = React.useState("");
   const [loginError, setLoginError] = React.useState(false);
+  const [activeTab, setActiveTab] = React.useState("events");
   const [addEventOpen, setAddEventOpen] = React.useState(false);
   const [addPhotoOpen, setAddPhotoOpen] = React.useState(false);
   const [addVideoOpen, setAddVideoOpen] = React.useState(false);
@@ -355,20 +356,29 @@ export function AdminDashboard(): React.ReactElement {
               <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-white/10 pt-4">
                 <span className="text-xs font-semibold text-[#D4AF37]">Quick Actions:</span>
                 <button
-                  onClick={() => setAddEventOpen(true)}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white/25 cursor-pointer border border-white/20"
+                  onClick={() => {
+                    setActiveTab("events");
+                    setAddEventOpen(true);
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3.5 py-1.5 text-xs font-semibold text-white transition hover:bg-white/25 cursor-pointer border border-white/20 active:scale-95"
                 >
                   <Plus className="size-3 text-[#D4AF37]" /> Add Event
                 </button>
                 <button
-                  onClick={() => setAddPhotoOpen(true)}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white/25 cursor-pointer border border-white/20"
+                  onClick={() => {
+                    setActiveTab("photos");
+                    setAddPhotoOpen(true);
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3.5 py-1.5 text-xs font-semibold text-white transition hover:bg-white/25 cursor-pointer border border-white/20 active:scale-95"
                 >
                   <Plus className="size-3 text-[#D4AF37]" /> Add Photo
                 </button>
                 <button
-                  onClick={() => setAddVideoOpen(true)}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white/25 cursor-pointer border border-white/20"
+                  onClick={() => {
+                    setActiveTab("videos");
+                    setAddVideoOpen(true);
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3.5 py-1.5 text-xs font-semibold text-white transition hover:bg-white/25 cursor-pointer border border-white/20 active:scale-95"
                 >
                   <Plus className="size-3 text-[#D4AF37]" /> Add Video
                 </button>
@@ -379,7 +389,10 @@ export function AdminDashboard(): React.ReactElement {
           {/* Right Bento Column: 2 Stacked Stat Cards */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
             {/* Bento Card: Live Inquiries Status */}
-            <div className="rounded-2xl border border-[#EBDCFB] bg-white p-5 shadow-sm transition hover:shadow-md hover:border-[#D4AF37]/60">
+            <div
+              onClick={() => setActiveTab("inquiries")}
+              className="rounded-2xl border border-[#EBDCFB] bg-white p-5 shadow-sm transition hover:shadow-md hover:border-[#D4AF37]/60 cursor-pointer"
+            >
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold uppercase tracking-wider text-[#7d5ea1]">
                   Client Inquiries
@@ -397,7 +410,10 @@ export function AdminDashboard(): React.ReactElement {
             </div>
 
             {/* Bento Card: Total Media Assets */}
-            <div className="rounded-2xl border border-[#EBDCFB] bg-white p-5 shadow-sm transition hover:shadow-md hover:border-[#D4AF37]/60">
+            <div
+              onClick={() => setActiveTab("photos")}
+              className="rounded-2xl border border-[#EBDCFB] bg-white p-5 shadow-sm transition hover:shadow-md hover:border-[#D4AF37]/60 cursor-pointer"
+            >
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold uppercase tracking-wider text-[#7d5ea1]">
                   Media Showcase
@@ -420,7 +436,10 @@ export function AdminDashboard(): React.ReactElement {
 
         {/* 4 Small Bento Quick Counter Cards */}
         <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="group rounded-2xl border border-[#EBDCFB] bg-white p-4 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-[#D4AF37] hover:shadow-md">
+          <div
+            onClick={() => setActiveTab("events")}
+            className="group rounded-2xl border border-[#EBDCFB] bg-white p-4 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-[#D4AF37] hover:shadow-md cursor-pointer"
+          >
             <div className="flex items-center justify-between text-[#5c4b6e]">
               <span className="text-xs font-semibold uppercase tracking-wider">Total Events</span>
               <Calendar className="size-4 text-[#D4AF37]" />
@@ -428,7 +447,10 @@ export function AdminDashboard(): React.ReactElement {
             <p className="font-display mt-2 text-2xl font-bold text-[#2D2238]">{events.length}</p>
           </div>
 
-          <div className="group rounded-2xl border border-[#EBDCFB] bg-white p-4 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-[#D4AF37] hover:shadow-md">
+          <div
+            onClick={() => setActiveTab("photos")}
+            className="group rounded-2xl border border-[#EBDCFB] bg-white p-4 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-[#D4AF37] hover:shadow-md cursor-pointer"
+          >
             <div className="flex items-center justify-between text-[#5c4b6e]">
               <span className="text-xs font-semibold uppercase tracking-wider">Gallery Photos</span>
               <ImageIcon className="size-4 text-[#D4AF37]" />
@@ -436,7 +458,10 @@ export function AdminDashboard(): React.ReactElement {
             <p className="font-display mt-2 text-2xl font-bold text-[#2D2238]">{photos.length}</p>
           </div>
 
-          <div className="group rounded-2xl border border-[#EBDCFB] bg-white p-4 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-[#D4AF37] hover:shadow-md">
+          <div
+            onClick={() => setActiveTab("videos")}
+            className="group rounded-2xl border border-[#EBDCFB] bg-white p-4 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-[#D4AF37] hover:shadow-md cursor-pointer"
+          >
             <div className="flex items-center justify-between text-[#5c4b6e]">
               <span className="text-xs font-semibold uppercase tracking-wider">Video Assets</span>
               <VideoIcon className="size-4 text-[#D4AF37]" />
@@ -444,7 +469,10 @@ export function AdminDashboard(): React.ReactElement {
             <p className="font-display mt-2 text-2xl font-bold text-[#2D2238]">{videos.length}</p>
           </div>
 
-          <div className="group rounded-2xl border border-[#EBDCFB] bg-white p-4 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-[#D4AF37] hover:shadow-md">
+          <div
+            onClick={() => setActiveTab("reviews")}
+            className="group rounded-2xl border border-[#EBDCFB] bg-white p-4 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-[#D4AF37] hover:shadow-md cursor-pointer"
+          >
             <div className="flex items-center justify-between text-[#5c4b6e]">
               <span className="text-xs font-semibold uppercase tracking-wider">Client Reviews</span>
               <Star className="size-4 text-[#D4AF37] fill-[#D4AF37]" />
@@ -454,7 +482,7 @@ export function AdminDashboard(): React.ReactElement {
         </div>
 
         {/* Tabbed Admin Interface */}
-        <Tabs defaultValue="events" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="mb-6 rounded-2xl border border-[#EBDCFB] bg-white p-1.5 shadow-sm flex-wrap gap-1">
             <TabsTrigger value="events">Manage Events</TabsTrigger>
             <TabsTrigger value="photos">Manage Photos</TabsTrigger>
