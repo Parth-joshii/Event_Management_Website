@@ -34,6 +34,7 @@ import {
   DialogTrigger
 } from "@/components/ui/dialog";
 import { siteConfig } from "@/config/site";
+import { convertDriveUrlToDirectLink } from "@/lib/utils";
 
 /** Compresses images to ultra-light 1000px, 68% JPEG format (~100KB) ensuring instant uploads that never hit Vercel payload limits. */
 function compressImageFile(file: File, maxWidth = 1000, quality = 0.68): Promise<string> {
@@ -607,8 +608,8 @@ export function AdminDashboard(): React.ReactElement {
                       <Input
                         id="ev-img"
                         className="mt-2"
-                        onChange={(e) => setEventImageSrc(e.target.value)}
-                        placeholder="Or paste URL e.g. /images/gallery/wedding-stage.jpg"
+                        onChange={(e) => setEventImageSrc(convertDriveUrlToDirectLink(e.target.value))}
+                        placeholder="Paste image URL or Google Drive link (e.g. https://drive.google.com/...)"
                         value={eventImageSrc}
                       />
                       {eventImageSrc ? (
@@ -803,8 +804,8 @@ export function AdminDashboard(): React.ReactElement {
                         <Input
                           id="ph-src"
                           className="mt-2"
-                          onChange={(e) => setPhotoImageSrc(e.target.value)}
-                          placeholder="Or paste URL e.g. /images/gallery/wedding-stage.jpg"
+                          onChange={(e) => setPhotoImageSrc(convertDriveUrlToDirectLink(e.target.value))}
+                          placeholder="Paste image URL or Google Drive link (e.g. https://drive.google.com/...)"
                           value={photoImageSrc}
                         />
                       )}
