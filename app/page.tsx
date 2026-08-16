@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
-import { MobileBottomBar } from "@/components/layout/mobile-bottom-bar";
 import { JsonLd } from "@/components/layout/json-ld";
 import { AboutPreview } from "@/components/sections/about-preview";
 import { CtaSection } from "@/components/sections/cta-section";
@@ -55,7 +54,6 @@ export default function HomePage(): React.ReactElement {
         <TestimonialsSection />
       </main>
       <Footer />
-      <MobileBottomBar />
     </>
   );
 }
