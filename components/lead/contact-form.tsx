@@ -15,20 +15,28 @@ import {
 import type { InquiryResponse } from "@/types/inquiry";
 
 const contactDefaults: InquiryFormValues = {
+  additionalRequirements: [],
+  bestTime: "Anytime",
   budget: 500_000,
   city: "",
+  colors: [],
+  customColor: "",
   email: "",
   eventDate: "",
+  eventDateFlexibility: "Flexible Date",
   eventType: "Luxury Wedding",
   functions: [],
   fullName: "",
   guests: 100,
   phone: "",
+  preferredContact: "WhatsApp",
   selectedServices: ["Event Planning"],
   source: "contact",
   specialRequirements: "",
   theme: "Modern Luxury",
-  venuePreference: "No Preference"
+  venueName: "",
+  venuePreference: "No Preference",
+  venueStatus: "Not Decided"
 };
 
 /** Renders a large public contact inquiry form. */
@@ -37,7 +45,7 @@ export function ContactForm(): React.ReactElement {
   const [error, setError] = React.useState<string>();
   const form = useForm<InquiryFormValues>({
     defaultValues: contactDefaults,
-    resolver: zodResolver(inquirySchema)
+    resolver: zodResolver(inquirySchema) as never
   });
 
   const submit = form.handleSubmit(async (data) => {

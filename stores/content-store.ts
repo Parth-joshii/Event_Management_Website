@@ -251,19 +251,29 @@ export const useContentStore = create<ContentState>()(
           ]);
 
           if (photosRes?.ok && Array.isArray(photosRes.data)) {
-            set({ photos: photosRes.data });
+            if (photosRes.data.length > 0 || get().photos.length === 0) {
+              set({ photos: photosRes.data });
+            }
           }
           if (videosRes?.ok && Array.isArray(videosRes.data)) {
-            set({ videos: videosRes.data });
+            if (videosRes.data.length > 0 || get().videos.length === 0) {
+              set({ videos: videosRes.data });
+            }
           }
           if (eventsRes?.ok && Array.isArray(eventsRes.data)) {
-            set({ events: eventsRes.data });
+            if (eventsRes.data.length > 0 || get().events.length === 0) {
+              set({ events: eventsRes.data });
+            }
           }
           if (inquiriesRes?.ok && Array.isArray(inquiriesRes.data)) {
-            set({ inquiries: inquiriesRes.data });
+            if (inquiriesRes.data.length > 0 || get().inquiries.length === 0) {
+              set({ inquiries: inquiriesRes.data });
+            }
           }
           if (reviewsRes?.ok && Array.isArray(reviewsRes.data)) {
-            set({ reviews: reviewsRes.data });
+            if (reviewsRes.data.length > 0 || get().reviews.length === 0) {
+              set({ reviews: reviewsRes.data });
+            }
           }
         } catch (e) {
           console.error("Failed to sync store with MongoDB API:", e);
@@ -357,8 +367,6 @@ export const useContentStore = create<ContentState>()(
           }
         } catch (e) {
           console.error("Failed to persist photo to MongoDB:", e);
-        } finally {
-          await get().fetchFromDatabase();
         }
       },
 
@@ -381,8 +389,6 @@ export const useContentStore = create<ContentState>()(
           );
         } catch (e) {
           console.error("Failed to persist bulk photos to MongoDB:", e);
-        } finally {
-          await get().fetchFromDatabase();
         }
       },
 

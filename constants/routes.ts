@@ -2,7 +2,7 @@ import type { NavigationItem } from "@/types/navigation";
 
 export const routes = {
   about: "/about",
-  admin: "/admin",
+  admin: "/sv-portal-99770",
   blog: "/blog",
   booking: "/booking",
   budgetCalculator: "/budget-calculator",
@@ -50,8 +50,8 @@ export const primaryNavigation: readonly NavigationItem[] = [
     label: "Gallery"
   },
   {
-    href: "#customize",
-    label: "Customize"
+    href: "/customize",
+    label: "Design Your Celebration"
   },
   {
     href: "#packages",

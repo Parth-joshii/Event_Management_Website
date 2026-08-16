@@ -113,7 +113,7 @@ export function Footer(): React.ReactElement {
                   className="transition hover:text-[#D4AF37] focus-visible:ring-2 focus-visible:ring-[#D4AF37] focus-visible:outline-none"
                   href={item.href}
                 >
-                  {item.label === "Customize" ? "Customize Event" : item.label}
+                  {item.label}
                 </a>
               </li>
             ))}
