@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import {
+  Activity,
   Calendar,
   ExternalLink,
   Image as ImageIcon,
@@ -330,52 +331,131 @@ export function AdminDashboard(): React.ReactElement {
 
       {/* Main Content Container */}
       <Container className="py-8">
-        {/* Quick Stats Bar */}
-        <div className="grid gap-4 sm:grid-cols-4 mb-8">
-          <div className="rounded-xl border border-[#EBDCFB] bg-white p-5 shadow-sm">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-[#7d5ea1]">
-                Total Events
-              </span>
-              <Calendar className="size-5 text-[#D4AF37]" />
+        {/* Bento Grid Header & Statistics Showcase */}
+        <div className="mb-8 grid gap-4 lg:grid-cols-3">
+          {/* Main Bento Hero Card (Span 2 Columns) */}
+          <div className="relative overflow-hidden rounded-2xl border border-[#D4AF37]/40 bg-gradient-to-br from-[#2D2238] via-[#3a2c49] to-[#1f1629] p-6 text-white shadow-xl lg:col-span-2">
+            <div className="pointer-events-none absolute -top-16 -right-16 size-64 rounded-full bg-[#D4AF37]/15 blur-3xl" />
+            <div className="relative z-10 flex flex-col justify-between h-full min-h-[160px]">
+              <div className="flex items-start justify-between">
+                <div>
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-[#D4AF37]/50 bg-[#D4AF37]/15 px-3 py-1 text-[11px] font-semibold text-[#D4AF37] uppercase tracking-wider">
+                    <Activity className="size-3.5 animate-pulse" />
+                    MongoDB Cloud Live Sync Active
+                  </span>
+                  <h2 className="font-display mt-3 text-2xl font-bold tracking-wide sm:text-3xl text-white">
+                    Command & Control Center
+                  </h2>
+                  <p className="mt-1 text-xs text-[#EBDCFB]/70 max-w-lg">
+                    Manage your royal weddings, showcase media, client reviews, and booking inquiries in real time.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-white/10 pt-4">
+                <span className="text-xs font-semibold text-[#D4AF37]">Quick Actions:</span>
+                <button
+                  onClick={() => setAddEventOpen(true)}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white/25 cursor-pointer border border-white/20"
+                >
+                  <Plus className="size-3 text-[#D4AF37]" /> Add Event
+                </button>
+                <button
+                  onClick={() => setAddPhotoOpen(true)}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white/25 cursor-pointer border border-white/20"
+                >
+                  <Plus className="size-3 text-[#D4AF37]" /> Add Photo
+                </button>
+                <button
+                  onClick={() => setAddVideoOpen(true)}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white/25 cursor-pointer border border-white/20"
+                >
+                  <Plus className="size-3 text-[#D4AF37]" /> Add Video
+                </button>
+              </div>
             </div>
-            <p className="font-display mt-3 text-3xl font-bold">{events.length}</p>
           </div>
 
-          <div className="rounded-xl border border-[#EBDCFB] bg-white p-5 shadow-sm">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-[#7d5ea1]">
-                Gallery Photos
-              </span>
-              <ImageIcon className="size-5 text-[#D4AF37]" />
+          {/* Right Bento Column: 2 Stacked Stat Cards */}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+            {/* Bento Card: Live Inquiries Status */}
+            <div className="rounded-2xl border border-[#EBDCFB] bg-white p-5 shadow-sm transition hover:shadow-md hover:border-[#D4AF37]/60">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#7d5ea1]">
+                  Client Inquiries
+                </span>
+                <span className="flex size-9 items-center justify-center rounded-full bg-[#EBDCFB]/50 text-[#2D2238]">
+                  <UserCheck className="size-4 text-[#D4AF37]" />
+                </span>
+              </div>
+              <div className="mt-3 flex items-baseline justify-between">
+                <p className="font-display text-3xl font-bold text-[#2D2238]">{inquiries.length}</p>
+                <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                  ● Real-time Leads
+                </span>
+              </div>
             </div>
-            <p className="font-display mt-3 text-[#2D2238] text-3xl font-bold">{photos.length}</p>
+
+            {/* Bento Card: Total Media Assets */}
+            <div className="rounded-2xl border border-[#EBDCFB] bg-white p-5 shadow-sm transition hover:shadow-md hover:border-[#D4AF37]/60">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#7d5ea1]">
+                  Media Showcase
+                </span>
+                <span className="flex size-9 items-center justify-center rounded-full bg-[#EBDCFB]/50 text-[#2D2238]">
+                  <ImageIcon className="size-4 text-[#D4AF37]" />
+                </span>
+              </div>
+              <div className="mt-3 flex items-baseline justify-between">
+                <p className="font-display text-3xl font-bold text-[#2D2238]">
+                  {photos.length + videos.length}
+                </p>
+                <span className="text-xs text-[#5c4b6e] font-medium">
+                  {photos.length} Photos • {videos.length} Videos
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 4 Small Bento Quick Counter Cards */}
+        <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="group rounded-2xl border border-[#EBDCFB] bg-white p-4 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-[#D4AF37] hover:shadow-md">
+            <div className="flex items-center justify-between text-[#5c4b6e]">
+              <span className="text-xs font-semibold uppercase tracking-wider">Total Events</span>
+              <Calendar className="size-4 text-[#D4AF37]" />
+            </div>
+            <p className="font-display mt-2 text-2xl font-bold text-[#2D2238]">{events.length}</p>
           </div>
 
-          <div className="rounded-xl border border-[#EBDCFB] bg-white p-5 shadow-sm">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-[#7d5ea1]">
-                Videos
-              </span>
-              <VideoIcon className="size-5 text-[#D4AF37]" />
+          <div className="group rounded-2xl border border-[#EBDCFB] bg-white p-4 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-[#D4AF37] hover:shadow-md">
+            <div className="flex items-center justify-between text-[#5c4b6e]">
+              <span className="text-xs font-semibold uppercase tracking-wider">Gallery Photos</span>
+              <ImageIcon className="size-4 text-[#D4AF37]" />
             </div>
-            <p className="font-display mt-3 text-[#2D2238] text-3xl font-bold">{videos.length}</p>
+            <p className="font-display mt-2 text-2xl font-bold text-[#2D2238]">{photos.length}</p>
           </div>
 
-          <div className="rounded-xl border border-[#EBDCFB] bg-white p-5 shadow-sm">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-[#7d5ea1]">
-                Client Inquiries
-              </span>
-              <UserCheck className="size-5 text-[#D4AF37]" />
+          <div className="group rounded-2xl border border-[#EBDCFB] bg-white p-4 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-[#D4AF37] hover:shadow-md">
+            <div className="flex items-center justify-between text-[#5c4b6e]">
+              <span className="text-xs font-semibold uppercase tracking-wider">Video Assets</span>
+              <VideoIcon className="size-4 text-[#D4AF37]" />
             </div>
-            <p className="font-display mt-3 text-3xl font-bold">{inquiries.length}</p>
+            <p className="font-display mt-2 text-2xl font-bold text-[#2D2238]">{videos.length}</p>
+          </div>
+
+          <div className="group rounded-2xl border border-[#EBDCFB] bg-white p-4 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-[#D4AF37] hover:shadow-md">
+            <div className="flex items-center justify-between text-[#5c4b6e]">
+              <span className="text-xs font-semibold uppercase tracking-wider">Client Reviews</span>
+              <Star className="size-4 text-[#D4AF37] fill-[#D4AF37]" />
+            </div>
+            <p className="font-display mt-2 text-2xl font-bold text-[#2D2238]">{reviews.length}</p>
           </div>
         </div>
 
         {/* Tabbed Admin Interface */}
         <Tabs defaultValue="events" className="w-full">
-          <TabsList className="mb-6 bg-[#EBDCFB]/60 p-1 flex-wrap">
+          <TabsList className="mb-6 rounded-2xl border border-[#EBDCFB] bg-white p-1.5 shadow-sm flex-wrap gap-1">
             <TabsTrigger value="events">Manage Events</TabsTrigger>
             <TabsTrigger value="photos">Manage Photos</TabsTrigger>
             <TabsTrigger value="videos">Manage Videos</TabsTrigger>
