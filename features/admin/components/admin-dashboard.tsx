@@ -34,8 +34,8 @@ import {
 } from "@/components/ui/dialog";
 import { siteConfig } from "@/config/site";
 
-/** Preserves Ultra-HD 2400px crisp image resolution & 95% pristine quality while optimizing for cloud storage. */
-function compressImageFile(file: File, maxWidth = 2400, quality = 0.95): Promise<string> {
+/** Optimizes image resolution (1400px, 78% JPEG) so uploads stay ultra-crisp while remaining under Vercel's 4.5MB API payload limit. */
+function compressImageFile(file: File, maxWidth = 1400, quality = 0.78): Promise<string> {
   return new Promise((resolve) => {
     const reader = new FileReader();
     reader.onload = (e) => {
