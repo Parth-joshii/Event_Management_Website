@@ -85,20 +85,36 @@ export async function saveInquiryToGoogleSheets(
     return "saved";
   }
 
-  if (env.GOOGLE_SHEETS_WEBHOOK_URL) {
-    await fetch(env.GOOGLE_SHEETS_WEBHOOK_URL, {
-      body: JSON.stringify({
-        referenceNumber: context.referenceNumber,
-        row,
-        source: inquiry.source
-      }),
-      headers: {
-        "Content-Type": "application/json"
-      },
-      method: "POST"
-    });
-
-    return "saved";
+  const webhookUrl = env.GOOGLE_SHEETS_WEBHOOK_URL || process.env.NEXT_PUBLIC_GOOGLE_SHEETS_WEBHOOK_URL || process.env.GOOGLE_SHEETS_WEBHOOK_URL;
+  if (webhookUrl) {
+    try {
+      await fetch(webhookUrl, {
+        body: JSON.stringify({
+          referenceNumber: context.referenceNumber,
+          fullName: inquiry.fullName,
+          phone: inquiry.phone,
+          email: inquiry.email,
+          city: inquiry.city,
+          eventType: inquiry.eventType,
+          functions: inquiry.functions,
+          theme: inquiry.theme,
+          venuePreference: inquiry.venuePreference,
+          guests: inquiry.guests,
+          budget: inquiry.budget,
+          selectedServices: inquiry.selectedServices,
+          specialRequirements: inquiry.specialRequirements,
+          row,
+          source: inquiry.source
+        }),
+        headers: {
+          "Content-Type": "application/json"
+        },
+        method: "POST"
+      });
+      return "saved";
+    } catch (e) {
+      console.error("Failed to post inquiry to Google Sheet Webhook:", e);
+    }
   }
 
   return "not-configured";
