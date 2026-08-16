@@ -25,16 +25,24 @@ export function convertDriveUrlToDirectLink(url: string): string {
   if (!url || typeof url !== "string") return url;
   const trimmed = url.trim();
 
+  if (trimmed.startsWith("data:") || trimmed.startsWith("blob:")) {
+    return trimmed;
+  }
+
+  if (trimmed.includes("googleusercontent.com")) {
+    return trimmed;
+  }
+
   // Match /file/d/FILE_ID
   const fileDMatch = trimmed.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
   if (fileDMatch && fileDMatch[1]) {
-    return `https://lh3.googleusercontent.com/d/${fileDMatch[1]}`;
+    return `https://drive.google.com/uc?export=view&id=${fileDMatch[1]}`;
   }
 
   // Match id=FILE_ID
   const idMatch = trimmed.match(/[?&]id=([a-zA-Z0-9_-]+)/);
   if (idMatch && idMatch[1]) {
-    return `https://lh3.googleusercontent.com/d/${idMatch[1]}`;
+    return `https://drive.google.com/uc?export=view&id=${idMatch[1]}`;
   }
 
   return trimmed;

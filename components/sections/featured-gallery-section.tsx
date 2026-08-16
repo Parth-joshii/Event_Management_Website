@@ -11,6 +11,9 @@ import { useContentStore, type PhotoItem } from "@/stores/content-store";
 import { featuredGallery } from "@/features/gallery/data/featured-gallery";
 import { cn } from "@/lib/utils";
 
+const galleryFallbackImage =
+  "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80";
+
 export interface GalleryDisplayItem {
   id: string;
   title: string;
@@ -167,7 +170,7 @@ export function FeaturedGallerySection(): React.ReactElement {
                   className="size-full object-cover transition duration-700 group-hover:scale-110"
                   src={item.imageSrc}
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80";
+                    (e.target as HTMLImageElement).src = galleryFallbackImage;
                   }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#2D2238]/85 via-transparent to-transparent opacity-85 transition duration-300 group-hover:opacity-95" />
@@ -236,6 +239,9 @@ export function FeaturedGallerySection(): React.ReactElement {
                         src={ph.imageSrc}
                         alt={ph.title}
                         className="size-full object-cover transition duration-500 group-hover:scale-105"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = galleryFallbackImage;
+                        }}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 transition duration-300 group-hover:opacity-100 flex items-end p-3 text-xs text-white font-medium">
                         {ph.title}
@@ -261,6 +267,9 @@ export function FeaturedGallerySection(): React.ReactElement {
                   src={activeLightboxPhoto.imageSrc}
                   alt={activeLightboxPhoto.alt}
                   className="max-h-[75vh] w-full rounded-xl object-contain mx-auto"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = galleryFallbackImage;
+                  }}
                 />
                 <div className="mt-4 text-left px-2 flex items-center justify-between">
                   <div>
