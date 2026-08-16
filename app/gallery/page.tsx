@@ -26,7 +26,7 @@ interface GalleryPageProps {
 }
 
 const galleryDescription =
-  "Browse a luxury Pinterest-style gallery of weddings, Haldi, Mehndi, Sangeet, receptions, corporate events, birthdays, religious ceremonies, lighting, flowers, drone moments, and premium decoration.";
+  "Browse real client works and live admin-uploaded moments from weddings, Haldi, Mehndi, Sangeet, receptions, corporate events, birthdays, religious ceremonies, lighting, flowers, drone moments, and premium decoration.";
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -37,15 +37,15 @@ export async function generateMetadata(): Promise<Metadata> {
     keywords: [...siteConfig.keywords, "luxury event gallery", "wedding gallery"],
     openGraph: {
       description: galleryDescription,
-      title: "Luxury Event Gallery | Shree Velora Event's",
+      title: "Explore Our Works | Shree Velora Event's",
       type: "website",
       url: `${siteConfig.url}/gallery`
     },
-    title: "Luxury Event Gallery | Shree Velora Event's",
+    title: "Explore Our Works | Shree Velora Event's",
     twitter: {
       card: "summary_large_image",
       description: galleryDescription,
-      title: "Luxury Event Gallery | Shree Velora Event's"
+      title: "Explore Our Works | Shree Velora Event's"
     }
   };
 }
@@ -145,9 +145,9 @@ export default async function GalleryPage({
       <Header logoSrc={logoSrc} navigationHrefPrefix="/" />
       <main id="main-content">
         <ShowcaseHero
-          breadcrumbs={[{ label: "Gallery" }]}
+          breadcrumbs={[{ label: "Works" }]}
           description={galleryDescription}
-          eyebrow="Luxury Gallery"
+          eyebrow="Explore Our Works"
           title="A Portfolio Of Cinematic Celebrations"
         />
         <section className="bg-[#FAF7FF] py-16 sm:py-20">

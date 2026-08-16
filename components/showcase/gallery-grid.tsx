@@ -48,7 +48,7 @@ export function GalleryGrid({ items: propItems }: GalleryGridProps): React.React
       description: p.title,
       fallbackClassName: "bg-[#2D2238]"
     }));
-    return [...mongoItems, ...propItems];
+    return mongoItems;
   }, [photos, propItems]);
 
   const toggleFavourite = (id: string) => {
