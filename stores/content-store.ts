@@ -238,6 +238,7 @@ export const useContentStore = create<ContentState>()(
       fetchFromDatabase: async () => {
         set({ isDbSyncing: true });
         try {
+          const localPhotos = get().photos;
           const [photosRes, videosRes, eventsRes, inquiriesRes, reviewsRes] = await Promise.all([
             fetch("/api/photos").then((r) => r.json()).catch(() => null),
             fetch("/api/videos").then((r) => r.json()).catch(() => null),
@@ -246,8 +247,21 @@ export const useContentStore = create<ContentState>()(
             fetch("/api/reviews").then((r) => r.json()).catch(() => null)
           ]);
 
-          if (photosRes?.ok && Array.isArray(photosRes.data) && photosRes.data.length > 0) {
-            set({ photos: photosRes.data });
+          if (photosRes?.ok && Array.isArray(photosRes.data)) {
+            if (photosRes.data.length > 0) {
+              set({ photos: photosRes.data });
+            } else if (localPhotos.length > 0) {
+              await fetch("/api/photos", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(localPhotos)
+              }).catch(() => null);
+
+              const refreshedPhotos = await fetch("/api/photos").then((r) => r.json()).catch(() => null);
+              if (refreshedPhotos?.ok && Array.isArray(refreshedPhotos.data) && refreshedPhotos.data.length > 0) {
+                set({ photos: refreshedPhotos.data });
+              }
+            }
           }
           if (videosRes?.ok && Array.isArray(videosRes.data) && videosRes.data.length > 0) {
             set({ videos: videosRes.data });

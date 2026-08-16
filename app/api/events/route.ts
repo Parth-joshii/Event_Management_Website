@@ -1,30 +1,22 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { convertDriveUrlToDirectLink } from "@/lib/utils";
+import { getCloudData, saveCloudData } from "@/lib/cloud-sync";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
-let globalEventsStore: Array<{
-  id: string;
-  title: string;
-  category: string;
-  description: string;
-  date?: string;
-  location?: string;
-  imageSrc: string;
-  imageAlt?: string;
-}> = [];
-
-/** GET /api/events - Fetch all events */
+/** GET /api/events - Fetch all events synced across all browsers */
 export async function GET(): Promise<NextResponse> {
-  return NextResponse.json({ ok: true, data: globalEventsStore });
+  const cloud = await getCloudData();
+  return NextResponse.json({ ok: true, data: cloud.events });
 }
 
-/** POST /api/events - Add new event */
+/** POST /api/events - Add new event & sync live */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const body = await request.json();
+    const cloud = await getCloudData();
 
     if (!body.title || !body.description || !body.imageSrc) {
       return NextResponse.json(
@@ -44,7 +36,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       imageAlt: body.imageAlt || body.title
     };
 
-    globalEventsStore = [newEvent, ...globalEventsStore];
+    const updatedEvents = [newEvent, ...cloud.events];
+    await saveCloudData({ events: updatedEvents });
+
     return NextResponse.json({ ok: true, data: newEvent });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to create event";
@@ -58,14 +52,16 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
     const deleteAll = searchParams.get("all") === "true";
+    const cloud = await getCloudData();
 
     if (deleteAll) {
-      globalEventsStore = [];
+      await saveCloudData({ events: [] });
       return NextResponse.json({ ok: true, message: "All events deleted" });
     }
 
     if (id) {
-      globalEventsStore = globalEventsStore.filter((ev) => ev.id !== id);
+      const updatedEvents = cloud.events.filter((ev) => ev.id !== id);
+      await saveCloudData({ events: updatedEvents });
     }
 
     return NextResponse.json({ ok: true, message: "Event deleted" });
