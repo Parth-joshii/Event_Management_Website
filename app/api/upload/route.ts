@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { writeFile, mkdir } from "node:fs/promises";
 import { join } from "node:path";
+import { uploadImageToDrive } from "@/services/server/google-drive.server";
 
 export const runtime = "nodejs";
 
@@ -20,6 +21,29 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // Sanitize filename
     const safeName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
     const isVideo = file.type.startsWith("video/") || file.name.endsWith(".mp4") || file.name.endsWith(".webm");
+    const isImage =
+      file.type.startsWith("image/") ||
+      /\.(png|jpe?g|webp|gif|avif|bmp|tiff?)$/i.test(file.name);
+
+    if (isImage) {
+      try {
+        const uploaded = await uploadImageToDrive(file);
+        return NextResponse.json({
+          ok: true,
+          url: uploaded.url,
+          storage: uploaded.fileId ? "drive" : "data-url",
+          message: uploaded.fileId ? "Image uploaded to Google Drive" : "Image prepared as data URL"
+        });
+      } catch {
+        const publicUrl = `data:${file.type || "image/jpeg"};base64,${buffer.toString("base64")}`;
+        return NextResponse.json({
+          ok: true,
+          url: publicUrl,
+          storage: "data-url",
+          message: "Image prepared as data URL"
+        });
+      }
+    }
 
     const subDir = isVideo ? ["public", "videos", "portfolio"] : ["public", "images", "gallery"];
     const uploadDir = join(process.cwd(), ...subDir);

@@ -68,6 +68,26 @@ function compressImageFile(file: File, maxWidth = 1000, quality = 0.68): Promise
   });
 }
 
+async function uploadImageFile(file: File): Promise<string> {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  try {
+    const response = await fetch("/api/upload", {
+      method: "POST",
+      body: formData
+    });
+    const data = await response.json().catch(() => null);
+    if (data?.ok && typeof data.url === "string" && data.url) {
+      return data.url;
+    }
+  } catch {
+    // Fallback below.
+  }
+
+  return compressImageFile(file);
+}
+
 export function AdminDashboard(): React.ReactElement {
   const {
     isAuthenticated,
@@ -789,7 +809,7 @@ export function AdminDashboard(): React.ReactElement {
                           const files = Array.from(e.target.files || []);
                           if (files.length > 0) {
                             const compressedUrls = await Promise.all(
-                              files.map((file) => compressImageFile(file))
+                              files.map((file) => uploadImageFile(file))
                             );
                             setPhotoImagesList(compressedUrls);
                             if (compressedUrls[0]) setPhotoImageSrc(compressedUrls[0]);

@@ -26,18 +26,28 @@ export function ResponsiveImage({
   title
 }: ResponsiveImageProps): React.ReactElement {
   const hasImage = publicAssetExists(src);
+  const usesInlineSource = src.startsWith("data:") || src.startsWith("blob:");
 
   return (
     <div className={cn("relative overflow-hidden", className)}>
       {hasImage ? (
-        <Image
-          alt={alt}
-          className={cn("object-cover", imageClassName)}
-          fill
-          priority={priority}
-          sizes={sizes}
-          src={src}
-        />
+        usesInlineSource ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            alt={alt}
+            className={cn("absolute inset-0 size-full object-cover", imageClassName)}
+            src={src}
+          />
+        ) : (
+          <Image
+            alt={alt}
+            className={cn("object-cover", imageClassName)}
+            fill
+            priority={priority}
+            sizes={sizes}
+            src={src}
+          />
+        )
       ) : (
         <div
           aria-label={alt}

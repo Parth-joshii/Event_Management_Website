@@ -27,19 +27,30 @@ export function ShowcaseImage({
   title
 }: ShowcaseImageProps): React.ReactElement {
   const [hasError, setHasError] = React.useState(false);
+  const usesInlineSource = src.startsWith("data:") || src.startsWith("blob:");
 
   return (
     <div className={cn("relative overflow-hidden", className)}>
       {!hasError ? (
-        <Image
-          alt={alt}
-          className={cn("object-cover", imageClassName)}
-          fill
-          onError={() => setHasError(true)}
-          priority={priority}
-          sizes={sizes}
-          src={src}
-        />
+        usesInlineSource ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            alt={alt}
+            className={cn("absolute inset-0 size-full object-cover", imageClassName)}
+            src={src}
+            onError={() => setHasError(true)}
+          />
+        ) : (
+          <Image
+            alt={alt}
+            className={cn("object-cover", imageClassName)}
+            fill
+            onError={() => setHasError(true)}
+            priority={priority}
+            sizes={sizes}
+            src={src}
+          />
+        )
       ) : (
         <div
           aria-label={alt}
