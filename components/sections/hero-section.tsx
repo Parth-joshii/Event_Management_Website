@@ -47,13 +47,15 @@ export function HeroSection({
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(45,34,56,0.55)_0%,rgba(45,34,56,0.58)_42%,rgba(45,34,56,0.9)_100%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_24%_20%,rgba(191,162,219,0.32),transparent_30%),radial-gradient(circle_at_78%_28%,rgba(212,175,55,0.24),transparent_26%)]" />
 
-      <Container className="relative z-10 flex min-h-screen items-center justify-center pt-24 pb-16">
+      <Container className="relative z-10 flex min-h-screen items-center justify-center pt-10 pb-20 sm:pt-14 sm:-translate-y-8 lg:-translate-y-12">
         <Reveal className="mx-auto max-w-5xl text-center">
-          <p className="mx-auto mb-4 inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[10px] sm:text-xs font-semibold tracking-[0.16em] text-[#EBDCFB] uppercase backdrop-blur">
+          <p className="mx-auto mb-3 inline-flex items-center gap-1.5 rounded-full border border-[#D4AF37]/40 bg-white/10 px-2.5 py-0.5 text-[9px] sm:text-[10px] font-semibold tracking-[0.2em] text-[#EBDCFB] uppercase backdrop-blur shadow-sm">
             Crafting Extraordinary Celebrations
           </p>
-          <h1 className="font-display text-[2.75rem] font-bold leading-[1.1] tracking-tight text-balance sm:text-6xl sm:leading-tight lg:text-7xl">
-            {siteConfig.name}
+          <h1 className="font-display text-4xl font-extrabold leading-[1.05] tracking-tight text-balance sm:text-7xl lg:text-8xl drop-shadow-[0_10px_35px_rgba(0,0,0,0.6)]">
+            <span className="bg-gradient-to-r from-white via-[#F3E5AB] to-[#D4AF37] bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(212,175,55,0.45)]">
+              {siteConfig.name}
+            </span>
           </h1>
           <p className="mt-4 text-base font-medium text-balance text-[#EBDCFB] sm:text-xl lg:text-2xl">
             {siteConfig.tagline}
