@@ -24,6 +24,7 @@ import { serviceOfferings } from "@/features/services/data/services";
 import { eventCategories } from "@/features/events/data/event-categories";
 import { useContentStore } from "@/stores/content-store";
 import { siteConfig } from "@/config/site";
+import { resolveRenderableImageSrc } from "@/lib/utils";
 
 interface HeroSectionProps {
   readonly desktopVideoSrc?: string;
@@ -229,7 +230,7 @@ export function HeroSection({
                           <img
                             alt={item.alt || item.title}
                             className="size-full object-cover transition duration-700 group-hover:scale-110"
-                            src={item.imageSrc}
+                            src={resolveRenderableImageSrc(item.imageSrc)}
                             onError={(e) => {
                               (e.target as HTMLImageElement).src = "/images/gallery/wedding-stage.jpg";
                             }}

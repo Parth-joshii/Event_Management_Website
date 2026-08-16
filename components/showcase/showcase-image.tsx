@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import * as React from "react";
-import { cn } from "@/lib/utils";
+import { cn, resolveRenderableImageSrc } from "@/lib/utils";
 
 interface ShowcaseImageProps {
   readonly alt: string;
@@ -27,7 +27,8 @@ export function ShowcaseImage({
   title
 }: ShowcaseImageProps): React.ReactElement {
   const [hasError, setHasError] = React.useState(false);
-  const usesInlineSource = src.startsWith("data:") || src.startsWith("blob:");
+  const resolvedSrc = resolveRenderableImageSrc(src);
+  const usesInlineSource = resolvedSrc.startsWith("data:") || resolvedSrc.startsWith("blob:");
 
   return (
     <div className={cn("relative overflow-hidden", className)}>
@@ -37,7 +38,7 @@ export function ShowcaseImage({
           <img
             alt={alt}
             className={cn("absolute inset-0 size-full object-cover", imageClassName)}
-            src={src}
+            src={resolvedSrc}
             onError={() => setHasError(true)}
           />
         ) : (
@@ -48,7 +49,7 @@ export function ShowcaseImage({
             onError={() => setHasError(true)}
             priority={priority}
             sizes={sizes}
-            src={src}
+            src={resolvedSrc}
           />
         )
       ) : (

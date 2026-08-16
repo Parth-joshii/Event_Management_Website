@@ -74,3 +74,45 @@ export function extractDriveUrlsFromText(text: string): string[] {
 
   return result;
 }
+
+const DRIVE_IMAGE_HOSTS = new Set([
+  "drive.google.com",
+  "lh3.googleusercontent.com",
+  "googleusercontent.com",
+  "drive.usercontent.google.com"
+]);
+
+/** Detects Google Drive-style image URLs that should be proxied for reliable rendering. */
+export function isDriveImageUrl(url: string): boolean {
+  const trimmed = url.trim();
+  if (!trimmed) return false;
+
+  try {
+    const hostname = new URL(trimmed).hostname.toLowerCase();
+    return Array.from(DRIVE_IMAGE_HOSTS).some((host) => hostname === host || hostname.endsWith(`.${host}`));
+  } catch {
+    return Array.from(DRIVE_IMAGE_HOSTS).some((host) => trimmed.includes(host));
+  }
+}
+
+/** Resolves an image source into a browser-friendly URL for preview and gallery rendering. */
+export function resolveRenderableImageSrc(src: string): string {
+  const trimmed = convertDriveUrlToDirectLink(src.trim());
+  if (!trimmed) return trimmed;
+
+  if (
+    trimmed.startsWith("data:") ||
+    trimmed.startsWith("blob:") ||
+    trimmed.startsWith("/") ||
+    trimmed.startsWith("http://localhost") ||
+    trimmed.startsWith("https://localhost")
+  ) {
+    return trimmed;
+  }
+
+  if (isDriveImageUrl(trimmed)) {
+    return `/api/image-proxy?url=${encodeURIComponent(trimmed)}`;
+  }
+
+  return trimmed;
+}

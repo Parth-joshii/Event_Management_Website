@@ -25,6 +25,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ResponsiveImage } from "@/components/ui/responsive-image";
 import {
   Dialog,
   DialogContent,
@@ -34,7 +35,11 @@ import {
   DialogTrigger
 } from "@/components/ui/dialog";
 import { siteConfig } from "@/config/site";
-import { convertDriveUrlToDirectLink, extractDriveUrlsFromText } from "@/lib/utils";
+import {
+  convertDriveUrlToDirectLink,
+  extractDriveUrlsFromText,
+  resolveRenderableImageSrc
+} from "@/lib/utils";
 
 /** Compresses images to ultra-light 1000px, 68% JPEG format (~100KB) ensuring instant uploads that never hit Vercel payload limits. */
 function compressImageFile(file: File, maxWidth = 1000, quality = 0.68): Promise<string> {
@@ -109,7 +114,6 @@ export function AdminDashboard(): React.ReactElement {
     addPhoto,
     deletePhoto,
     deleteAllPhotos,
-    toggleFeaturedPhoto,
     addVideo,
     deleteVideo,
     updateInquiryStatus,
@@ -635,7 +639,11 @@ export function AdminDashboard(): React.ReactElement {
                       {eventImageSrc ? (
                         <div className="mt-2 h-24 w-full overflow-hidden rounded-md border border-[#EBDCFB]">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={eventImageSrc} alt="Preview" className="size-full object-cover" />
+                          <img
+                            src={resolveRenderableImageSrc(eventImageSrc)}
+                            alt="Preview"
+                            className="size-full object-cover"
+                          />
                         </div>
                       ) : null}
                     </div>
@@ -855,7 +863,11 @@ export function AdminDashboard(): React.ReactElement {
                       {photoImageSrc && photoImagesList.length <= 1 ? (
                         <div className="mt-2 h-24 w-full overflow-hidden rounded-md border border-[#EBDCFB]">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={photoImageSrc} alt="Preview" className="size-full object-cover" />
+                          <img
+                            src={resolveRenderableImageSrc(photoImageSrc)}
+                            alt="Preview"
+                            className="size-full object-cover"
+                          />
                         </div>
                       ) : null}
                     </div>
@@ -883,7 +895,7 @@ export function AdminDashboard(): React.ReactElement {
                   <div className="h-56 w-full overflow-hidden bg-gray-100">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src={ph.imageSrc}
+                      src={resolveRenderableImageSrc(ph.imageSrc)}
                       alt={ph.alt}
                       className="size-full object-cover transition duration-500 group-hover:scale-105"
                       onError={(e) => {
@@ -1158,10 +1170,14 @@ export function AdminDashboard(): React.ReactElement {
                     {/* Background Image Preview */}
                     <div className="relative mt-4 flex h-44 w-full items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
                       {card.imageSrc ? (
-                        <img
-                          src={card.imageSrc}
+                        <ResponsiveImage
                           alt={card.title}
-                          className="h-full w-full object-cover"
+                          className="size-full"
+                          fallbackClassName="bg-slate-100"
+                          imageClassName="object-cover"
+                          sizes="100vw"
+                          src={resolveRenderableImageSrc(card.imageSrc)}
+                          title={card.title}
                         />
                       ) : (
                         <div className="p-4 text-center text-slate-400">

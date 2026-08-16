@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useContentStore, type PhotoItem } from "@/stores/content-store";
 import { dedupePhotosByImageSrc } from "@/lib/photo-utils";
-import { cn } from "@/lib/utils";
+import { cn, resolveRenderableImageSrc } from "@/lib/utils";
 
 export interface GalleryDisplayItem {
   id: string;
@@ -162,7 +162,7 @@ export function FeaturedGallerySection(): React.ReactElement {
                   <img
                     alt={item.alt || item.title}
                     className="size-full object-cover transition duration-700 group-hover:scale-110"
-                    src={item.imageSrc}
+                    src={resolveRenderableImageSrc(item.imageSrc)}
                     onError={(e) => {
                       (e.target as HTMLImageElement).src =
                         "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80";
@@ -232,7 +232,7 @@ export function FeaturedGallerySection(): React.ReactElement {
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={ph.imageSrc}
+                        src={resolveRenderableImageSrc(ph.imageSrc)}
                         alt={ph.title}
                         className="size-full object-cover transition duration-500 group-hover:scale-105"
                         onError={(e) => {
@@ -261,7 +261,7 @@ export function FeaturedGallerySection(): React.ReactElement {
               <div className="relative overflow-hidden rounded-2xl border border-white/20 bg-[#2D2238] p-4 text-center shadow-2xl">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={activeLightboxPhoto.imageSrc}
+                  src={resolveRenderableImageSrc(activeLightboxPhoto.imageSrc)}
                   alt={activeLightboxPhoto.alt}
                   className="max-h-[75vh] w-full rounded-xl object-contain mx-auto"
                   onError={(e) => {

@@ -8,6 +8,7 @@ import { Container } from "@/components/layout/container";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useContentStore, type EventItem, type PhotoItem } from "@/stores/content-store";
+import { resolveRenderableImageSrc } from "@/lib/utils";
 
 /** Renders interactive event category preview cards synced with Admin store & MongoDB. */
 export function EventCategoriesSection(): React.ReactElement {
@@ -64,7 +65,7 @@ export function EventCategoriesSection(): React.ReactElement {
                     <img
                       alt={category.imageAlt || category.title}
                       className="size-full object-cover transition duration-700 group-hover:scale-110"
-                      src={category.imageSrc}
+                      src={resolveRenderableImageSrc(category.imageSrc)}
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = "/images/gallery/wedding-stage.jpg";
                       }}
@@ -140,7 +141,7 @@ export function EventCategoriesSection(): React.ReactElement {
                         >
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
-                            src={ph.imageSrc}
+                            src={resolveRenderableImageSrc(ph.imageSrc)}
                             alt={ph.alt || ph.title}
                             className="size-full object-cover transition duration-500 group-hover:scale-105"
                           />
@@ -187,7 +188,7 @@ export function EventCategoriesSection(): React.ReactElement {
               <div className="relative overflow-hidden rounded-2xl border border-white/20 bg-[#2D2238] p-4 text-center shadow-2xl">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={activePhotoLightbox.imageSrc}
+                  src={resolveRenderableImageSrc(activePhotoLightbox.imageSrc)}
                   alt={activePhotoLightbox.alt}
                   className="max-h-[75vh] w-full rounded-xl object-contain mx-auto"
                 />
