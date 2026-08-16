@@ -8,6 +8,7 @@ import { SectionHeading } from "@/components/ui/section-heading";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useContentStore, type PhotoItem } from "@/stores/content-store";
+import { featuredGallery } from "@/features/gallery/data/featured-gallery";
 import { cn } from "@/lib/utils";
 
 export interface GalleryDisplayItem {
@@ -20,6 +21,17 @@ export interface GalleryDisplayItem {
   photos: PhotoItem[];
 }
 
+const defaultFallbackPhotos: PhotoItem[] = featuredGallery.map((fg, idx) => ({
+  id: `fallback-${idx + 1}`,
+  title: fg.title,
+  category: fg.category,
+  eventId: `ev-fallback-${idx + 1}`,
+  eventTitle: fg.title,
+  isFeatured: idx === 0,
+  imageSrc: fg.imageSrc,
+  alt: fg.alt
+}));
+
 /** Renders the dynamic showcase gallery grouped by Event / Album to prevent duplicate cards. */
 export function FeaturedGallerySection(): React.ReactElement {
   const { photos, fetchFromDatabase } = useContentStore();
@@ -27,18 +39,18 @@ export function FeaturedGallerySection(): React.ReactElement {
   const [activeAlbum, setActiveAlbum] = React.useState<GalleryDisplayItem | null>(null);
   const [activeLightboxPhoto, setActiveLightboxPhoto] = React.useState<PhotoItem | null>(null);
 
-  // Sync latest MongoDB data on client mount
+  // Sync latest data on client mount
   React.useEffect(() => {
     void fetchFromDatabase();
   }, [fetchFromDatabase]);
 
   // Group photos by Event or unique Title/Category to eliminate repetitive duplicate cards
   const displayItems = React.useMemo(() => {
+    const activePhotos = photos.length > 0 ? photos : defaultFallbackPhotos;
     const groups: Record<string, PhotoItem[]> = {};
     const standalone: PhotoItem[] = [];
 
-    photos.forEach((ph) => {
-      // Group by eventId or eventTitle or title if shared
+    activePhotos.forEach((ph) => {
       const eventKey = ph.eventId || (ph.eventTitle ? ph.eventTitle.trim().toLowerCase() : null);
       if (eventKey) {
         if (!groups[eventKey]) groups[eventKey] = [];
@@ -53,7 +65,6 @@ export function FeaturedGallerySection(): React.ReactElement {
     // Process event groups (each event gets EXACTLY 1 card)
     Object.values(groups).forEach((groupPhotos) => {
       if (groupPhotos.length === 0) return;
-      // Prefer cover photo (isFeatured) or first photo
       const cover = groupPhotos.find((p) => p.isFeatured) || groupPhotos[0];
       if (!cover) return;
       const displayTitle = cover.eventTitle || cover.title.replace(/\s*#\d+$/, "") || "Event Album";
@@ -156,7 +167,7 @@ export function FeaturedGallerySection(): React.ReactElement {
                   className="size-full object-cover transition duration-700 group-hover:scale-110"
                   src={item.imageSrc}
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = "/images/gallery/wedding-stage.jpg";
+                    (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80";
                   }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#2D2238]/85 via-transparent to-transparent opacity-85 transition duration-300 group-hover:opacity-95" />
