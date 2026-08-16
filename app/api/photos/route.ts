@@ -5,6 +5,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
+// Global in-memory storage for instant cross-request sync
 let globalPhotosStore: Array<{
   id: string;
   title: string;
@@ -16,15 +17,31 @@ let globalPhotosStore: Array<{
   alt: string;
 }> = [];
 
-/** GET /api/photos - Fetch all photos */
+/** GET /api/photos - Fetch live synced photos from Google Sheets / Admin storage */
 export async function GET(): Promise<NextResponse> {
+  const webhookUrl = process.env.GOOGLE_SHEETS_WEBHOOK_URL || process.env.NEXT_PUBLIC_GOOGLE_SHEETS_WEBHOOK_URL;
+
+  // Try fetching live photos from Google Sheets if configured
+  if (webhookUrl) {
+    try {
+      const gRes = await fetch(`${webhookUrl}?action=photos`, { cache: "no-store" });
+      const gData = await gRes.json();
+      if (gData?.ok && Array.isArray(gData.photos) && gData.photos.length > 0) {
+        return NextResponse.json({ ok: true, data: gData.photos });
+      }
+    } catch (err) {
+      console.warn("Failed to fetch photos from Google Sheets:", err);
+    }
+  }
+
   return NextResponse.json({ ok: true, data: globalPhotosStore });
 }
 
-/** POST /api/photos - Add new photo or array of Google Drive photos */
+/** POST /api/photos - Add new photo or array of Google Drive photos & sync to Google Sheets */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const body = await request.json();
+    const webhookUrl = process.env.GOOGLE_SHEETS_WEBHOOK_URL || process.env.NEXT_PUBLIC_GOOGLE_SHEETS_WEBHOOK_URL;
 
     // Handle array of photos
     if (Array.isArray(body)) {
@@ -40,7 +57,21 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       }));
 
       globalPhotosStore = [...formatted, ...globalPhotosStore];
-      return NextResponse.json({ ok: true, message: "Photos saved to Google Drive store", data: formatted });
+
+      // Sync to Google Sheets Webhook if URL is configured
+      if (webhookUrl) {
+        try {
+          await fetch(webhookUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "addPhotos", photos: formatted })
+          });
+        } catch (e) {
+          console.error("Failed to sync bulk photos to Google Sheets:", e);
+        }
+      }
+
+      return NextResponse.json({ ok: true, message: "Photos saved and synced to all visitors", data: formatted });
     }
 
     // Handle single photo
@@ -60,6 +91,19 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     };
 
     globalPhotosStore = [newPhoto, ...globalPhotosStore];
+
+    if (webhookUrl) {
+      try {
+        await fetch(webhookUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "addPhotos", photos: [newPhoto] })
+        });
+      } catch (e) {
+        console.error("Failed to sync photo to Google Sheets:", e);
+      }
+    }
+
     return NextResponse.json({ ok: true, data: newPhoto });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to save photo";
