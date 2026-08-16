@@ -47,17 +47,15 @@ export function HeroSection({
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(45,34,56,0.55)_0%,rgba(45,34,56,0.58)_42%,rgba(45,34,56,0.9)_100%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_24%_20%,rgba(191,162,219,0.32),transparent_30%),radial-gradient(circle_at_78%_28%,rgba(212,175,55,0.24),transparent_26%)]" />
 
-      <Container className="relative z-10 flex min-h-screen items-center justify-center pt-8 pb-20 sm:pt-12 sm:-translate-y-8 lg:-translate-y-12">
+      <Container className="relative z-10 flex min-h-screen items-center justify-center pt-2 pb-24 -translate-y-12 sm:pt-10 sm:-translate-y-10 lg:-translate-y-16">
         <Reveal className="mx-auto max-w-6xl text-center">
-          <p className="mx-auto mb-2.5 inline-flex items-center gap-1.5 rounded-full border border-[#D4AF37]/35 bg-white/10 px-2.5 py-0.5 text-[8px] sm:text-[9px] font-semibold tracking-[0.22em] text-[#EBDCFB]/90 uppercase backdrop-blur shadow-sm">
+          <p className="mx-auto mb-2.5 inline-flex items-center gap-1.5 rounded-full border border-white/30 bg-white/10 px-2.5 py-0.5 text-[8px] sm:text-[9px] font-semibold tracking-[0.22em] text-[#EBDCFB]/90 uppercase backdrop-blur shadow-sm">
             Crafting Extraordinary Celebrations
           </p>
-          <h1 className="font-display text-5xl font-black leading-[0.95] tracking-tight text-balance sm:text-8xl lg:text-[7.5rem] xl:text-[8.5rem] drop-shadow-[0_12px_40px_rgba(0,0,0,0.7)]">
-            <span className="bg-gradient-to-r from-white via-[#F3E5AB] to-[#D4AF37] bg-clip-text text-transparent drop-shadow-[0_0_35px_rgba(212,175,55,0.5)]">
-              {siteConfig.name}
-            </span>
+          <h1 className="font-display text-5xl font-black leading-[0.95] tracking-tight text-balance sm:text-8xl lg:text-[7.5rem] xl:text-[8.5rem] text-white drop-shadow-[0_8px_30px_rgba(0,0,0,0.8)]">
+            {siteConfig.name}
           </h1>
-          <p className="mx-auto mt-3 max-w-2xl text-xs font-normal tracking-wide text-balance text-[#EBDCFB]/75 sm:text-sm lg:text-base">
+          <p className="mx-auto mt-3 max-w-2xl text-xs font-normal tracking-wide text-balance text-[#EBDCFB]/80 sm:text-sm lg:text-base">
             {siteConfig.tagline}
           </p>
 
