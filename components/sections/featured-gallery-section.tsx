@@ -8,12 +8,8 @@ import { SectionHeading } from "@/components/ui/section-heading";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useContentStore, type PhotoItem } from "@/stores/content-store";
-import { featuredGallery } from "@/features/gallery/data/featured-gallery";
 import { dedupePhotosByImageSrc } from "@/lib/photo-utils";
 import { cn } from "@/lib/utils";
-
-const galleryFallbackImage =
-  "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80";
 
 export interface GalleryDisplayItem {
   id: string;
@@ -24,17 +20,6 @@ export interface GalleryDisplayItem {
   photoCount: number;
   photos: PhotoItem[];
 }
-
-const defaultFallbackPhotos: PhotoItem[] = featuredGallery.map((fg, idx) => ({
-  id: `fallback-${idx + 1}`,
-  title: fg.title,
-  category: fg.category,
-  eventId: `ev-fallback-${idx + 1}`,
-  eventTitle: fg.title,
-  isFeatured: idx === 0,
-  imageSrc: fg.imageSrc,
-  alt: fg.alt
-}));
 
 /** Renders the dynamic showcase gallery grouped by Event / Album to prevent duplicate cards. */
 export function FeaturedGallerySection(): React.ReactElement {
@@ -50,7 +35,7 @@ export function FeaturedGallerySection(): React.ReactElement {
 
   // Group photos by Event or unique Title/Category to eliminate repetitive duplicate cards
   const displayItems = React.useMemo(() => {
-    const activePhotos = photos.length > 0 ? photos : defaultFallbackPhotos;
+    const activePhotos = dedupePhotosByImageSrc(photos);
     const groups: Record<string, PhotoItem[]> = {};
     const standalone: PhotoItem[] = [];
 
@@ -146,60 +131,69 @@ export function FeaturedGallerySection(): React.ReactElement {
           </div>
         ) : null}
 
-        {/* Photo Gallery Grid */}
-        <div className="mt-12 grid auto-rows-[19rem] gap-5 md:grid-cols-3">
-          {filteredItems.map((item, index) => (
-            <Reveal
-              className={cn(
-                index % 4 === 0 || index % 5 === 3 ? "md:row-span-2 md:auto-rows-auto" : ""
-              )}
-              delay={index * 0.05}
-              key={item.id || item.title}
-            >
-              <article
-                onClick={() => {
-                  if (item.photos.length > 1) {
-                    setActiveAlbum(item);
-                  } else {
-                    setActiveLightboxPhoto(item.photos[0] || null);
-                  }
-                }}
-                className="group relative size-full overflow-hidden rounded-xl border border-white/80 bg-[#2D2238] shadow-[0_24px_80px_rgba(45,34,56,0.1)] cursor-pointer"
+        {filteredItems.length === 0 ? (
+          <div className="mt-12 rounded-2xl border border-[#EBDCFB] bg-white px-6 py-10 text-center shadow-sm">
+            <p className="font-semibold text-[#2D2238]">No uploaded photos are available yet.</p>
+            <p className="mt-2 text-sm text-[#5c4b6e]">
+              Once the admin uploads photos to the shared gallery, they will appear here for everyone.
+            </p>
+          </div>
+        ) : (
+          <div className="mt-12 grid auto-rows-[19rem] gap-5 md:grid-cols-3">
+            {filteredItems.map((item, index) => (
+              <Reveal
+                key={item.id || item.title}
+                className={cn(
+                  index % 4 === 0 || index % 5 === 3 ? "md:row-span-2 md:auto-rows-auto" : ""
+                )}
+                delay={index * 0.05}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  alt={item.alt || item.title}
-                  className="size-full object-cover transition duration-700 group-hover:scale-110"
-                  src={item.imageSrc}
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = galleryFallbackImage;
+                <article
+                  onClick={() => {
+                    if (item.photos.length > 1) {
+                      setActiveAlbum(item);
+                    } else {
+                      setActiveLightboxPhoto(item.photos[0] || null);
+                    }
                   }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#2D2238]/85 via-transparent to-transparent opacity-85 transition duration-300 group-hover:opacity-95" />
+                  className="group relative size-full cursor-pointer overflow-hidden rounded-xl border border-white/80 bg-[#2D2238] shadow-[0_24px_80px_rgba(45,34,56,0.1)]"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    alt={item.alt || item.title}
+                    className="size-full object-cover transition duration-700 group-hover:scale-110"
+                    src={item.imageSrc}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src =
+                        "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80";
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#2D2238]/85 via-transparent to-transparent opacity-85 transition duration-300 group-hover:opacity-95" />
 
-                {/* Album Photo Count Badge */}
-                {item.photoCount > 1 ? (
-                  <span className="absolute top-4 left-4 inline-flex items-center gap-1.5 rounded-full border border-[#D4AF37]/60 bg-[#2D2238]/85 px-3 py-1 text-xs font-semibold text-[#D4AF37] backdrop-blur shadow-sm">
-                    <Images className="size-3.5" />
-                    {item.photoCount} Photos
-                  </span>
-                ) : null}
+                  {/* Album Photo Count Badge */}
+                  {item.photoCount > 1 ? (
+                    <span className="absolute top-4 left-4 inline-flex items-center gap-1.5 rounded-full border border-[#D4AF37]/60 bg-[#2D2238]/85 px-3 py-1 text-xs font-semibold text-[#D4AF37] backdrop-blur shadow-sm">
+                      <Images className="size-3.5" />
+                      {item.photoCount} Photos
+                    </span>
+                  ) : null}
 
-                {/* Hover overlay button */}
-                <div className="absolute top-4 right-4 flex size-10 items-center justify-center rounded-full bg-white/20 backdrop-blur opacity-0 transition duration-300 group-hover:opacity-100 text-white">
-                  <Maximize2 className="size-4" />
-                </div>
+                  {/* Hover overlay button */}
+                  <div className="absolute top-4 right-4 flex size-10 items-center justify-center rounded-full bg-white/20 text-white opacity-0 backdrop-blur transition duration-300 group-hover:opacity-100">
+                    <Maximize2 className="size-4" />
+                  </div>
 
-                <div className="absolute inset-x-0 bottom-0 p-6 text-white">
-                  <Badge className="border-[#D4AF37]/60 bg-[#D4AF37]/20 text-[#D4AF37] text-[10px] uppercase font-semibold">
-                    {item.category}
-                  </Badge>
-                  <h3 className="mt-2 text-xl font-bold font-display">{item.title}</h3>
-                </div>
-              </article>
-            </Reveal>
-          ))}
-        </div>
+                  <div className="absolute inset-x-0 bottom-0 p-6 text-white">
+                    <Badge className="border-[#D4AF37]/60 bg-[#D4AF37]/20 text-[10px] font-semibold uppercase text-[#D4AF37]">
+                      {item.category}
+                    </Badge>
+                    <h3 className="mt-2 text-xl font-bold font-display">{item.title}</h3>
+                  </div>
+                </article>
+              </Reveal>
+            ))}
+          </div>
+        )}
 
         {/* Modal 1: Album Folder Lightbox Dialog (Multiple Photos in Event) */}
         <Dialog open={Boolean(activeAlbum)} onOpenChange={() => setActiveAlbum(null)}>
@@ -242,7 +236,8 @@ export function FeaturedGallerySection(): React.ReactElement {
                         alt={ph.title}
                         className="size-full object-cover transition duration-500 group-hover:scale-105"
                         onError={(e) => {
-                          (e.target as HTMLImageElement).src = galleryFallbackImage;
+                          (e.target as HTMLImageElement).src =
+                            "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80";
                         }}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 transition duration-300 group-hover:opacity-100 flex items-end p-3 text-xs text-white font-medium">
@@ -270,7 +265,8 @@ export function FeaturedGallerySection(): React.ReactElement {
                   alt={activeLightboxPhoto.alt}
                   className="max-h-[75vh] w-full rounded-xl object-contain mx-auto"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = galleryFallbackImage;
+                    (e.target as HTMLImageElement).src =
+                      "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80";
                   }}
                 />
                 <div className="mt-4 text-left px-2 flex items-center justify-between">

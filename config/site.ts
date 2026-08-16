@@ -78,5 +78,7 @@ export const siteConfig = {
     youtube: ""
   },
   tagline: "Where Moments Become the Masterpiece",
-  url: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
+  url:
+    process.env.NEXT_PUBLIC_APP_URL ??
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000")
 } as const satisfies SiteConfig;
