@@ -273,8 +273,11 @@ export const useContentStore = create<ContentState>()(
       },
 
       login: (password: string) => {
-        const targetPassword = process.env.ADMIN_PASSWORD || process.env.NEXT_PUBLIC_ADMIN_PASSWORD || "Velora@Admin2026#";
-        if (password === targetPassword || password === "Velora@Admin2026#") {
+        const targetPassword =
+          process.env.ADMIN_PASSWORD ||
+          process.env.NEXT_PUBLIC_ADMIN_PASSWORD ||
+          "Velora#Luxury99770$Secure2026";
+        if (password === targetPassword || password === "Velora#Luxury99770$Secure2026") {
           set({ isAuthenticated: true });
           return true;
         }
