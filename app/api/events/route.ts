@@ -1,47 +1,29 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
-import { EventModel } from "@/models/Event";
+import { convertDriveUrlToDirectLink } from "@/lib/utils";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
-/** GET /api/events - Fetch all events from MongoDB */
+let globalEventsStore: Array<{
+  id: string;
+  title: string;
+  category: string;
+  description: string;
+  date?: string;
+  location?: string;
+  imageSrc: string;
+  imageAlt?: string;
+}> = [];
+
+/** GET /api/events - Fetch all events */
 export async function GET(): Promise<NextResponse> {
-  try {
-    const db = await connectToDatabase();
-    if (!db) {
-      return NextResponse.json({ ok: false, message: "MongoDB connection failed", data: [] }, { status: 500 });
-    }
-
-    const events = await EventModel.find({}).sort({ createdAt: -1 }).lean();
-
-    const formatted = events.map((ev) => ({
-      id: String(ev._id),
-      title: ev.title,
-      category: ev.category,
-      description: ev.description,
-      date: ev.date || "2026-08-15",
-      location: ev.location || "India",
-      imageSrc: ev.imageSrc,
-      imageAlt: ev.imageAlt || ev.title
-    }));
-
-    return NextResponse.json({ ok: true, data: formatted });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to fetch events";
-    return NextResponse.json({ ok: false, message, data: [] }, { status: 500 });
-  }
+  return NextResponse.json({ ok: true, data: globalEventsStore });
 }
 
-/** POST /api/events - Add new event to MongoDB */
+/** POST /api/events - Add new event */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    const db = await connectToDatabase();
-    if (!db) {
-      return NextResponse.json({ ok: false, message: "MongoDB connection failed" }, { status: 500 });
-    }
-
     const body = await request.json();
 
     if (!body.title || !body.description || !body.imageSrc) {
@@ -51,63 +33,43 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    const newEvent = await EventModel.create({
+    const newEvent = {
+      id: body.id || `event-${Date.now()}`,
       title: body.title,
       category: body.category || "Luxury Wedding",
       description: body.description,
       date: body.date || "2026-09-01",
       location: body.location || "India",
-      imageSrc: body.imageSrc,
+      imageSrc: convertDriveUrlToDirectLink(body.imageSrc),
       imageAlt: body.imageAlt || body.title
-    });
+    };
 
-    return NextResponse.json({
-      ok: true,
-      data: {
-        id: String(newEvent._id),
-        title: newEvent.title,
-        category: newEvent.category,
-        description: newEvent.description,
-        date: newEvent.date,
-        location: newEvent.location,
-        imageSrc: newEvent.imageSrc,
-        imageAlt: newEvent.imageAlt
-      }
-    });
+    globalEventsStore = [newEvent, ...globalEventsStore];
+    return NextResponse.json({ ok: true, data: newEvent });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to create event";
     return NextResponse.json({ ok: false, message }, { status: 500 });
   }
 }
 
-/** DELETE /api/events?id=xyz OR DELETE /api/events?all=true - Delete event(s) from MongoDB */
+/** DELETE /api/events - Delete event(s) */
 export async function DELETE(request: NextRequest): Promise<NextResponse> {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
     const deleteAll = searchParams.get("all") === "true";
 
-    const db = await connectToDatabase();
-    if (!db) {
-      return NextResponse.json({ ok: false, message: "MongoDB connection failed" }, { status: 500 });
-    }
-
     if (deleteAll) {
-      await EventModel.deleteMany({});
-      return NextResponse.json({ ok: true, message: "All events deleted successfully" });
+      globalEventsStore = [];
+      return NextResponse.json({ ok: true, message: "All events deleted" });
     }
 
-    if (!id) {
-      return NextResponse.json({ ok: false, message: "Event ID required" }, { status: 400 });
+    if (id) {
+      globalEventsStore = globalEventsStore.filter((ev) => ev.id !== id);
     }
 
-    if (id.match(/^[0-9a-fA-F]{24}$/)) {
-      await EventModel.findByIdAndDelete(id);
-    }
-
-    return NextResponse.json({ ok: true, message: "Event deleted successfully" });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to delete event";
-    return NextResponse.json({ ok: false, message }, { status: 500 });
+    return NextResponse.json({ ok: true, message: "Event deleted" });
+  } catch {
+    return NextResponse.json({ ok: false, message: "Failed to delete event" }, { status: 500 });
   }
 }
