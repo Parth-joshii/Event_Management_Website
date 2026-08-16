@@ -11,7 +11,7 @@ export async function GET(): Promise<NextResponse> {
   try {
     const db = await connectToDatabase();
     if (!db) {
-      return NextResponse.json({ ok: false, data: [] }, { status: 200 });
+      return NextResponse.json({ ok: false, message: "MongoDB connection failed", data: [] }, { status: 500 });
     }
 
     const events = await EventModel.find({}).sort({ createdAt: -1 }).lean();
@@ -38,6 +38,10 @@ export async function GET(): Promise<NextResponse> {
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const db = await connectToDatabase();
+    if (!db) {
+      return NextResponse.json({ ok: false, message: "MongoDB connection failed" }, { status: 500 });
+    }
+
     const body = await request.json();
 
     if (!body.title || !body.description || !body.imageSrc) {
@@ -47,31 +51,27 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    let createdId = `event-${Date.now()}`;
-    if (db) {
-      const newEvent = await EventModel.create({
-        title: body.title,
-        category: body.category || "Luxury Wedding",
-        description: body.description,
-        date: body.date || "2026-09-01",
-        location: body.location || "India",
-        imageSrc: body.imageSrc,
-        imageAlt: body.imageAlt || body.title
-      });
-      createdId = String(newEvent._id);
-    }
+    const newEvent = await EventModel.create({
+      title: body.title,
+      category: body.category || "Luxury Wedding",
+      description: body.description,
+      date: body.date || "2026-09-01",
+      location: body.location || "India",
+      imageSrc: body.imageSrc,
+      imageAlt: body.imageAlt || body.title
+    });
 
     return NextResponse.json({
       ok: true,
       data: {
-        id: createdId,
-        title: body.title,
-        category: body.category || "Luxury Wedding",
-        description: body.description,
-        date: body.date || "2026-09-01",
-        location: body.location || "India",
-        imageSrc: body.imageSrc,
-        imageAlt: body.imageAlt || body.title
+        id: String(newEvent._id),
+        title: newEvent.title,
+        category: newEvent.category,
+        description: newEvent.description,
+        date: newEvent.date,
+        location: newEvent.location,
+        imageSrc: newEvent.imageSrc,
+        imageAlt: newEvent.imageAlt
       }
     });
   } catch (error) {
@@ -88,8 +88,11 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
     const deleteAll = searchParams.get("all") === "true";
 
     const db = await connectToDatabase();
+    if (!db) {
+      return NextResponse.json({ ok: false, message: "MongoDB connection failed" }, { status: 500 });
+    }
 
-    if (deleteAll && db) {
+    if (deleteAll) {
       await EventModel.deleteMany({});
       return NextResponse.json({ ok: true, message: "All events deleted successfully" });
     }
@@ -98,7 +101,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ ok: false, message: "Event ID required" }, { status: 400 });
     }
 
-    if (db && id.match(/^[0-9a-fA-F]{24}$/)) {
+    if (id.match(/^[0-9a-fA-F]{24}$/)) {
       await EventModel.findByIdAndDelete(id);
     }
 

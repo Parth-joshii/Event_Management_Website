@@ -373,11 +373,18 @@ export const useContentStore = create<ContentState>()(
         set({ photos: [...tempNewPhotos, ...get().photos] });
 
         try {
-          await fetch("/api/photos", {
+          const res = await fetch("/api/photos", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(photosList)
           });
+          const data = await res.json();
+          if (data.ok && Array.isArray(data.data)) {
+            const map = new Map<string, PhotoItem>();
+            get().photos.forEach((ph) => map.set(ph.id, ph));
+            data.data.forEach((p: PhotoItem) => map.set(p.id, p));
+            set({ photos: Array.from(map.values()) });
+          }
         } catch (e) {
           console.error("Failed to persist bulk photos to MongoDB:", e);
         }
