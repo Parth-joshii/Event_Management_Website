@@ -35,8 +35,8 @@ import {
 } from "@/components/ui/dialog";
 import { siteConfig } from "@/config/site";
 
-/** Optimizes image resolution (1400px, 78% JPEG) so uploads stay ultra-crisp while remaining under Vercel's 4.5MB API payload limit. */
-function compressImageFile(file: File, maxWidth = 1400, quality = 0.78): Promise<string> {
+/** Compresses images to ultra-light 1000px, 68% JPEG format (~100KB) ensuring instant uploads that never hit Vercel payload limits. */
+function compressImageFile(file: File, maxWidth = 1000, quality = 0.68): Promise<string> {
   return new Promise((resolve) => {
     const reader = new FileReader();
     reader.onload = (e) => {

@@ -63,18 +63,23 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     let createdId = `photo-${Date.now()}`;
-    if (db) {
-      const newPhoto = await PhotoModel.create({
-        title: body.title,
-        category: body.category || "General",
-        eventId: body.eventId || "",
-        eventTitle: body.eventTitle || "",
-        isFeatured: Boolean(body.isFeatured),
-        imageSrc: body.imageSrc,
-        alt: body.alt || body.title
-      });
-      createdId = String(newPhoto._id);
+    if (!db) {
+      return NextResponse.json(
+        { ok: false, message: "MongoDB connection failed. Check MONGODB_URI environment variable." },
+        { status: 500 }
+      );
     }
+
+    const newPhoto = await PhotoModel.create({
+      title: body.title,
+      category: body.category || "General",
+      eventId: body.eventId || "",
+      eventTitle: body.eventTitle || "",
+      isFeatured: Boolean(body.isFeatured),
+      imageSrc: body.imageSrc,
+      alt: body.alt || body.title
+    });
+    createdId = String(newPhoto._id);
 
     return NextResponse.json({
       ok: true,
