@@ -246,35 +246,20 @@ export const useContentStore = create<ContentState>()(
             fetch("/api/reviews").then((r) => r.json()).catch(() => null)
           ]);
 
-          if (photosRes?.ok && Array.isArray(photosRes.data)) {
-            const map = new Map<string, PhotoItem>();
-            get().photos.forEach((p) => map.set(p.id, p));
-            photosRes.data.forEach((p: PhotoItem) => map.set(p.id, p));
-            set({ photos: Array.from(map.values()) });
+          if (photosRes?.ok && Array.isArray(photosRes.data) && photosRes.data.length > 0) {
+            set({ photos: photosRes.data });
           }
-          if (videosRes?.ok && Array.isArray(videosRes.data)) {
-            const map = new Map<string, VideoItem>();
-            get().videos.forEach((v) => map.set(v.id, v));
-            videosRes.data.forEach((v: VideoItem) => map.set(v.id, v));
-            set({ videos: Array.from(map.values()) });
+          if (videosRes?.ok && Array.isArray(videosRes.data) && videosRes.data.length > 0) {
+            set({ videos: videosRes.data });
           }
-          if (eventsRes?.ok && Array.isArray(eventsRes.data)) {
-            const map = new Map<string, EventItem>();
-            get().events.forEach((e) => map.set(e.id, e));
-            eventsRes.data.forEach((e: EventItem) => map.set(e.id, e));
-            set({ events: Array.from(map.values()) });
+          if (eventsRes?.ok && Array.isArray(eventsRes.data) && eventsRes.data.length > 0) {
+            set({ events: eventsRes.data });
           }
-          if (inquiriesRes?.ok && Array.isArray(inquiriesRes.data)) {
-            const map = new Map<string, InquiryItem>();
-            get().inquiries.forEach((i) => map.set(i.id, i));
-            inquiriesRes.data.forEach((i: InquiryItem) => map.set(i.id, i));
-            set({ inquiries: Array.from(map.values()) });
+          if (inquiriesRes?.ok && Array.isArray(inquiriesRes.data) && inquiriesRes.data.length > 0) {
+            set({ inquiries: inquiriesRes.data });
           }
-          if (reviewsRes?.ok && Array.isArray(reviewsRes.data)) {
-            const map = new Map<string, ReviewItem>();
-            get().reviews.forEach((r) => map.set(r.id, r));
-            reviewsRes.data.forEach((r: ReviewItem) => map.set(r.id, r));
-            set({ reviews: Array.from(map.values()) });
+          if (reviewsRes?.ok && Array.isArray(reviewsRes.data) && reviewsRes.data.length > 0) {
+            set({ reviews: reviewsRes.data });
           }
         } catch (e) {
           console.error("Failed to sync store with MongoDB API:", e);
