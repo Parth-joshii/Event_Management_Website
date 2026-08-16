@@ -17,7 +17,7 @@ import {
   UserCheck,
   Video as VideoIcon
 } from "lucide-react";
-import { useContentStore, EventItem, PhotoItem, VideoItem, InquiryItem } from "@/stores/content-store";
+import { useContentStore, type InquiryItem } from "@/stores/content-store";
 import { Container } from "@/components/layout/container";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { Input } from "@/components/ui/input";
@@ -33,7 +33,6 @@ import {
   DialogTrigger
 } from "@/components/ui/dialog";
 import { siteConfig } from "@/config/site";
-import { cn } from "@/lib/utils";
 
 /** Preserves Ultra-HD 2400px crisp image resolution & 95% pristine quality while optimizing for cloud storage. */
 function compressImageFile(file: File, maxWidth = 2400, quality = 0.95): Promise<string> {
