@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useContentStore, type PhotoItem } from "@/stores/content-store";
 import { featuredGallery } from "@/features/gallery/data/featured-gallery";
+import { dedupePhotosByImageSrc } from "@/lib/photo-utils";
 import { cn } from "@/lib/utils";
 
 const galleryFallbackImage =
@@ -67,8 +68,9 @@ export function FeaturedGallerySection(): React.ReactElement {
 
     // Process event groups (each event gets EXACTLY 1 card)
     Object.values(groups).forEach((groupPhotos) => {
-      if (groupPhotos.length === 0) return;
-      const cover = groupPhotos.find((p) => p.isFeatured) || groupPhotos[0];
+      const uniquePhotos = dedupePhotosByImageSrc(groupPhotos);
+      if (uniquePhotos.length === 0) return;
+      const cover = uniquePhotos.find((p) => p.isFeatured) || uniquePhotos[0];
       if (!cover) return;
       const displayTitle = cover.eventTitle || cover.title.replace(/\s*#\d+$/, "") || "Event Album";
 
@@ -78,8 +80,8 @@ export function FeaturedGallerySection(): React.ReactElement {
         category: cover.category || "Luxury Event",
         imageSrc: cover.imageSrc,
         alt: cover.alt || displayTitle,
-        photoCount: groupPhotos.length,
-        photos: groupPhotos
+        photoCount: uniquePhotos.length,
+        photos: uniquePhotos
       });
     });
 

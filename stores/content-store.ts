@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { eventCategories } from "@/features/events/data/event-categories";
 import { featuredGallery } from "@/features/gallery/data/featured-gallery";
+import { dedupePhotosByImageSrc } from "@/lib/photo-utils";
 
 export interface EventItem {
   id: string;
@@ -249,7 +250,7 @@ export const useContentStore = create<ContentState>()(
 
           if (photosRes?.ok && Array.isArray(photosRes.data)) {
             if (photosRes.data.length > 0) {
-              set({ photos: photosRes.data });
+              set({ photos: dedupePhotosByImageSrc(photosRes.data) });
             } else if (localPhotos.length > 0) {
               await fetch("/api/photos", {
                 method: "POST",
@@ -259,7 +260,7 @@ export const useContentStore = create<ContentState>()(
 
               const refreshedPhotos = await fetch("/api/photos").then((r) => r.json()).catch(() => null);
               if (refreshedPhotos?.ok && Array.isArray(refreshedPhotos.data) && refreshedPhotos.data.length > 0) {
-                set({ photos: refreshedPhotos.data });
+                set({ photos: dedupePhotosByImageSrc(refreshedPhotos.data) });
               }
             }
           }
@@ -345,7 +346,7 @@ export const useContentStore = create<ContentState>()(
       addPhoto: async (photoData) => {
         const localId = `photo-${Date.now()}`;
         const newPhoto: PhotoItem = { ...photoData, id: localId };
-        set({ photos: [newPhoto, ...get().photos] });
+        set({ photos: dedupePhotosByImageSrc([newPhoto, ...get().photos]) });
 
         try {
           const res = await fetch("/api/photos", {
@@ -356,7 +357,9 @@ export const useContentStore = create<ContentState>()(
           const data = await res.json();
           if (data.ok && data.data?.id) {
             set({
-              photos: get().photos.map((ph) => (ph.id === localId ? { ...ph, id: data.data.id } : ph))
+              photos: dedupePhotosByImageSrc(
+                get().photos.map((ph) => (ph.id === localId ? { ...ph, id: data.data.id } : ph))
+              )
             });
           }
         } catch (e) {
@@ -365,24 +368,25 @@ export const useContentStore = create<ContentState>()(
       },
 
       addMultiplePhotos: async (photosList) => {
-        const tempNewPhotos: PhotoItem[] = photosList.map((p, idx) => ({
+        const uniquePhotosList = dedupePhotosByImageSrc(photosList);
+        const tempNewPhotos: PhotoItem[] = uniquePhotosList.map((p, idx) => ({
           ...p,
           id: `photo-${Date.now()}-${idx}`
         }));
-        set({ photos: [...tempNewPhotos, ...get().photos] });
+        set({ photos: dedupePhotosByImageSrc([...tempNewPhotos, ...get().photos]) });
 
         try {
           const res = await fetch("/api/photos", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(photosList)
+            body: JSON.stringify(uniquePhotosList)
           });
           const data = await res.json();
           if (data.ok && Array.isArray(data.data)) {
             const map = new Map<string, PhotoItem>();
-            get().photos.forEach((ph) => map.set(ph.id, ph));
+            dedupePhotosByImageSrc(get().photos).forEach((ph) => map.set(ph.id, ph));
             data.data.forEach((p: PhotoItem) => map.set(p.id, p));
-            set({ photos: Array.from(map.values()) });
+            set({ photos: dedupePhotosByImageSrc(Array.from(map.values())) });
           }
         } catch (e) {
           console.error("Failed to persist bulk photos to MongoDB:", e);

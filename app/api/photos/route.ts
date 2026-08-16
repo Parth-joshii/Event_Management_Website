@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
+import { dedupePhotosByImageSrc } from "@/lib/photo-utils";
 import { convertDriveUrlToDirectLink } from "@/lib/utils";
 import { PhotoModel } from "@/models/Photo";
 
@@ -50,7 +51,7 @@ export async function GET(): Promise<NextResponse> {
 
     return NextResponse.json({
       ok: true,
-      data: photos.map((photo) => serializePhoto(photo))
+      data: dedupePhotosByImageSrc(photos.map((photo) => serializePhoto(photo)))
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to fetch photos";
@@ -78,7 +79,7 @@ async function saveSinglePhoto(body: PhotoPayload): Promise<NextResponse> {
 }
 
 async function saveBulkPhotos(body: PhotoPayload[]): Promise<NextResponse> {
-  const formatted = body.map((item, idx) => ({
+  const formatted = dedupePhotosByImageSrc(body.map((item, idx) => ({
     title: item.title || `Gallery Photo ${idx + 1}`,
     category: item.category || "General",
     eventId: item.eventId || "",
@@ -86,7 +87,7 @@ async function saveBulkPhotos(body: PhotoPayload[]): Promise<NextResponse> {
     isFeatured: Boolean(item.isFeatured),
     imageSrc: convertDriveUrlToDirectLink(item.imageSrc || ""),
     alt: item.alt || item.title || "Gallery Photo"
-  }));
+  })));
 
   const validPhotos = formatted.filter((item) => item.imageSrc);
   if (validPhotos.length === 0) {
@@ -99,7 +100,7 @@ async function saveBulkPhotos(body: PhotoPayload[]): Promise<NextResponse> {
   return NextResponse.json({
     ok: true,
     message: "Photos saved successfully",
-    data: inserted.map((photo) => serializePhoto(photo))
+    data: dedupePhotosByImageSrc(inserted.map((photo) => serializePhoto(photo)))
   });
 }
 
