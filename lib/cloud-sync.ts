@@ -1,11 +1,18 @@
 /**
  * Instant Zero-Config Shared Cloud Storage
- * Provides live cross-browser synchronization for photos, events, and reviews
+ * Provides live cross-browser synchronization for photos, events, reviews, and about cards
  * across all devices worldwide without requiring any manual database setup.
  */
 
 const CLOUD_BIN_ID = "66c1f100e41b4d34e42358bc"; // Public shared cloud sync bin for Shree Velora Events
 const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${CLOUD_BIN_ID}`;
+
+export interface AboutCardItem {
+  id: string;
+  title: string;
+  description: string;
+  imageSrc?: string;
+}
 
 export interface CloudStoreData {
   photos: Array<{
@@ -44,14 +51,23 @@ export interface CloudStoreData {
     comment: string;
     avatarSrc?: string;
   }>;
+  aboutCards: AboutCardItem[];
 }
+
+const defaultAboutCards: AboutCardItem[] = [
+  { id: "bespoke-design", title: "Bespoke Design", description: "Tailored themes, atmospheric lighting, and luxury stage installations.", imageSrc: "" },
+  { id: "flawless-execution", title: "Flawless Execution", description: "Seamless vendor management and attentive on-day coordination.", imageSrc: "" },
+  { id: "curated-network", title: "Curated Network", description: "Exclusive access to top-tier venues, artists, and production masters.", imageSrc: "" },
+  { id: "transparent-pricing", title: "Transparent Pricing", description: "Clear line-item quotes and real-time budget management.", imageSrc: "" }
+];
 
 // In-memory cache for ultra-fast local server response
 let memoryCache: CloudStoreData = {
   photos: [],
   events: [],
   videos: [],
-  reviews: []
+  reviews: [],
+  aboutCards: defaultAboutCards
 };
 
 let lastFetchTime = 0;
@@ -75,7 +91,8 @@ export async function getCloudData(): Promise<CloudStoreData> {
           photos: gData.photos || memoryCache.photos,
           events: gData.events || memoryCache.events,
           videos: gData.videos || memoryCache.videos,
-          reviews: gData.reviews || memoryCache.reviews
+          reviews: gData.reviews || memoryCache.reviews,
+          aboutCards: gData.aboutCards || memoryCache.aboutCards
         };
         lastFetchTime = now;
         return memoryCache;
@@ -93,7 +110,8 @@ export async function getCloudData(): Promise<CloudStoreData> {
           photos: Array.isArray(data.photos) ? data.photos : memoryCache.photos,
           events: Array.isArray(data.events) ? data.events : memoryCache.events,
           videos: Array.isArray(data.videos) ? data.videos : memoryCache.videos,
-          reviews: Array.isArray(data.reviews) ? data.reviews : memoryCache.reviews
+          reviews: Array.isArray(data.reviews) ? data.reviews : memoryCache.reviews,
+          aboutCards: Array.isArray(data.aboutCards) && data.aboutCards.length > 0 ? data.aboutCards : memoryCache.aboutCards
         };
         lastFetchTime = now;
       }

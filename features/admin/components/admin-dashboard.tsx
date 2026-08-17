@@ -1107,10 +1107,10 @@ export function AdminDashboard(): React.ReactElement {
                       </td>
                       <td className="px-5 py-4">
                         <span className="font-medium text-[#7d5ea1]">{inq.eventType}</span>
-                        <p className="text-xs text-gray-500 mt-0.5">Date: {inq.eventDate}</p>
+                        <p className="text-xs text-gray-500 mt-0.5">Submitted: {inq.createdAt ? new Date(inq.createdAt).toLocaleDateString("en-IN") : "Recent"}</p>
                       </td>
-                      <td className="px-5 py-4 font-semibold">
-                        ₹{inq.budget.toLocaleString("en-IN")}
+                      <td className="px-5 py-4 font-semibold text-[#2D2238]">
+                        {inq.budgetRange || "Flexible"}
                       </td>
                       <td className="px-5 py-4">
                         <select

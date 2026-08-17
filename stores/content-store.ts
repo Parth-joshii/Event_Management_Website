@@ -1,8 +1,8 @@
+"use client";
+
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { eventCategories } from "@/features/events/data/event-categories";
-import { featuredGallery } from "@/features/gallery/data/featured-gallery";
-import { dedupePhotosByImageSrc } from "@/lib/photo-utils";
+import { convertDriveUrlToDirectLink } from "@/lib/utils";
 
 export interface EventItem {
   id: string;
@@ -38,21 +38,20 @@ export interface VideoItem {
 export interface InquiryItem {
   id: string;
   fullName: string;
-  email: string;
   phone: string;
+  email: string;
+  city: string;
   eventType: string;
-  eventDate: string;
-  budget: number;
+  functions?: string[];
+  themePreference?: string;
+  venuePreference?: string;
+  guestCount?: string;
+  budgetRange?: string;
+  requiredServices?: string[];
   specialRequirements?: string;
   createdAt: string;
-  status: "New" | "Contacted" | "Confirmed";
-}
-
-export interface AboutCardItem {
-  id: string;
-  title: string;
-  description: string;
-  imageSrc?: string;
+  status: "New" | "Contacted" | "Confirmed" | "Archived";
+  referenceNumber?: string;
 }
 
 export interface ReviewItem {
@@ -62,55 +61,13 @@ export interface ReviewItem {
   rating: number;
   comment: string;
   avatarSrc?: string;
-  createdAt?: string;
 }
 
-interface ContentState {
-  events: EventItem[];
-  photos: PhotoItem[];
-  videos: VideoItem[];
-  inquiries: InquiryItem[];
-  reviews: ReviewItem[];
-  aboutCards: AboutCardItem[];
-  isAuthenticated: boolean;
-  isDbSyncing: boolean;
-
-  // Hydration from MongoDB
-  fetchFromDatabase: () => Promise<void>;
-
-  // Authentication actions
-  login: (password: string) => boolean;
-  logout: () => void;
-
-  // About cards management
-  updateAboutCardImage: (id: string, imageSrc: string) => void;
-
-  // Review management
-  addReview: (review: Omit<ReviewItem, "id">) => Promise<void>;
-  deleteReview: (id: string) => Promise<void>;
-
-  // Event management
-  addEvent: (event: Omit<EventItem, "id">) => Promise<void>;
-  updateEvent: (id: string, event: Partial<EventItem>) => void;
-  deleteEvent: (id: string) => Promise<void>;
-  deleteAllEvents: () => Promise<void>;
-
-  // Photo management
-  addPhoto: (photo: Omit<PhotoItem, "id">) => Promise<void>;
-  addMultiplePhotos: (photosList: Omit<PhotoItem, "id">[]) => Promise<void>;
-  updatePhoto: (id: string, photo: Partial<PhotoItem>) => void;
-  toggleFeaturedPhoto: (id: string, isFeatured: boolean) => Promise<void>;
-  deletePhoto: (id: string) => Promise<void>;
-  deleteAllPhotos: () => Promise<void>;
-
-  // Video management
-  addVideo: (video: Omit<VideoItem, "id">) => Promise<void>;
-  deleteVideo: (id: string) => Promise<void>;
-
-  // Inquiry management
-  addInquiry: (inquiry: Omit<InquiryItem, "id" | "createdAt" | "status">) => Promise<void>;
-  updateInquiryStatus: (id: string, status: InquiryItem["status"]) => Promise<void>;
-  deleteInquiry: (id: string) => Promise<void>;
+export interface AboutCardItem {
+  id: string;
+  title: string;
+  description: string;
+  imageSrc?: string;
 }
 
 const defaultAboutCards: AboutCardItem[] = [
@@ -140,41 +97,94 @@ const defaultAboutCards: AboutCardItem[] = [
   }
 ];
 
-const defaultEvents: EventItem[] = [];
+function dedupePhotosByImageSrc(photosList: PhotoItem[]): PhotoItem[] {
+  const seenSrcs = new Set<string>();
+  const unique: PhotoItem[] = [];
 
-const defaultPhotos: PhotoItem[] = [];
+  for (const ph of photosList) {
+    const rawSrc = ph.imageSrc || "";
+    const directSrc = convertDriveUrlToDirectLink(rawSrc);
 
-const defaultVideos: VideoItem[] = [
-  {
-    id: "vid-1",
-    title: "Hero Background Showcase",
-    category: "Hero",
-    videoSrc: "/videos/landing-page.mp4",
-    posterSrc: "",
-    description: "Main cinematic luxury event celebration video background"
+    if (!directSrc || seenSrcs.has(directSrc)) {
+      continue;
+    }
+    seenSrcs.add(directSrc);
+    unique.push({
+      ...ph,
+      imageSrc: directSrc
+    });
   }
-];
+
+  return unique;
+}
+
+interface ContentState {
+  events: EventItem[];
+  photos: PhotoItem[];
+  videos: VideoItem[];
+  inquiries: InquiryItem[];
+  reviews: ReviewItem[];
+  aboutCards: AboutCardItem[];
+  isAuthenticated: boolean;
+  isDbSyncing: boolean;
+
+  fetchFromDatabase: () => Promise<void>;
+  login: (password: string) => boolean;
+  logout: () => void;
+
+  addEvent: (eventData: Omit<EventItem, "id">) => Promise<void>;
+  updateEvent: (id: string, updatedData: Partial<EventItem>) => void;
+  deleteEvent: (id: string) => Promise<void>;
+  deleteAllEvents: () => Promise<void>;
+
+  addPhoto: (photoData: Omit<PhotoItem, "id">) => Promise<void>;
+  addMultiplePhotos: (photosList: Array<Omit<PhotoItem, "id">>) => Promise<void>;
+  updatePhoto: (id: string, updatedData: Partial<PhotoItem>) => void;
+  toggleFeaturedPhoto: (id: string, isFeatured: boolean) => Promise<void>;
+  deletePhoto: (id: string) => Promise<void>;
+  deleteAllPhotos: () => Promise<void>;
+
+  addVideo: (videoData: Omit<VideoItem, "id">) => Promise<void>;
+  deleteVideo: (id: string) => Promise<void>;
+
+  addReview: (reviewData: Omit<ReviewItem, "id">) => Promise<void>;
+  deleteReview: (id: string) => Promise<void>;
+
+  updateAboutCardImage: (id: string, imageSrc: string) => Promise<void>;
+
+  addInquiry: (inquiryData: Omit<InquiryItem, "id" | "createdAt" | "status">) => void;
+  updateInquiryStatus: (id: string, status: InquiryItem["status"]) => Promise<void>;
+  deleteInquiry: (id: string) => Promise<void>;
+}
 
 export const useContentStore = create<ContentState>()(
   persist(
     (set, get) => ({
-      events: defaultEvents,
-      photos: defaultPhotos,
-      videos: defaultVideos,
-      inquiries: [
+      events: [
         {
-          id: "inq-1",
-          fullName: "Rahul Sharma",
-          email: "rahul.sharma@example.com",
-          phone: "+91 99770 24666",
-          eventType: "Luxury Wedding",
-          eventDate: "2026-11-20",
-          budget: 1500000,
-          specialRequirements: "Royal stage setup and bridal entry lighting",
-          createdAt: new Date().toISOString(),
-          status: "New"
+          id: "ev-1",
+          title: "Riya & Aman Royal Wedding",
+          category: "Royal Wedding",
+          description: "A grand palace wedding featuring a glass mandap and 10,000+ floral elements.",
+          date: "2026-02-14",
+          location: "Udaipur Palace",
+          imageSrc: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80",
+          imageAlt: "Riya and Aman Royal Palace Wedding"
+        },
+        {
+          id: "ev-2",
+          title: "Aster Corporate Annual Meet",
+          category: "Corporate Production",
+          description: "High-impact stage production with dynamic LED walls and executive hospitality.",
+          date: "2026-01-20",
+          location: "JW Marriott Mumbai",
+          imageSrc: "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80",
+          imageAlt: "Aster Corporate Stage Production"
         }
       ],
+      photos: [],
+      videos: [],
+      inquiries: [],
       reviews: [
         {
           id: "rev-1",
@@ -197,12 +207,23 @@ export const useContentStore = create<ContentState>()(
       isAuthenticated: false,
       isDbSyncing: false,
 
-      updateAboutCardImage: (id: string, imageSrc: string) => {
+      updateAboutCardImage: async (id: string, imageSrc: string) => {
+        const directSrc = convertDriveUrlToDirectLink(imageSrc);
         set({
           aboutCards: get().aboutCards.map((card) =>
-            card.id === id ? { ...card, imageSrc } : card
+            card.id === id ? { ...card, imageSrc: directSrc } : card
           )
         });
+
+        try {
+          await fetch("/api/about", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id, imageSrc: directSrc })
+          });
+        } catch (e) {
+          console.error("Failed to sync about card image to cloud:", e);
+        }
       },
 
       addReview: async (reviewData) => {
@@ -223,7 +244,7 @@ export const useContentStore = create<ContentState>()(
             });
           }
         } catch (e) {
-          console.error("Failed to persist review to MongoDB:", e);
+          console.error("Failed to persist review:", e);
         }
       },
 
@@ -232,7 +253,7 @@ export const useContentStore = create<ContentState>()(
         try {
           await fetch(`/api/reviews?id=${encodeURIComponent(id)}`, { method: "DELETE" });
         } catch (e) {
-          console.error("Failed to delete review from MongoDB:", e);
+          console.error("Failed to delete review:", e);
         }
       },
 
@@ -240,12 +261,13 @@ export const useContentStore = create<ContentState>()(
         set({ isDbSyncing: true });
         try {
           const localPhotos = get().photos;
-          const [photosRes, videosRes, eventsRes, inquiriesRes, reviewsRes] = await Promise.all([
+          const [photosRes, videosRes, eventsRes, inquiriesRes, reviewsRes, aboutRes] = await Promise.all([
             fetch("/api/photos").then((r) => r.json()).catch(() => null),
             fetch("/api/videos").then((r) => r.json()).catch(() => null),
             fetch("/api/events").then((r) => r.json()).catch(() => null),
             fetch("/api/inquiries").then((r) => r.json()).catch(() => null),
-            fetch("/api/reviews").then((r) => r.json()).catch(() => null)
+            fetch("/api/reviews").then((r) => r.json()).catch(() => null),
+            fetch("/api/about").then((r) => r.json()).catch(() => null)
           ]);
 
           if (photosRes?.ok && Array.isArray(photosRes.data)) {
@@ -276,8 +298,11 @@ export const useContentStore = create<ContentState>()(
           if (reviewsRes?.ok && Array.isArray(reviewsRes.data) && reviewsRes.data.length > 0) {
             set({ reviews: reviewsRes.data });
           }
+          if (aboutRes?.ok && Array.isArray(aboutRes.data) && aboutRes.data.length > 0) {
+            set({ aboutCards: aboutRes.data });
+          }
         } catch (e) {
-          console.error("Failed to sync store with MongoDB API:", e);
+          console.error("Failed to sync store with API:", e);
         } finally {
           set({ isDbSyncing: false });
         }
@@ -315,7 +340,7 @@ export const useContentStore = create<ContentState>()(
             });
           }
         } catch (e) {
-          console.error("Failed to persist event to MongoDB:", e);
+          console.error("Failed to persist event:", e);
         }
       },
 
@@ -330,7 +355,7 @@ export const useContentStore = create<ContentState>()(
         try {
           await fetch(`/api/events?id=${encodeURIComponent(id)}`, { method: "DELETE" });
         } catch (e) {
-          console.error("Failed to delete event from MongoDB:", e);
+          console.error("Failed to delete event:", e);
         }
       },
 
@@ -339,14 +364,14 @@ export const useContentStore = create<ContentState>()(
         try {
           await fetch("/api/events?all=true", { method: "DELETE" });
         } catch (e) {
-          console.error("Failed to delete all events from MongoDB:", e);
+          console.error("Failed to delete all events:", e);
         }
       },
 
       addPhoto: async (photoData) => {
         const localId = `photo-${Date.now()}`;
         const newPhoto: PhotoItem = { ...photoData, id: localId };
-        set({ photos: dedupePhotosByImageSrc([newPhoto, ...get().photos]) });
+        set({ photos: [newPhoto, ...get().photos] });
 
         try {
           const res = await fetch("/api/photos", {
@@ -357,39 +382,36 @@ export const useContentStore = create<ContentState>()(
           const data = await res.json();
           if (data.ok && data.data?.id) {
             set({
-              photos: dedupePhotosByImageSrc(
-                get().photos.map((ph) => (ph.id === localId ? { ...ph, id: data.data.id } : ph))
-              )
+              photos: get().photos.map((ph) => (ph.id === localId ? { ...ph, id: data.data.id } : ph))
             });
           }
         } catch (e) {
-          console.error("Failed to persist photo to MongoDB:", e);
+          console.error("Failed to persist photo:", e);
         }
       },
 
       addMultiplePhotos: async (photosList) => {
-        const uniquePhotosList = dedupePhotosByImageSrc(photosList);
-        const tempNewPhotos: PhotoItem[] = uniquePhotosList.map((p, idx) => ({
+        const tempNewPhotos: PhotoItem[] = photosList.map((p, idx) => ({
           ...p,
           id: `photo-${Date.now()}-${idx}`
         }));
-        set({ photos: dedupePhotosByImageSrc([...tempNewPhotos, ...get().photos]) });
+        set({ photos: [...tempNewPhotos, ...get().photos] });
 
         try {
           const res = await fetch("/api/photos", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(uniquePhotosList)
+            body: JSON.stringify(photosList)
           });
           const data = await res.json();
           if (data.ok && Array.isArray(data.data)) {
             const map = new Map<string, PhotoItem>();
-            dedupePhotosByImageSrc(get().photos).forEach((ph) => map.set(ph.id, ph));
+            get().photos.forEach((ph) => map.set(ph.id, ph));
             data.data.forEach((p: PhotoItem) => map.set(p.id, p));
-            set({ photos: dedupePhotosByImageSrc(Array.from(map.values())) });
+            set({ photos: Array.from(map.values()) });
           }
         } catch (e) {
-          console.error("Failed to persist bulk photos to MongoDB:", e);
+          console.error("Failed to persist bulk photos:", e);
         }
       },
 
@@ -411,7 +433,7 @@ export const useContentStore = create<ContentState>()(
             body: JSON.stringify({ id, isFeatured })
           });
         } catch (e) {
-          console.error("Failed to update featured photo status in MongoDB:", e);
+          console.error("Failed to toggle featured photo:", e);
         }
       },
 
@@ -420,7 +442,7 @@ export const useContentStore = create<ContentState>()(
         try {
           await fetch(`/api/photos?id=${encodeURIComponent(id)}`, { method: "DELETE" });
         } catch (e) {
-          console.error("Failed to delete photo from MongoDB:", e);
+          console.error("Failed to delete photo:", e);
         }
       },
 
@@ -429,7 +451,7 @@ export const useContentStore = create<ContentState>()(
         try {
           await fetch("/api/photos?all=true", { method: "DELETE" });
         } catch (e) {
-          console.error("Failed to delete all photos from MongoDB:", e);
+          console.error("Failed to delete all photos:", e);
         }
       },
 
@@ -451,7 +473,7 @@ export const useContentStore = create<ContentState>()(
             });
           }
         } catch (e) {
-          console.error("Failed to persist video to MongoDB:", e);
+          console.error("Failed to persist video:", e);
         }
       },
 
@@ -460,11 +482,11 @@ export const useContentStore = create<ContentState>()(
         try {
           await fetch(`/api/videos?id=${encodeURIComponent(id)}`, { method: "DELETE" });
         } catch (e) {
-          console.error("Failed to delete video from MongoDB:", e);
+          console.error("Failed to delete video:", e);
         }
       },
 
-      addInquiry: async (inquiryData) => {
+      addInquiry: (inquiryData) => {
         const localId = `inq-${Date.now()}`;
         const newInquiry: InquiryItem = {
           ...inquiryData,
@@ -487,7 +509,7 @@ export const useContentStore = create<ContentState>()(
             body: JSON.stringify({ id, status })
           });
         } catch (e) {
-          console.error("Failed to update inquiry status in MongoDB:", e);
+          console.error("Failed to update inquiry status:", e);
         }
       },
 
@@ -496,7 +518,7 @@ export const useContentStore = create<ContentState>()(
         try {
           await fetch(`/api/inquiries?id=${encodeURIComponent(id)}`, { method: "DELETE" });
         } catch (e) {
-          console.error("Failed to delete inquiry from MongoDB:", e);
+          console.error("Failed to delete inquiry:", e);
         }
       }
     }),

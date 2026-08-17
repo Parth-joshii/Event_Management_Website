@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { Reveal } from "@/components/animations/reveal";
 import { Container } from "@/components/layout/container";
 import { SectionHeading } from "@/components/ui/section-heading";
@@ -35,7 +36,12 @@ const defaultHighlights = [
 
 /** Renders the concise brand introduction and highlight cards with customizable background images & ultra-premium layout. */
 export function AboutPreview(): React.ReactElement {
-  const { aboutCards } = useContentStore();
+  const { aboutCards, fetchFromDatabase } = useContentStore();
+
+  // Sync latest cloud data on client mount
+  React.useEffect(() => {
+    void fetchFromDatabase();
+  }, [fetchFromDatabase]);
 
   return (
     <section
@@ -123,5 +129,3 @@ export function AboutPreview(): React.ReactElement {
     </section>
   );
 }
-
-
