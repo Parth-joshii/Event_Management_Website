@@ -24,7 +24,7 @@ export async function GET(): Promise<NextResponse> {
 /** POST /api/videos - Add new video */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    const body = await request.json();
+    const body = (await request.json().catch(() => null)) || {};
 
     if (!body.title || !body.videoSrc) {
       return NextResponse.json({ ok: false, message: "Title and videoSrc are required" }, { status: 400 });

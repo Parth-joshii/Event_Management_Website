@@ -271,10 +271,10 @@ export function EventCustomizerWizard(): React.ReactElement {
         headers: { "Content-Type": "application/json" },
         method: "POST"
       });
-      const result = (await response.json()) as InquiryResponse;
+      const result = (await response.json().catch(() => null)) as InquiryResponse | null;
 
-      if (!response.ok || !result.ok) {
-        setSubmitError(result.message ?? "We couldn't complete your request right now. Please try again or contact us directly on WhatsApp.");
+      if (!response.ok || !result || !result.ok) {
+        setSubmitError(result?.message ?? "We couldn't complete your request right now. Please try again or contact us directly on WhatsApp.");
         return;
       }
 

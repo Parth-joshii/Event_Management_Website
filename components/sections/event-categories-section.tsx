@@ -132,18 +132,18 @@ export function EventCategoriesSection(): React.ReactElement {
                   </h3>
 
                   {eventPhotos.length > 0 ? (
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    <div className="columns-1 sm:columns-2 md:columns-3 gap-4 [column-fill:_balance]">
                       {eventPhotos.map((ph) => (
                         <div
                           key={ph.id}
                           onClick={() => setActivePhotoLightbox(ph)}
-                          className="group relative h-48 overflow-hidden rounded-xl border border-white/20 bg-black/40 cursor-pointer"
+                          className="group relative mb-4 break-inside-avoid overflow-hidden rounded-xl border border-white/20 bg-black/40 cursor-pointer shadow-md transition hover:-translate-y-1 hover:border-[#D4AF37]/60"
                         >
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={resolveRenderableImageSrc(ph.imageSrc)}
                             alt={ph.alt || ph.title}
-                            className="size-full object-cover transition duration-500 group-hover:scale-105"
+                            className="w-full h-auto block object-cover transition duration-500 group-hover:scale-105"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 group-hover:opacity-90 transition" />
                           <div className="absolute bottom-3 left-3 right-3 text-white">

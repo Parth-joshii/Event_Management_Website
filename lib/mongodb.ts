@@ -1,4 +1,12 @@
 import mongoose from "mongoose";
+import dns from "node:dns";
+
+// Fix Node.js DNS SRV resolution issues on Windows & certain ISPs (querySrv ECONNREFUSED)
+try {
+  dns.setServers(["8.8.8.8", "1.1.1.1"]);
+} catch {
+  // Ignore in restricted environments
+}
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
@@ -26,17 +34,35 @@ const cached: CachedMongoose = global.mongooseCache ?? {
 global.mongooseCache = cached;
 
 export async function connectToDatabase(): Promise<typeof mongoose> {
-  if (cached.conn) {
+  if (cached.conn && mongoose.connection.readyState === 1) {
     return cached.conn;
   }
 
   if (!cached.promise) {
-    cached.promise = mongoose.connect(mongoUri, {
-      bufferCommands: false,
-      maxPoolSize: 10
-    });
+    cached.promise = mongoose
+      .connect(mongoUri, {
+        bufferCommands: false,
+        maxPoolSize: 10,
+        serverSelectionTimeoutMS: 8000
+      })
+      .then((m) => {
+        cached.conn = m;
+        return m;
+      })
+      .catch((err) => {
+        cached.promise = null;
+        cached.conn = null;
+        throw err;
+      });
   }
 
-  cached.conn = await cached.promise;
-  return cached.conn;
+  try {
+    cached.conn = await cached.promise;
+    return cached.conn;
+  } catch (err) {
+    cached.promise = null;
+    cached.conn = null;
+    throw err;
+  }
 }
+

@@ -16,8 +16,13 @@ import {
   Phone,
   Sparkles,
   UserCheck,
-  Video as VideoIcon
+  Video as VideoIcon,
+  Cloud,
+  CheckCircle2,
+  AlertCircle,
+  Loader2
 } from "lucide-react";
+import { toast } from "sonner";
 import { useContentStore, type InquiryItem } from "@/stores/content-store";
 import { Container } from "@/components/layout/container";
 import { GradientButton } from "@/components/ui/gradient-button";
@@ -40,57 +45,22 @@ import {
   extractDriveUrlsFromText,
   resolveRenderableImageSrc
 } from "@/lib/utils";
+import {
+  uploadFileToCloudinary,
+  uploadMultipleImagesToCloudinary,
+  checkCloudinaryStatus
+} from "@/lib/image-upload";
 
-/** Compresses images to ultra-light 1000px, 68% JPEG format (~100KB) ensuring instant uploads that never hit Vercel payload limits. */
-function compressImageFile(file: File, maxWidth = 1000, quality = 0.68): Promise<string> {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        let { width, height } = img;
-        if (width > maxWidth) {
-          height = Math.round((height * maxWidth) / width);
-          width = maxWidth;
-        }
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext("2d");
-        if (ctx) {
-          ctx.imageSmoothingEnabled = true;
-          ctx.imageSmoothingQuality = "high";
-          ctx.drawImage(img, 0, 0, width, height);
-          resolve(canvas.toDataURL("image/jpeg", quality));
-        } else {
-          resolve((e.target?.result as string) || "");
-        }
-      };
-      img.onerror = () => resolve((e.target?.result as string) || "");
-      img.src = (e.target?.result as string) || "";
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
-async function uploadImageFile(file: File): Promise<string> {
-  const formData = new FormData();
-  formData.append("file", file);
-
-  try {
-    const response = await fetch("/api/upload", {
-      method: "POST",
-      body: formData
-    });
-    const data = await response.json().catch(() => null);
-    if (data?.ok && typeof data.url === "string" && data.url) {
-      return data.url;
-    }
-  } catch {
-    // Fallback below.
-  }
-
-  return compressImageFile(file);
+function isValidHttpOrDataUrl(url?: string): boolean {
+  if (!url) return false;
+  const trimmed = url.trim();
+  return (
+    (trimmed.startsWith("http://") ||
+      trimmed.startsWith("https://") ||
+      trimmed.startsWith("data:") ||
+      trimmed.startsWith("/")) &&
+    trimmed.length > 5
+  );
 }
 
 export function AdminDashboard(): React.ReactElement {
@@ -150,9 +120,20 @@ export function AdminDashboard(): React.ReactElement {
     setAddReviewOpen(false);
   };
 
-  // Sync from DB on mount
+  // Cloudinary status & upload state
+  const [cloudinaryStatus, setCloudinaryStatus] = React.useState<{
+    configured: boolean;
+    cloudName: string | null;
+  } | null>(null);
+  const [isUploadingPhotos, setIsUploadingPhotos] = React.useState(false);
+  const [uploadProgressText, setUploadProgressText] = React.useState("");
+  const [isUploadingEventCover, setIsUploadingEventCover] = React.useState(false);
+  const [isUploadingVideo, setIsUploadingVideo] = React.useState(false);
+
+  // Sync from DB & check Cloudinary status on mount
   React.useEffect(() => {
     void fetchFromDatabase();
+    void checkCloudinaryStatus().then((status) => setCloudinaryStatus(status));
   }, [fetchFromDatabase]);
 
   // New Event Form state
@@ -170,6 +151,7 @@ export function AdminDashboard(): React.ReactElement {
   const [isFeaturedPhoto, setIsFeaturedPhoto] = React.useState(false);
   const [photoImagesList, setPhotoImagesList] = React.useState<string[]>([]);
   const [photoImageSrc, setPhotoImageSrc] = React.useState("/images/gallery/wedding-stage.jpg");
+  const [photoUploadMethod, setPhotoUploadMethod] = React.useState<"computer" | "drive">("computer");
 
   // New Video Form state
   const [videoTitle, setVideoTitle] = React.useState("");
@@ -615,25 +597,37 @@ export function AdminDashboard(): React.ReactElement {
                       <input
                         type="file"
                         accept="image/*"
-                        className="mt-1.5 block w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-[#EBDCFB] file:text-[#7d5ea1] hover:file:bg-[#2D2238] hover:file:text-white"
-                        onChange={(e) => {
+                        disabled={isUploadingEventCover}
+                        className="mt-1.5 block w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-[#EBDCFB] file:text-[#7d5ea1] hover:file:bg-[#2D2238] hover:file:text-white disabled:opacity-50"
+                        onChange={async (e) => {
                           const file = e.target.files?.[0];
-                          if (file) {
-                            const reader = new FileReader();
-                            reader.onloadend = () => {
-                              if (typeof reader.result === "string") {
-                                setEventImageSrc(reader.result);
-                              }
-                            };
-                            reader.readAsDataURL(file);
+                          if (!file) return;
+                          setIsUploadingEventCover(true);
+                          try {
+                            const res = await uploadFileToCloudinary(file, {
+                              folder: "shree_velora/events",
+                              category: eventCategory
+                            });
+                            setEventImageSrc(res.url);
+                            toast.success("Event cover uploaded to Cloudinary CDN!");
+                          } catch (err) {
+                            const msg = err instanceof Error ? err.message : "Upload failed";
+                            toast.error(msg);
+                          } finally {
+                            setIsUploadingEventCover(false);
                           }
                         }}
                       />
+                      {isUploadingEventCover ? (
+                        <p className="mt-1.5 text-xs text-purple-600 flex items-center gap-1.5 font-medium">
+                          <Loader2 className="size-3.5 animate-spin" /> Compressing & uploading cover to Cloudinary...
+                        </p>
+                      ) : null}
                       <Input
                         id="ev-img"
                         className="mt-2"
                         onChange={(e) => setEventImageSrc(convertDriveUrlToDirectLink(e.target.value))}
-                        placeholder="Paste image URL or Google Drive link (e.g. https://drive.google.com/...)"
+                        placeholder="Cloudinary URL, image link, or Google Drive link"
                         value={eventImageSrc}
                       />
                       {eventImageSrc ? (
@@ -721,13 +715,76 @@ export function AdminDashboard(): React.ReactElement {
 
           {/* TAB 2: MANAGE PHOTOS */}
           <TabsContent value="photos" className="space-y-6">
+            {/* Live Cloudinary CDN Status Card */}
+            <div className="rounded-xl border border-[#EBDCFB] bg-gradient-to-r from-purple-50/70 via-white to-amber-50/40 p-4 shadow-xs">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`p-2.5 rounded-lg shrink-0 ${
+                      cloudinaryStatus?.configured
+                        ? "bg-emerald-100 text-emerald-700"
+                        : "bg-amber-100 text-amber-700"
+                    }`}
+                  >
+                    <Cloud className="size-5" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-sm text-[#2D2238]">
+                        {cloudinaryStatus?.configured
+                          ? "Cloudinary CDN Connected"
+                          : "Cloudinary CDN Storage"}
+                      </h3>
+                      <span
+                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
+                          cloudinaryStatus?.configured
+                            ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
+                            : "bg-amber-100 text-amber-700 border border-amber-200"
+                        }`}
+                      >
+                        {cloudinaryStatus?.configured ? (
+                          <CheckCircle2 className="size-3" />
+                        ) : (
+                          <AlertCircle className="size-3" />
+                        )}
+                        {cloudinaryStatus?.configured
+                          ? `Cloud: ${cloudinaryStatus.cloudName}`
+                          : "Credentials Needed"}
+                      </span>
+                    </div>
+                    <p className="text-xs text-[#5c4b6e] mt-0.5">
+                      {cloudinaryStatus?.configured
+                        ? "Direct CDN storage is active. Any photo larger than Vercel's limit (>3.8MB) is automatically compressed on device before upload."
+                        : "Add CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET in your environment variables (.env.local or Vercel)."}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    void checkCloudinaryStatus().then((st) => {
+                      setCloudinaryStatus(st);
+                      if (st.configured) {
+                        toast.success(`Cloudinary connected to '${st.cloudName}'`);
+                      } else {
+                        toast.warning("Cloudinary credentials not detected in environment.");
+                      }
+                    });
+                  }}
+                  className="text-xs font-semibold text-[#7d5ea1] hover:text-[#2D2238] underline cursor-pointer"
+                >
+                  Verify Connection
+                </button>
+              </div>
+            </div>
+
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="font-display text-2xl font-bold text-[#2D2238]">
                   Website Photos & Assets
                 </h2>
                 <p className="text-sm text-[#5c4b6e]">
-                  Add or remove website photos stored in MongoDB.
+                  Add or remove website photos stored in MongoDB and hosted on Cloudinary CDN.
                 </p>
               </div>
 
@@ -747,135 +804,277 @@ export function AdminDashboard(): React.ReactElement {
                   </button>
                 ) : null}
 
-                <Dialog open={addPhotoOpen} onOpenChange={setAddPhotoOpen}>
+                <Dialog
+                  open={addPhotoOpen}
+                  onOpenChange={(open) => {
+                    setAddPhotoOpen(open);
+                    if (!open) {
+                      setPhotoImagesList([]);
+                      setPhotoImageSrc("/images/gallery/wedding-stage.jpg");
+                      setPhotoTitle("");
+                    }
+                  }}
+                >
                   <DialogTrigger asChild>
                     <GradientButton type="button">
                       <Plus className="size-4" />
                       Add New Photo
                     </GradientButton>
                   </DialogTrigger>
-                <DialogContent className="max-w-md bg-white border-[#EBDCFB] text-[#2D2238]">
-                  <DialogHeader>
-                    <DialogTitle className="font-display text-2xl font-bold">
+                <DialogContent className="max-w-md max-h-[85vh] flex flex-col p-0 overflow-hidden bg-white border-[#EBDCFB] text-[#2D2238] rounded-2xl shadow-xl">
+                  <DialogHeader className="px-4 py-3 border-b border-[#EBDCFB]/70 bg-gradient-to-r from-purple-50/70 to-white shrink-0">
+                    <DialogTitle className="font-display text-base font-bold text-[#2D2238]">
                       Add New Photo
                     </DialogTitle>
-                    <DialogDescription>
-                      Choose a photo file from your computer or enter an image URL.
+                    <DialogDescription className="text-xs text-[#5c4b6e]">
+                      Upload directly to Cloudinary CDN or paste image links.
                     </DialogDescription>
                   </DialogHeader>
 
-                  <form onSubmit={handleAddPhotoSubmit} className="space-y-4 mt-2">
-                    <div>
-                      <Label htmlFor="ph-event">Assign to Specific Event</Label>
-                      <select
-                        id="ph-event"
-                        onChange={(e) => {
-                          setSelectedEventId(e.target.value);
-                          const ev = events.find((item) => item.id === e.target.value);
-                          if (ev && !photoTitle) setPhotoTitle(`${ev.title} Photo`);
-                        }}
-                        value={selectedEventId}
-                        className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
-                      >
-                        <option value="">-- General Gallery (No Specific Event) --</option>
-                        {events.map((ev) => (
-                          <option key={ev.id} value={ev.id}>
-                            📌 {ev.title} ({ev.category})
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                  <form onSubmit={handleAddPhotoSubmit} className="flex flex-col flex-1 overflow-hidden">
+                    <div className="overflow-y-auto px-4 py-3 space-y-2.5 flex-1 text-xs">
+                      <div>
+                        <Label htmlFor="ph-event" className="text-xs font-semibold text-slate-700">Assign to Specific Event</Label>
+                        <select
+                          id="ph-event"
+                          onChange={(e) => {
+                            setSelectedEventId(e.target.value);
+                            const ev = events.find((item) => item.id === e.target.value);
+                            if (ev && !photoTitle) setPhotoTitle(`${ev.title} Photo`);
+                          }}
+                          value={selectedEventId}
+                          className="mt-1 w-full rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[#D4AF37]"
+                        >
+                          <option value="">-- General Gallery (No Specific Event) --</option>
+                          {events.map((ev) => (
+                            <option key={ev.id} value={ev.id}>
+                              📌 {ev.title} ({ev.category})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
 
-                    <div>
-                      <Label htmlFor="ph-title">Photo Title / Caption</Label>
-                      <Input
-                        id="ph-title"
-                        onChange={(e) => setPhotoTitle(e.target.value)}
-                        placeholder="e.g. Royal Stage Lighting / Bridal Entry"
-                        value={photoTitle}
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="ph-cat">Category Tag</Label>
-                      <Input
-                        id="ph-cat"
-                        onChange={(e) => setPhotoCategory(e.target.value)}
-                        placeholder="e.g. Stage Decor, Haldi, Corporate"
-                        value={photoCategory}
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="ph-src">Option A: Select Photos from Computer (Multiple Files)</Label>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        className="mt-1.5 block w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-[#EBDCFB] file:text-[#7d5ea1] hover:file:bg-[#2D2238] hover:file:text-white"
-                        onChange={async (e) => {
-                          const files = Array.from(e.target.files || []);
-                          if (files.length > 0) {
-                            const compressedUrls = await Promise.all(
-                              files.map((file) => uploadImageFile(file))
-                            );
-                            setPhotoImagesList(compressedUrls);
-                            if (compressedUrls[0]) setPhotoImageSrc(compressedUrls[0]);
-                          }
-                        }}
-                      />
-                    </div>
-
-                    <div className="pt-1">
-                      <Label htmlFor="ph-bulk-drive">
-                        Option B: Bulk Paste Google Drive Photo Links (Paste All Links from Event Folder)
-                      </Label>
-                      <p className="text-[11px] text-[#7d5ea1] mb-1">
-                        💡 Tip: In Google Drive, select all photos $\to$ Copy links $\to$ Paste below!
-                      </p>
-                      <Textarea
-                        id="ph-bulk-drive"
-                        rows={3}
-                        placeholder="Paste single or multiple Google Drive links here (one per line)..."
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          const extracted = extractDriveUrlsFromText(val);
-                          if (extracted.length > 0) {
-                            setPhotoImagesList(extracted);
-                            setPhotoImageSrc(extracted[0] || "");
-                          } else if (val.trim()) {
-                            const single = convertDriveUrlToDirectLink(val.trim());
-                            setPhotoImageSrc(single);
-                            setPhotoImagesList([single]);
-                          } else {
-                            setPhotoImagesList([]);
-                            setPhotoImageSrc("/images/gallery/wedding-stage.jpg");
-                          }
-                        }}
-                      />
-
-                      {photoImagesList.length > 0 ? (
-                        <p className="mt-1.5 text-xs font-bold text-emerald-600">
-                          ✓ {photoImagesList.length} photos ready to publish to Event!
-                        </p>
-                      ) : null}
-
-                      {photoImageSrc && photoImagesList.length <= 1 ? (
-                        <div className="mt-2 h-24 w-full overflow-hidden rounded-md border border-[#EBDCFB]">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={resolveRenderableImageSrc(photoImageSrc)}
-                            alt="Preview"
-                            className="size-full object-cover"
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <Label htmlFor="ph-title" className="text-xs font-semibold text-slate-700">Caption / Title</Label>
+                          <Input
+                            id="ph-title"
+                            onChange={(e) => setPhotoTitle(e.target.value)}
+                            placeholder="e.g. Royal Stage"
+                            value={photoTitle}
+                            className="mt-1 h-8 text-xs"
                           />
                         </div>
-                      ) : null}
+                        <div>
+                          <Label htmlFor="ph-cat" className="text-xs font-semibold text-slate-700">Category Tag</Label>
+                          <Input
+                            id="ph-cat"
+                            onChange={(e) => setPhotoCategory(e.target.value)}
+                            placeholder="e.g. Stage Decor"
+                            value={photoCategory}
+                            className="mt-1 h-8 text-xs"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Compact Method Switcher */}
+                      <div>
+                        <Label className="text-xs font-semibold text-slate-700 mb-1 block">Photo Source</Label>
+                        <div className="grid grid-cols-2 gap-1 rounded-lg bg-slate-100 p-0.5 border border-slate-200">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setPhotoUploadMethod("computer");
+                              setPhotoImagesList([]);
+                              setPhotoImageSrc("/images/gallery/wedding-stage.jpg");
+                            }}
+                            className={`py-1 px-2 rounded-md font-medium text-xs transition cursor-pointer flex items-center justify-center gap-1.5 ${
+                              photoUploadMethod === "computer"
+                                ? "bg-white text-[#2D2238] shadow-xs font-semibold"
+                                : "text-slate-500 hover:text-slate-800"
+                            }`}
+                          >
+                            <Cloud className="size-3.5 text-[#7d5ea1]" />
+                            Upload from Computer
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setPhotoUploadMethod("drive");
+                              setPhotoImagesList([]);
+                              setPhotoImageSrc("/images/gallery/wedding-stage.jpg");
+                            }}
+                            className={`py-1 px-2 rounded-md font-medium text-xs transition cursor-pointer flex items-center justify-center gap-1.5 ${
+                              photoUploadMethod === "drive"
+                                ? "bg-white text-[#2D2238] shadow-xs font-semibold"
+                                : "text-slate-500 hover:text-slate-800"
+                            }`}
+                          >
+                            <ExternalLink className="size-3.5 text-slate-500" />
+                            Google Drive Links
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Method 1: Computer Upload */}
+                      {photoUploadMethod === "computer" ? (
+                        <div className="rounded-lg border border-purple-100 bg-purple-50/40 p-2.5 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <Label htmlFor="ph-src" className="text-xs font-medium text-purple-900">
+                              Select Image Files
+                            </Label>
+                            <span className="text-[10px] text-purple-600">
+                              ⚡ Auto-compressed for Vercel
+                            </span>
+                          </div>
+                          <input
+                            id="ph-src"
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            disabled={isUploadingPhotos}
+                            className="block w-full text-xs text-gray-500 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-[#EBDCFB] file:text-[#7d5ea1] hover:file:bg-[#2D2238] hover:file:text-white disabled:opacity-50 cursor-pointer"
+                            onChange={async (e) => {
+                              const files = Array.from(e.target.files || []);
+                              if (files.length === 0) return;
+                              setIsUploadingPhotos(true);
+                              setUploadProgressText(`Preparing ${files.length} photo(s)...`);
+
+                              try {
+                                const uploaded = await uploadMultipleImagesToCloudinary(files, {
+                                  category: photoCategory,
+                                  folder: "shree_velora/gallery",
+                                  onProgress: (_curr, _tot, msg) => setUploadProgressText(msg)
+                                });
+
+                                const newUrls = uploaded.map((u) => u.url);
+                                setPhotoImagesList((prev) => [...prev, ...newUrls]);
+                                if (!photoImageSrc || photoImageSrc === "/images/gallery/wedding-stage.jpg") {
+                                  setPhotoImageSrc(newUrls[0] || "");
+                                }
+                                toast.success(`✓ Uploaded ${newUrls.length} photo(s) to Cloudinary!`);
+                              } catch (err) {
+                                const msg = err instanceof Error ? err.message : "Upload failed";
+                                toast.error(msg);
+                              } finally {
+                                setIsUploadingPhotos(false);
+                                setUploadProgressText("");
+                                e.target.value = "";
+                              }
+                            }}
+                          />
+
+                          {isUploadingPhotos ? (
+                            <div className="flex items-center gap-2 rounded-md bg-purple-100/80 p-2 text-xs text-purple-700">
+                              <Loader2 className="size-3.5 animate-spin shrink-0 text-purple-600" />
+                              <span className="font-medium truncate">{uploadProgressText || "Uploading to Cloudinary..."}</span>
+                            </div>
+                          ) : null}
+
+                          {photoImagesList.length > 0 && photoImagesList.some(isValidHttpOrDataUrl) ? (
+                            <div className="space-y-1 pt-1">
+                              <div className="flex items-center justify-between text-[11px]">
+                                <span className="font-semibold text-emerald-700">
+                                  ✓ {photoImagesList.filter(isValidHttpOrDataUrl).length} photo(s) ready in Cloudinary
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setPhotoImagesList([]);
+                                    setPhotoImageSrc("/images/gallery/wedding-stage.jpg");
+                                  }}
+                                  className="text-rose-600 hover:underline cursor-pointer"
+                                >
+                                  Clear
+                                </button>
+                              </div>
+                              <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto p-1.5 rounded-md border border-purple-200/60 bg-white">
+                                {photoImagesList.filter(isValidHttpOrDataUrl).map((url, idx) => (
+                                  <div
+                                    key={`${url}-${idx}`}
+                                    className="group relative size-11 rounded-md overflow-hidden border border-slate-200 bg-slate-100 shrink-0 shadow-2xs"
+                                  >
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img
+                                      src={resolveRenderableImageSrc(url)}
+                                      alt={`Photo ${idx + 1}`}
+                                      className="size-full object-cover"
+                                      onError={(e) => {
+                                        (e.target as HTMLImageElement).style.display = "none";
+                                      }}
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const updated = photoImagesList.filter((_, i) => i !== idx);
+                                        setPhotoImagesList(updated);
+                                        if (photoImageSrc === url) {
+                                          setPhotoImageSrc(updated[0] || "");
+                                        }
+                                      }}
+                                      className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition cursor-pointer"
+                                      title="Remove this photo"
+                                    >
+                                      <Trash2 className="size-3" />
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ) : null}
+                        </div>
+                      ) : (
+                        /* Method 2: Google Drive Links */
+                        <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-2.5 space-y-1.5">
+                          <Label htmlFor="ph-bulk-drive" className="text-xs font-medium text-slate-700">
+                            Paste Google Drive Photo Links (one per line)
+                          </Label>
+                          <Textarea
+                            id="ph-bulk-drive"
+                            rows={2}
+                            className="text-xs font-mono resize-none"
+                            placeholder="https://drive.google.com/file/d/..."
+                            onChange={(e) => {
+                              const val = e.target.value.trim();
+                              if (!val) {
+                                setPhotoImagesList([]);
+                                setPhotoImageSrc("/images/gallery/wedding-stage.jpg");
+                                return;
+                              }
+                              const extracted = extractDriveUrlsFromText(val);
+                              if (extracted.length > 0) {
+                                setPhotoImagesList(extracted);
+                                setPhotoImageSrc(extracted[0] || "");
+                              } else if (val.startsWith("http")) {
+                                const single = convertDriveUrlToDirectLink(val);
+                                setPhotoImageSrc(single);
+                                setPhotoImagesList([single]);
+                              }
+                            }}
+                          />
+                          {photoImagesList.length > 0 && isValidHttpOrDataUrl(photoImagesList[0]) ? (
+                            <p className="text-[11px] font-semibold text-emerald-600">
+                              ✓ {photoImagesList.length} photo link(s) ready
+                            </p>
+                          ) : null}
+                        </div>
+                      )}
                     </div>
 
-                    <div className="flex justify-end gap-2 pt-2">
-                      <GradientButton type="submit">
-                        {photoImagesList.length > 1
-                          ? `Upload ${photoImagesList.length} Photos to Event`
+                    {/* Fixed Compact Footer */}
+                    <div className="px-4 py-2.5 border-t border-[#EBDCFB]/70 bg-slate-50 flex items-center justify-end gap-2 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setAddPhotoOpen(false)}
+                        className="px-3 py-1.5 text-xs text-slate-600 hover:text-slate-900 rounded-md transition cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                      <GradientButton type="submit" disabled={isUploadingPhotos}>
+                        {isUploadingPhotos
+                          ? "Uploading to Cloudinary..."
+                          : photoImagesList.length > 1
+                          ? `Publish ${photoImagesList.length} Photos`
                           : "Upload & Save Photo"}
                       </GradientButton>
                     </div>
@@ -982,28 +1181,29 @@ export function AdminDashboard(): React.ReactElement {
                       <input
                         type="file"
                         accept="video/*"
-                        className="mt-1.5 block w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-[#EBDCFB] file:text-[#7d5ea1] hover:file:bg-[#2D2238] hover:file:text-white"
+                        disabled={isUploadingVideo}
+                        className="mt-1.5 block w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-[#EBDCFB] file:text-[#7d5ea1] hover:file:bg-[#2D2238] hover:file:text-white disabled:opacity-50"
                         onChange={async (e) => {
                           const file = e.target.files?.[0];
-                          if (file) {
-                            const formData = new FormData();
-                            formData.append("file", file);
-                            try {
-                              const res = await fetch("/api/upload", { method: "POST", body: formData });
-                              const data = await res.json();
-                              if (data.ok && data.url) {
-                                setVideoSrc(data.url);
-                                return;
-                              }
-                            } catch {
-                              // Fallback
-                            }
-                            const reader = new FileReader();
-                            reader.onloadend = () => setVideoSrc(reader.result as string);
-                            reader.readAsDataURL(file);
+                          if (!file) return;
+                          setIsUploadingVideo(true);
+                          try {
+                            const res = await uploadFileToCloudinary(file, { folder: "shree_velora/videos" });
+                            setVideoSrc(res.url);
+                            toast.success("Video uploaded to Cloudinary CDN!");
+                          } catch (err) {
+                            const msg = err instanceof Error ? err.message : "Video upload failed";
+                            toast.error(msg);
+                          } finally {
+                            setIsUploadingVideo(false);
                           }
                         }}
                       />
+                      {isUploadingVideo ? (
+                        <p className="mt-1 text-xs text-purple-600 flex items-center gap-1.5 font-medium">
+                          <Loader2 className="size-3.5 animate-spin" /> Uploading video to Cloudinary...
+                        </p>
+                      ) : null}
                       <Input
                         id="vd-src"
                         className="mt-2"
@@ -1199,9 +1399,15 @@ export function AdminDashboard(): React.ReactElement {
                         className="mt-1 text-xs cursor-pointer"
                         onChange={async (e) => {
                           const file = e.target.files?.[0];
-                          if (file) {
-                            const compressed = await compressImageFile(file);
-                            updateAboutCardImage(card.id, compressed);
+                          if (!file) return;
+                          try {
+                            toast.loading("Uploading to Cloudinary...", { id: `card-upload-${card.id}` });
+                            const res = await uploadFileToCloudinary(file, { folder: "shree_velora/about" });
+                            updateAboutCardImage(card.id, res.url);
+                            toast.success("Card photo uploaded to Cloudinary CDN!", { id: `card-upload-${card.id}` });
+                          } catch (err) {
+                            const msg = err instanceof Error ? err.message : "Failed to upload photo";
+                            toast.error(msg, { id: `card-upload-${card.id}` });
                           }
                         }}
                       />

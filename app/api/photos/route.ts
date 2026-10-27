@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { dedupePhotosByImageSrc } from "@/lib/photo-utils";
 import { convertDriveUrlToDirectLink } from "@/lib/utils";
+import { deleteFromCloudinary, extractCloudinaryPublicId } from "@/lib/cloudinary";
 import { PhotoModel } from "@/models/Photo";
 
 export const runtime = "nodejs";
@@ -17,6 +18,8 @@ type PhotoPayload = {
   isFeatured?: boolean;
   imageSrc?: string;
   alt?: string;
+  publicId?: string;
+  storage?: string;
 };
 
 function serializePhoto(photo: {
@@ -29,6 +32,8 @@ function serializePhoto(photo: {
   isFeatured?: boolean;
   imageSrc: string;
   alt: string;
+  publicId?: string;
+  storage?: string;
   createdAt?: Date;
 }) {
   return {
@@ -39,7 +44,9 @@ function serializePhoto(photo: {
     eventTitle: photo.eventTitle || "",
     isFeatured: Boolean(photo.isFeatured),
     imageSrc: photo.imageSrc,
-    alt: photo.alt || photo.title
+    alt: photo.alt || photo.title,
+    publicId: photo.publicId || extractCloudinaryPublicId(photo.imageSrc) || "",
+    storage: photo.storage || (photo.imageSrc.includes("cloudinary") ? "cloudinary" : "external")
   };
 }
 
@@ -64,6 +71,10 @@ async function saveSinglePhoto(body: PhotoPayload): Promise<NextResponse> {
     return NextResponse.json({ ok: false, message: "imageSrc is required" }, { status: 400 });
   }
 
+  const directLink = convertDriveUrlToDirectLink(body.imageSrc);
+  const detectedPublicId = body.publicId || extractCloudinaryPublicId(directLink) || "";
+  const detectedStorage = body.storage || (directLink.includes("cloudinary") ? "cloudinary" : "external");
+
   await connectToDatabase();
   const photo = await PhotoModel.create({
     title: body.title || "Gallery Photo",
@@ -71,23 +82,33 @@ async function saveSinglePhoto(body: PhotoPayload): Promise<NextResponse> {
     eventId: body.eventId || "",
     eventTitle: body.eventTitle || "",
     isFeatured: Boolean(body.isFeatured),
-    imageSrc: convertDriveUrlToDirectLink(body.imageSrc),
-    alt: body.alt || body.title || "Gallery Photo"
+    imageSrc: directLink,
+    alt: body.alt || body.title || "Gallery Photo",
+    publicId: detectedPublicId,
+    storage: detectedStorage
   });
 
   return NextResponse.json({ ok: true, data: serializePhoto(photo) });
 }
 
 async function saveBulkPhotos(body: PhotoPayload[]): Promise<NextResponse> {
-  const formatted = dedupePhotosByImageSrc(body.map((item, idx) => ({
-    title: item.title || `Gallery Photo ${idx + 1}`,
-    category: item.category || "General",
-    eventId: item.eventId || "",
-    eventTitle: item.eventTitle || "",
-    isFeatured: Boolean(item.isFeatured),
-    imageSrc: convertDriveUrlToDirectLink(item.imageSrc || ""),
-    alt: item.alt || item.title || "Gallery Photo"
-  })));
+  const formatted = dedupePhotosByImageSrc(body.map((item, idx) => {
+    const directLink = convertDriveUrlToDirectLink(item.imageSrc || "");
+    const detectedPublicId = item.publicId || extractCloudinaryPublicId(directLink) || "";
+    const detectedStorage = item.storage || (directLink.includes("cloudinary") ? "cloudinary" : "external");
+
+    return {
+      title: item.title || `Gallery Photo ${idx + 1}`,
+      category: item.category || "General",
+      eventId: item.eventId || "",
+      eventTitle: item.eventTitle || "",
+      isFeatured: Boolean(item.isFeatured),
+      imageSrc: directLink,
+      alt: item.alt || item.title || "Gallery Photo",
+      publicId: detectedPublicId,
+      storage: detectedStorage
+    };
+  }));
 
   const validPhotos = formatted.filter((item) => item.imageSrc);
   if (validPhotos.length === 0) {
@@ -107,13 +128,17 @@ async function saveBulkPhotos(body: PhotoPayload[]): Promise<NextResponse> {
 /** POST /api/photos - Add single or multiple photos and persist them for all browsers */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    const body = (await request.json()) as PhotoPayload | PhotoPayload[];
+    const body = (await request.json().catch(() => null)) as PhotoPayload | PhotoPayload[] | null;
 
-    if (Array.isArray(body)) {
-      return saveBulkPhotos(body);
+    if (!body) {
+      return NextResponse.json({ ok: false, message: "Invalid or empty JSON body" }, { status: 400 });
     }
 
-    return saveSinglePhoto(body);
+    if (Array.isArray(body)) {
+      return await saveBulkPhotos(body);
+    }
+
+    return await saveSinglePhoto(body);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to save photo";
     return NextResponse.json({ ok: false, message }, { status: 500 });
@@ -123,8 +148,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 /** PUT /api/photos - Toggle featured photo status */
 export async function PUT(request: NextRequest): Promise<NextResponse> {
   try {
-    const body = await request.json();
-    const { id, isFeatured } = body as { id?: string; isFeatured?: boolean };
+    const body = await request.json().catch(() => null);
+    const { id, isFeatured } = (body || {}) as { id?: string; isFeatured?: boolean };
 
     if (!id) {
       return NextResponse.json({ ok: false, message: "id is required" }, { status: 400 });
@@ -134,12 +159,14 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
     await PhotoModel.findByIdAndUpdate(id, { isFeatured: Boolean(isFeatured) });
 
     return NextResponse.json({ ok: true, message: "Photo updated" });
-  } catch {
-    return NextResponse.json({ ok: false, message: "Failed to update photo" }, { status: 500 });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to update photo";
+    return NextResponse.json({ ok: false, message }, { status: 500 });
   }
 }
 
-/** DELETE /api/photos - Delete photo(s) */
+
+/** DELETE /api/photos - Delete photo(s) and cleanup from Cloudinary */
 export async function DELETE(request: NextRequest): Promise<NextResponse> {
   try {
     const { searchParams } = new URL(request.url);
@@ -149,12 +176,27 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
     await connectToDatabase();
 
     if (deleteAll) {
+      // Find all Cloudinary photos to delete assets if possible
+      const allPhotos = await PhotoModel.find({}).lean();
+      for (const p of allPhotos) {
+        const pubId = p.publicId || extractCloudinaryPublicId(p.imageSrc);
+        if (pubId) {
+          await deleteFromCloudinary(pubId).catch(() => null);
+        }
+      }
       await PhotoModel.deleteMany({});
       return NextResponse.json({ ok: true, message: "All photos cleared" });
     }
 
     if (id) {
-      await PhotoModel.findByIdAndDelete(id);
+      const existing = await PhotoModel.findById(id).lean();
+      if (existing) {
+        const pubId = existing.publicId || extractCloudinaryPublicId(existing.imageSrc);
+        if (pubId) {
+          await deleteFromCloudinary(pubId).catch(() => null);
+        }
+        await PhotoModel.findByIdAndDelete(id);
+      }
     }
 
     return NextResponse.json({ ok: true, message: "Photo deleted" });

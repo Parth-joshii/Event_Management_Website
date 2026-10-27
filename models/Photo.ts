@@ -8,6 +8,8 @@ export interface IPhoto extends Document {
   isFeatured?: boolean;
   imageSrc: string;
   alt: string;
+  publicId?: string;
+  storage?: string;
   createdAt: Date;
 }
 
@@ -19,7 +21,9 @@ const PhotoSchema = new Schema<IPhoto>(
     eventTitle: { type: String, default: "" },
     isFeatured: { type: Boolean, default: false },
     imageSrc: { type: String, required: true },
-    alt: { type: String, default: "" }
+    alt: { type: String, default: "" },
+    publicId: { type: String, default: "" },
+    storage: { type: String, default: "cloudinary" }
   },
   {
     collection: "photos",

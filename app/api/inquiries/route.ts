@@ -38,7 +38,7 @@ export async function GET(): Promise<NextResponse> {
 /** POST /api/inquiries - Accepts validated public inquiries & saves to Google Sheets & Email */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    const payload = await request.json();
+    const payload = (await request.json().catch(() => null)) || {};
     const inquiry = inquirySchema.parse(payload);
     const referenceNumber = createReferenceNumber();
     const context = {
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 /** PUT /api/inquiries - Update inquiry status */
 export async function PUT(request: NextRequest): Promise<NextResponse> {
   try {
-    const body = await request.json();
+    const body = (await request.json().catch(() => null)) || {};
     const { id, status } = body;
 
     globalInquiriesStore = globalInquiriesStore.map((inq) =>

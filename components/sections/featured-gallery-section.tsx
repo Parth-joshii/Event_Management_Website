@@ -139,58 +139,62 @@ export function FeaturedGallerySection(): React.ReactElement {
             </p>
           </div>
         ) : (
-          <div className="mt-12 grid auto-rows-[19rem] gap-5 md:grid-cols-3">
+          <div className="mt-12 columns-1 gap-6 sm:columns-2 lg:columns-3 [column-fill:_balance]">
             {filteredItems.map((item, index) => (
-              <Reveal
-                key={item.id || item.title}
-                className={cn(
-                  index % 4 === 0 || index % 5 === 3 ? "md:row-span-2 md:auto-rows-auto" : ""
-                )}
-                delay={index * 0.05}
-              >
-                <article
-                  onClick={() => {
-                    if (item.photos.length > 1) {
-                      setActiveAlbum(item);
-                    } else {
-                      setActiveLightboxPhoto(item.photos[0] || null);
-                    }
-                  }}
-                  className="group relative size-full cursor-pointer overflow-hidden rounded-xl border border-white/80 bg-[#2D2238] shadow-[0_24px_80px_rgba(45,34,56,0.1)]"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    alt={item.alt || item.title}
-                    className="size-full object-cover transition duration-700 group-hover:scale-110"
-                    src={resolveRenderableImageSrc(item.imageSrc)}
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src =
-                        "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80";
+              <div key={item.id || item.title} className="mb-6 break-inside-avoid">
+                <Reveal delay={index * 0.04}>
+                  <article
+                    onClick={() => {
+                      if (item.photos.length > 1) {
+                        setActiveAlbum(item);
+                      } else {
+                        setActiveLightboxPhoto(item.photos[0] || null);
+                      }
                     }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#2D2238]/85 via-transparent to-transparent opacity-85 transition duration-300 group-hover:opacity-95" />
+                    className="group relative w-full cursor-pointer overflow-hidden rounded-2xl border border-white/80 bg-[#1E1428] shadow-[0_20px_60px_rgba(45,34,56,0.14)] transition-all duration-500 hover:-translate-y-1.5 hover:shadow-[0_28px_80px_rgba(45,34,56,0.28)] hover:border-[#D4AF37]/60"
+                  >
+                    {/* Natural Image Box - Automatically adapts to photo's natural aspect ratio */}
+                    <div className="relative w-full overflow-hidden bg-[#181122]">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        alt={item.alt || item.title}
+                        className="w-full h-auto block object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                        src={resolveRenderableImageSrc(item.imageSrc)}
+                        loading="lazy"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src =
+                            "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80";
+                        }}
+                      />
+                      {/* Targeted bottom gradient for sharp contrast on captions while keeping the upper photo completely clear */}
+                      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#1F1629]/95 via-[#1F1629]/55 to-transparent transition-opacity duration-300 group-hover:opacity-95" />
+                    </div>
 
-                  {/* Album Photo Count Badge */}
-                  {item.photoCount > 1 ? (
-                    <span className="absolute top-4 left-4 inline-flex items-center gap-1.5 rounded-full border border-[#D4AF37]/60 bg-[#2D2238]/85 px-3 py-1 text-xs font-semibold text-[#D4AF37] backdrop-blur shadow-sm">
-                      <Images className="size-3.5" />
-                      {item.photoCount} Photos
-                    </span>
-                  ) : null}
+                    {/* Album Photo Count Badge */}
+                    {item.photoCount > 1 ? (
+                      <span className="absolute top-3.5 left-3.5 z-10 inline-flex items-center gap-1.5 rounded-full border border-[#D4AF37]/60 bg-[#1E1428]/90 px-3 py-1 text-xs font-semibold text-[#D4AF37] backdrop-blur-md shadow-lg">
+                        <Images className="size-3.5" />
+                        {item.photoCount} Photos
+                      </span>
+                    ) : null}
 
-                  {/* Hover overlay button */}
-                  <div className="absolute top-4 right-4 flex size-10 items-center justify-center rounded-full bg-white/20 text-white opacity-0 backdrop-blur transition duration-300 group-hover:opacity-100">
-                    <Maximize2 className="size-4" />
-                  </div>
+                    {/* Hover overlay zoom button */}
+                    <div className="absolute top-3.5 right-3.5 z-10 flex size-9 items-center justify-center rounded-full bg-black/40 text-white opacity-0 backdrop-blur-md transition duration-300 group-hover:opacity-100 shadow-md">
+                      <Maximize2 className="size-4 text-[#D4AF37]" />
+                    </div>
 
-                  <div className="absolute inset-x-0 bottom-0 p-6 text-white">
-                    <Badge className="border-[#D4AF37]/60 bg-[#D4AF37]/20 text-[10px] font-semibold uppercase text-[#D4AF37]">
-                      {item.category}
-                    </Badge>
-                    <h3 className="mt-2 text-xl font-bold font-display">{item.title}</h3>
-                  </div>
-                </article>
-              </Reveal>
+                    {/* Bottom Caption and Category */}
+                    <div className="absolute inset-x-0 bottom-0 z-10 p-5 text-white">
+                      <Badge className="border-[#D4AF37]/60 bg-[#D4AF37]/20 text-[10px] font-semibold uppercase tracking-wider text-[#D4AF37]">
+                        {item.category}
+                      </Badge>
+                      <h3 className="mt-1.5 text-lg sm:text-xl font-bold font-display leading-snug drop-shadow text-white">
+                        {item.title}
+                      </h3>
+                    </div>
+                  </article>
+                </Reveal>
+              </div>
             ))}
           </div>
         )}
@@ -223,18 +227,18 @@ export function FeaturedGallerySection(): React.ReactElement {
                   </button>
                 </div>
 
-                <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="mt-6 columns-1 sm:columns-2 md:columns-3 gap-4 [column-fill:_balance]">
                   {activeAlbum.photos.map((ph) => (
                     <div
                       key={ph.id}
                       onClick={() => setActiveLightboxPhoto(ph)}
-                      className="group relative h-48 overflow-hidden rounded-xl border border-white/20 bg-black/40 cursor-pointer"
+                      className="group relative mb-4 break-inside-avoid overflow-hidden rounded-xl border border-white/20 bg-black/40 cursor-pointer shadow-md transition hover:-translate-y-1 hover:border-[#D4AF37]/60"
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={resolveRenderableImageSrc(ph.imageSrc)}
                         alt={ph.title}
-                        className="size-full object-cover transition duration-500 group-hover:scale-105"
+                        className="w-full h-auto block object-cover transition duration-500 group-hover:scale-105"
                         onError={(e) => {
                           (e.target as HTMLImageElement).src =
                             "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80";

@@ -24,6 +24,8 @@ export interface PhotoItem {
   isFeatured?: boolean;
   imageSrc: string;
   alt: string;
+  publicId?: string;
+  storage?: string;
 }
 
 export interface VideoItem {
@@ -237,8 +239,8 @@ export const useContentStore = create<ContentState>()(
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(reviewData)
           });
-          const data = await res.json();
-          if (data.ok && data.data?.id) {
+          const data = await res.json().catch(() => null);
+          if (data?.ok && data.data?.id) {
             set({
               reviews: get().reviews.map((r) => (r.id === localId ? { ...r, id: data.data.id } : r))
             });
@@ -333,8 +335,8 @@ export const useContentStore = create<ContentState>()(
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(eventData)
           });
-          const data = await res.json();
-          if (data.ok && data.data?.id) {
+          const data = await res.json().catch(() => null);
+          if (data?.ok && data.data?.id) {
             set({
               events: get().events.map((ev) => (ev.id === localId ? { ...ev, id: data.data.id } : ev))
             });
@@ -379,8 +381,8 @@ export const useContentStore = create<ContentState>()(
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(photoData)
           });
-          const data = await res.json();
-          if (data.ok && data.data?.id) {
+          const data = await res.json().catch(() => null);
+          if (data?.ok && data.data?.id) {
             set({
               photos: get().photos.map((ph) => (ph.id === localId ? { ...ph, id: data.data.id } : ph))
             });
@@ -403,8 +405,8 @@ export const useContentStore = create<ContentState>()(
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(photosList)
           });
-          const data = await res.json();
-          if (data.ok && Array.isArray(data.data)) {
+          const data = await res.json().catch(() => null);
+          if (data?.ok && Array.isArray(data.data)) {
             const map = new Map<string, PhotoItem>();
             get().photos.forEach((ph) => map.set(ph.id, ph));
             data.data.forEach((p: PhotoItem) => map.set(p.id, p));
@@ -466,8 +468,8 @@ export const useContentStore = create<ContentState>()(
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(videoData)
           });
-          const data = await res.json();
-          if (data.ok && data.data?.id) {
+          const data = await res.json().catch(() => null);
+          if (data?.ok && data.data?.id) {
             set({
               videos: get().videos.map((v) => (v.id === localId ? { ...v, id: data.data.id } : v))
             });

@@ -35,3 +35,5 @@ Thumbs.db
 # local source videos and generated inspection frames
 /*.mp4
 /*.preview.jpg
+/*-removebg-preview.png
+

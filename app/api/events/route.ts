@@ -15,10 +15,10 @@ export async function GET(): Promise<NextResponse> {
 /** POST /api/events - Add new event & sync live */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    const body = await request.json();
+    const body = await request.json().catch(() => null);
     const cloud = await getCloudData();
 
-    if (!body.title || !body.description || !body.imageSrc) {
+    if (!body || !body.title || !body.description || !body.imageSrc) {
       return NextResponse.json(
         { ok: false, message: "Title, description, and imageSrc are required" },
         { status: 400 }

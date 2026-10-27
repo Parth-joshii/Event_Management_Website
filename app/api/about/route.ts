@@ -15,7 +15,7 @@ export async function GET(): Promise<NextResponse> {
 /** POST /api/about - Update an about card image and sync across all browsers */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    const body = await request.json();
+    const body = (await request.json().catch(() => null)) || {};
     const { id, imageSrc } = body;
 
     if (!id) {

@@ -104,7 +104,7 @@ export async function getCloudData(): Promise<CloudStoreData> {
       next: { revalidate: 0 }
     });
     if (res.ok) {
-      const data = await res.json();
+      const data = await res.json().catch(() => null);
       if (data && typeof data === "object") {
         memoryCache = {
           photos: Array.isArray(data.photos) ? data.photos : memoryCache.photos,

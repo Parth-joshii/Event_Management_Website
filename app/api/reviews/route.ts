@@ -31,7 +31,7 @@ export async function GET(): Promise<NextResponse> {
 /** POST /api/reviews - Add a new review */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    const body = await request.json();
+    const body = (await request.json().catch(() => null)) || {};
     const { authorName, roleOrEvent, rating, comment, avatarSrc } = body;
 
     if (!authorName || !comment) {

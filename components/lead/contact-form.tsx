@@ -55,10 +55,10 @@ export function ContactForm(): React.ReactElement {
       headers: { "Content-Type": "application/json" },
       method: "POST"
     });
-    const payload = (await response.json()) as InquiryResponse;
+    const payload = (await response.json().catch(() => null)) as InquiryResponse | null;
 
-    if (!response.ok || !payload.ok) {
-      setError(payload.message ?? "Unable to submit inquiry.");
+    if (!response.ok || !payload || !payload.ok) {
+      setError(payload?.message ?? "Unable to submit inquiry.");
       return;
     }
 

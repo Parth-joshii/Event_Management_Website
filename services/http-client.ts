@@ -45,5 +45,14 @@ export async function apiRequest<TResponse, TBody = unknown>(
     return undefined as TResponse;
   }
 
-  return (await response.json()) as TResponse;
+  const text = await response.text();
+  if (!text || !text.trim()) {
+    return undefined as TResponse;
+  }
+
+  try {
+    return JSON.parse(text) as TResponse;
+  } catch {
+    return undefined as TResponse;
+  }
 }
