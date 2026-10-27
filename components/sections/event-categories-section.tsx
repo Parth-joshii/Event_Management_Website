@@ -112,6 +112,7 @@ export function EventCategoriesSection(): React.ReactElement {
         {/* Modal: Photos belonging to the clicked Event */}
         <Dialog open={Boolean(selectedEvent)} onOpenChange={() => setSelectedEvent(null)}>
           <DialogContent
+            showCloseButton={false}
             data-lenis-prevent
             className="max-w-4xl max-h-[88vh] overflow-y-auto bg-[#2D2238] border border-white/20 text-white p-6 sm:p-8 rounded-2xl shadow-2xl custom-scrollbar overscroll-contain"
           >
@@ -195,7 +196,7 @@ export function EventCategoriesSection(): React.ReactElement {
 
         {/* Lightbox for zooming event photo */}
         <Dialog open={Boolean(activePhotoLightbox)} onOpenChange={() => setActivePhotoLightbox(null)}>
-          <DialogContent className="max-w-4xl border-none bg-transparent p-0 shadow-none text-white">
+          <DialogContent showCloseButton={false} className="max-w-4xl border-none bg-transparent p-0 shadow-none text-white">
             <DialogTitle className="sr-only">{activePhotoLightbox?.title || "Zoom Photo"}</DialogTitle>
             {activePhotoLightbox ? (
               <div className="relative overflow-hidden rounded-2xl border border-white/20 bg-[#2D2238] p-4 text-center shadow-2xl">

@@ -198,6 +198,7 @@ export function FeaturedGallerySection(): React.ReactElement {
         {/* Modal 1: Album Folder Lightbox Dialog (Multiple Photos in Event) */}
         <Dialog open={Boolean(activeAlbum)} onOpenChange={() => setActiveAlbum(null)}>
           <DialogContent
+            showCloseButton={false}
             data-lenis-prevent
             className="max-w-5xl max-h-[88vh] overflow-y-auto bg-[#2D2238] border border-white/20 text-white p-6 sm:p-8 rounded-2xl shadow-2xl custom-scrollbar overscroll-contain"
           >
@@ -252,7 +253,7 @@ export function FeaturedGallerySection(): React.ReactElement {
 
         {/* Modal 2: Single Photo Full-screen Lightbox Dialog */}
         <Dialog open={Boolean(activeLightboxPhoto)} onOpenChange={() => setActiveLightboxPhoto(null)}>
-          <DialogContent className="max-w-4xl border-none bg-transparent p-0 shadow-none text-white">
+          <DialogContent showCloseButton={false} className="max-w-4xl border-none bg-transparent p-0 shadow-none text-white">
             <DialogTitle className="sr-only">
               {activeLightboxPhoto?.title || "Photo Lightbox"}
             </DialogTitle>
