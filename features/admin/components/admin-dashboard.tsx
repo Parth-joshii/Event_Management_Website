@@ -143,7 +143,7 @@ export function AdminDashboard(): React.ReactElement {
   const [eventDescription, setEventDescription] = React.useState("");
   const [eventDate, setEventDate] = React.useState("");
   const [eventLocation, setEventLocation] = React.useState("India");
-  const [eventImageSrc, setEventImageSrc] = React.useState("/images/gallery/wedding-stage.jpg");
+  const [eventImageSrc, setEventImageSrc] = React.useState("");
 
   // New Photo Form state
   const [photoTitle, setPhotoTitle] = React.useState("");
@@ -151,7 +151,7 @@ export function AdminDashboard(): React.ReactElement {
   const [selectedEventId, setSelectedEventId] = React.useState("");
   const [isFeaturedPhoto, setIsFeaturedPhoto] = React.useState(false);
   const [photoImagesList, setPhotoImagesList] = React.useState<string[]>([]);
-  const [photoImageSrc, setPhotoImageSrc] = React.useState("/images/gallery/wedding-stage.jpg");
+  const [photoImageSrc, setPhotoImageSrc] = React.useState("");
   const [photoUploadMethod, setPhotoUploadMethod] = React.useState<"computer" | "drive">("computer");
 
   // New Video Form state
@@ -196,7 +196,7 @@ export function AdminDashboard(): React.ReactElement {
     e.preventDefault();
     if (isSavingPhoto || isUploadingPhotos) return;
 
-    if (photoImagesList.length === 0 && (!photoImageSrc || photoImageSrc === "/images/gallery/wedding-stage.jpg")) {
+    if (photoImagesList.length === 0 && !photoImageSrc.trim()) {
       toast.error("Please choose or upload a photo first.");
       return;
     }
@@ -219,7 +219,11 @@ export function AdminDashboard(): React.ReactElement {
         await useContentStore.getState().addMultiplePhotos(bulkItems);
         toast.success(`✓ Published ${bulkItems.length} photos to gallery!`);
       } else {
-        const src = photoImagesList[0] || photoImageSrc || "/images/gallery/wedding-stage.jpg";
+        const src = photoImagesList[0] || photoImageSrc.trim();
+        if (!src) {
+          toast.error("Please choose or upload a photo first.");
+          return;
+        }
         const title = photoTitle.trim() || matchedEvent?.title || "Event Photo";
         await addPhoto({
           title,
@@ -235,7 +239,7 @@ export function AdminDashboard(): React.ReactElement {
 
       setPhotoTitle("");
       setPhotoImagesList([]);
-      setPhotoImageSrc("/images/gallery/wedding-stage.jpg");
+      setPhotoImageSrc("");
       setSelectedEventId("");
       setIsFeaturedPhoto(false);
       setAddPhotoOpen(false);
@@ -829,7 +833,7 @@ export function AdminDashboard(): React.ReactElement {
                     setAddPhotoOpen(open);
                     if (!open) {
                       setPhotoImagesList([]);
-                      setPhotoImageSrc("/images/gallery/wedding-stage.jpg");
+                      setPhotoImageSrc("");
                       setPhotoTitle("");
                     }
                   }}

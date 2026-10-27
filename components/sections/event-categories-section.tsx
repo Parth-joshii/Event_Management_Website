@@ -45,68 +45,81 @@ export function EventCategoriesSection(): React.ReactElement {
           />
         </Reveal>
 
-        <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {events.map((category, index) => {
-            const count = photos.filter(
-              (p) =>
-                p.eventId === category.id ||
-                p.eventTitle?.toLowerCase() === category.title.toLowerCase() ||
-                p.category.toLowerCase() === category.category.toLowerCase()
-            ).length;
+        {events.length === 0 ? (
+          <div className="mt-12 rounded-2xl border border-white/20 bg-white/5 px-6 py-10 text-center backdrop-blur">
+            <p className="font-semibold text-white">No signature events published yet.</p>
+            <p className="mt-2 text-sm text-[#EBDCFB]/70">
+              Events added in the Admin panel will appear here.
+            </p>
+          </div>
+        ) : (
+          <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {events.map((category, index) => {
+              const count = photos.filter(
+                (p) =>
+                  p.eventId === category.id ||
+                  p.eventTitle?.toLowerCase() === category.title.toLowerCase() ||
+                  p.category.toLowerCase() === category.category.toLowerCase()
+              ).length;
 
-            return (
-              <Reveal delay={index * 0.05} key={category.id || category.title}>
-                <div
-                  onClick={() => setSelectedEvent(category)}
-                  className="group relative block overflow-hidden rounded-xl border border-white/20 shadow-[0_26px_90px_rgba(45,34,56,0.18)] cursor-pointer"
-                >
-                  <div className="h-80 w-full overflow-hidden bg-[#2D2238]">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      alt={category.imageAlt || category.title}
-                      className="size-full object-cover transition duration-700 group-hover:scale-110"
-                      src={resolveRenderableImageSrc(category.imageSrc)}
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = "/images/gallery/wedding-stage.jpg";
-                      }}
-                    />
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#2D2238]/90 via-[#2D2238]/30 to-transparent" />
-                  
-                  {count > 0 ? (
-                    <span className="absolute top-4 right-4 inline-flex items-center gap-1.5 rounded-full border border-[#D4AF37]/60 bg-[#2D2238]/85 px-3 py-1 text-xs font-semibold text-[#D4AF37] backdrop-blur shadow-sm">
-                      <Images className="size-3.5" />
-                      {count} {count === 1 ? "Photo" : "Photos"}
-                    </span>
-                  ) : null}
-
-                  <div className="absolute inset-x-0 bottom-0 p-6 text-white">
-                    <div className="mb-3 flex size-10 items-center justify-center rounded-full border border-white/25 bg-white/16 backdrop-blur text-[#D4AF37]">
-                      <Sparkles aria-hidden="true" className="size-4" />
+              return (
+                <Reveal delay={index * 0.05} key={category.id || category.title}>
+                  <div
+                    onClick={() => setSelectedEvent(category)}
+                    className="group relative block overflow-hidden rounded-xl border border-white/20 shadow-[0_26px_90px_rgba(45,34,56,0.18)] cursor-pointer"
+                  >
+                    <div className="h-80 w-full overflow-hidden bg-[#2D2238]">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        alt={category.imageAlt || category.title}
+                        className="size-full object-cover transition duration-700 group-hover:scale-110"
+                        src={resolveRenderableImageSrc(category.imageSrc)}
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src =
+                            "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80";
+                        }}
+                      />
                     </div>
-                    <h3 className="text-2xl font-semibold font-display">{category.title}</h3>
-                    <p className="mt-2 text-sm leading-6 text-white/76 line-clamp-2">
-                      {category.description}
-                    </p>
-                    <span className="mt-4 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/15 px-4 py-1.5 text-xs font-semibold backdrop-blur transition duration-300 group-hover:border-[#D4AF37] group-hover:bg-[#2D2238] group-hover:text-[#D4AF37]">
-                      View Event Gallery
-                      <ArrowUpRight aria-hidden="true" className="size-3.5" />
-                    </span>
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#2D2238]/90 via-[#2D2238]/30 to-transparent" />
+                    
+                    {count > 0 ? (
+                      <span className="absolute top-4 right-4 inline-flex items-center gap-1.5 rounded-full border border-[#D4AF37]/60 bg-[#2D2238]/85 px-3 py-1 text-xs font-semibold text-[#D4AF37] backdrop-blur shadow-sm">
+                        <Images className="size-3.5" />
+                        {count} {count === 1 ? "Photo" : "Photos"}
+                      </span>
+                    ) : null}
+
+                    <div className="absolute inset-x-0 bottom-0 p-6 text-white">
+                      <div className="mb-3 flex size-10 items-center justify-center rounded-full border border-white/25 bg-white/16 backdrop-blur text-[#D4AF37]">
+                        <Sparkles aria-hidden="true" className="size-4" />
+                      </div>
+                      <h3 className="text-2xl font-semibold font-display">{category.title}</h3>
+                      <p className="mt-2 text-sm leading-6 text-white/76 line-clamp-2">
+                        {category.description}
+                      </p>
+                      <span className="mt-4 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/15 px-4 py-1.5 text-xs font-semibold backdrop-blur transition duration-300 group-hover:border-[#D4AF37] group-hover:bg-[#2D2238] group-hover:text-[#D4AF37]">
+                        View Event Gallery
+                        <ArrowUpRight aria-hidden="true" className="size-3.5" />
+                      </span>
+                    </div>
                   </div>
-                </div>
-              </Reveal>
-            );
-          })}
-        </div>
+                </Reveal>
+              );
+            })}
+          </div>
+        )}
 
         {/* Modal: Photos belonging to the clicked Event */}
         <Dialog open={Boolean(selectedEvent)} onOpenChange={() => setSelectedEvent(null)}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-[#2D2238] border border-white/20 text-white p-6 sm:p-8 rounded-2xl shadow-2xl">
+          <DialogContent
+            data-lenis-prevent
+            className="max-w-4xl max-h-[88vh] overflow-y-auto bg-[#2D2238] border border-white/20 text-white p-6 sm:p-8 rounded-2xl shadow-2xl custom-scrollbar overscroll-contain"
+          >
             <DialogTitle className="sr-only">{selectedEvent?.title || "Event Gallery"}</DialogTitle>
 
             {selectedEvent ? (
               <div>
-                <div className="flex items-start justify-between border-b border-white/15 pb-4">
+                <div className="sticky top-0 z-20 -mt-2 bg-[#2D2238]/95 backdrop-blur-md flex items-start justify-between border-b border-white/15 pb-4 pt-2">
                   <div>
                     <span className="text-xs font-semibold text-[#D4AF37] uppercase tracking-wider">
                       {selectedEvent.category} • {selectedEvent.location || "India"}

@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import mongoose from "mongoose";
 import { connectToDatabase } from "@/lib/mongodb";
 import { dedupePhotosByImageSrc } from "@/lib/photo-utils";
 import { convertDriveUrlToDirectLink } from "@/lib/utils";
@@ -171,6 +172,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
+    const src = searchParams.get("src");
     const deleteAll = searchParams.get("all") === "true";
 
     await connectToDatabase();
@@ -188,19 +190,32 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ ok: true, message: "All photos cleared" });
     }
 
-    if (id) {
-      const existing = await PhotoModel.findById(id).lean();
+    if (id || src) {
+      let existing = null;
+      if (id && mongoose.isValidObjectId(id)) {
+        existing = await PhotoModel.findById(id).lean();
+      }
+      if (!existing && (src || id)) {
+        existing = await PhotoModel.findOne({
+          $or: [
+            ...(src ? [{ imageSrc: src }] : []),
+            ...(id ? [{ publicId: id }, { imageSrc: id }] : [])
+          ]
+        }).lean();
+      }
+
       if (existing) {
         const pubId = existing.publicId || extractCloudinaryPublicId(existing.imageSrc);
         if (pubId) {
           await deleteFromCloudinary(pubId).catch(() => null);
         }
-        await PhotoModel.findByIdAndDelete(id);
+        await PhotoModel.deleteOne({ _id: existing._id });
       }
     }
 
     return NextResponse.json({ ok: true, message: "Photo deleted" });
-  } catch {
-    return NextResponse.json({ ok: false, message: "Failed to delete photo" }, { status: 500 });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to delete photo";
+    return NextResponse.json({ ok: false, message }, { status: 500 });
   }
 }

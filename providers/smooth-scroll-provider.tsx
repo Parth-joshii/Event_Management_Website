@@ -25,7 +25,16 @@ export function SmoothScrollProvider({
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
       wheelMultiplier: 0.95,
-      touchMultiplier: 1.2
+      touchMultiplier: 1.2,
+      prevent: (node) => {
+        if (!node || typeof node.closest !== "function") return false;
+        return Boolean(
+          node.closest("[data-lenis-prevent]") ||
+          node.closest('[role="dialog"]') ||
+          node.closest("[data-slot='dialog-content']") ||
+          node.closest(".overflow-y-auto")
+        );
+      }
     });
 
     let frameId = 0;

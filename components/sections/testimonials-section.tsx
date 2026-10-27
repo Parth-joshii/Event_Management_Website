@@ -154,31 +154,40 @@ export function TestimonialsSection(): React.ReactElement {
           </Reveal>
         ) : null}
 
-        {/* Testimonials Grid */}
-        <div className="mt-14 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {(reviews || []).map((testimonial, index) => (
-            <Reveal delay={index * 0.06} key={testimonial.id || index}>
-              <LuxuryCard className="flex h-full flex-col p-6">
-                <div className="flex gap-1 text-[#D4AF37]">
-                  {Array.from({ length: testimonial.rating || 5 }).map((_, star) => (
-                    <Star
-                      aria-hidden="true"
-                      className="size-4 fill-current"
-                      key={star}
-                    />
-                  ))}
-                </div>
-                <p className="mt-6 flex-1 text-sm leading-7 text-[#5c4b6e]">
-                  &quot;{testimonial.comment}&quot;
-                </p>
-                <div className="mt-7 border-t border-[#EBDCFB] pt-5">
-                  <p className="font-semibold text-[#2D2238]">{testimonial.authorName}</p>
-                  <p className="mt-1 text-sm text-[#7d5ea1]">{testimonial.roleOrEvent}</p>
-                </div>
-              </LuxuryCard>
-            </Reveal>
-          ))}
-        </div>
+        {/* Testimonials Grid or Empty State */}
+        {!reviews || reviews.length === 0 ? (
+          <div className="mt-12 rounded-2xl border border-[#EBDCFB] bg-white px-6 py-10 text-center shadow-sm">
+            <p className="font-semibold text-[#2D2238]">No client reviews published yet.</p>
+            <p className="mt-2 text-sm text-[#5c4b6e]">
+              Click &quot;Write A Review&quot; above to be the first to share your celebration experience!
+            </p>
+          </div>
+        ) : (
+          <div className="mt-14 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {reviews.map((testimonial, index) => (
+              <Reveal delay={index * 0.06} key={testimonial.id || index}>
+                <LuxuryCard className="flex h-full flex-col p-6">
+                  <div className="flex gap-1 text-[#D4AF37]">
+                    {Array.from({ length: testimonial.rating || 5 }).map((_, star) => (
+                      <Star
+                        aria-hidden="true"
+                        className="size-4 fill-current"
+                        key={star}
+                      />
+                    ))}
+                  </div>
+                  <p className="mt-6 flex-1 text-sm leading-7 text-[#5c4b6e]">
+                    &quot;{testimonial.comment}&quot;
+                  </p>
+                  <div className="mt-7 border-t border-[#EBDCFB] pt-5">
+                    <p className="font-semibold text-[#2D2238]">{testimonial.authorName}</p>
+                    <p className="mt-1 text-sm text-[#7d5ea1]">{testimonial.roleOrEvent}</p>
+                  </div>
+                </LuxuryCard>
+              </Reveal>
+            ))}
+          </div>
+        )}
       </Container>
     </section>
   );

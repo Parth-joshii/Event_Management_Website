@@ -1,34 +1,41 @@
 import { NextResponse, type NextRequest } from "next/server";
+import mongoose from "mongoose";
+import { connectToDatabase } from "@/lib/mongodb";
+import { ReviewModel } from "@/models/Review";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
-let globalReviewsStore = [
-  {
-    id: "rev-1",
-    authorName: "Vikram & Ananya Mehta",
-    roleOrEvent: "Royal Wedding Client, Udaipur",
-    rating: 5,
-    comment: "Shree Velora transformed our wedding into an absolute fairytale. Every decor detail and stage execution was regal beyond words.",
-    avatarSrc: "/images/testimonials-[#1].jpg"
-  },
-  {
-    id: "rev-2",
-    authorName: "Sanjay Singhania",
-    roleOrEvent: "Corporate Gala Host, Mumbai",
-    rating: 5,
-    comment: "Flawless professionalism, magnificent venue lighting, and seamless coordination. Our high-profile corporate delegates were deeply impressed.",
-    avatarSrc: "/images/testimonials-[#2].jpg"
-  }
-];
-
-/** GET /api/reviews - Fetch all client reviews */
-export async function GET(): Promise<NextResponse> {
-  return NextResponse.json({ ok: true, data: globalReviewsStore });
+function serializeReview(review: any) {
+  return {
+    id: review._id?.toString?.() || review.id || "",
+    authorName: review.authorName,
+    roleOrEvent: review.roleOrEvent || "Luxury Celebration Client",
+    rating: Number(review.rating) || 5,
+    comment: review.comment,
+    avatarSrc: review.avatarSrc || "",
+    createdAt: review.createdAt
+  };
 }
 
-/** POST /api/reviews - Add a new review */
+/** GET /api/reviews - Fetch all client reviews persisted in MongoDB */
+export async function GET(): Promise<NextResponse> {
+  try {
+    await connectToDatabase();
+    let reviews = await ReviewModel.find({}).sort({ createdAt: -1 }).lean();
+
+    return NextResponse.json({
+      ok: true,
+      data: reviews.map((r) => serializeReview(r))
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to fetch reviews";
+    return NextResponse.json({ ok: false, message, data: [] }, { status: 500 });
+  }
+}
+
+/** POST /api/reviews - Add a new review and persist to MongoDB */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const body = (await request.json().catch(() => null)) || {};
@@ -38,37 +45,48 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ ok: false, message: "Author name and comment are required" }, { status: 400 });
     }
 
-    const newReview = {
-      id: `rev-${Date.now()}`,
+    await connectToDatabase();
+    const created = await ReviewModel.create({
       authorName: authorName.trim(),
       roleOrEvent: roleOrEvent ? roleOrEvent.trim() : "Luxury Event Client",
       rating: Number(rating) || 5,
       comment: comment.trim(),
       avatarSrc: avatarSrc || ""
-    };
+    });
 
-    globalReviewsStore = [newReview, ...globalReviewsStore];
-    return NextResponse.json({ ok: true, data: newReview });
+    return NextResponse.json({ ok: true, data: serializeReview(created) });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to save review";
     return NextResponse.json({ ok: false, message }, { status: 500 });
   }
 }
 
-/** DELETE /api/reviews?id=xyz - Delete review */
+/** DELETE /api/reviews?id=xyz - Delete review permanently from MongoDB */
 export async function DELETE(request: NextRequest): Promise<NextResponse> {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
-    const all = searchParams.get("all");
+    const author = searchParams.get("author");
+    const all = searchParams.get("all") === "true";
 
-    if (all === "true") {
-      globalReviewsStore = [];
+    await connectToDatabase();
+
+    if (all) {
+      await ReviewModel.deleteMany({});
       return NextResponse.json({ ok: true, message: "All reviews deleted" });
     }
 
-    if (id) {
-      globalReviewsStore = globalReviewsStore.filter((r) => r.id !== id);
+    if (id || author) {
+      if (id && mongoose.isValidObjectId(id)) {
+        await ReviewModel.findByIdAndDelete(id);
+      } else {
+        await ReviewModel.deleteOne({
+          $or: [
+            ...(id ? [{ _id: id }] : []),
+            ...(author ? [{ authorName: author }] : [])
+          ]
+        });
+      }
     }
 
     return NextResponse.json({ ok: true, message: "Review deleted successfully" });

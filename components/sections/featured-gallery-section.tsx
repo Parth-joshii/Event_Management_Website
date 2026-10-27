@@ -161,10 +161,6 @@ export function FeaturedGallerySection(): React.ReactElement {
                         className="w-full h-auto block object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                         src={resolveRenderableImageSrc(item.imageSrc)}
                         loading="lazy"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src =
-                            "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80";
-                        }}
                       />
                       {/* Targeted bottom gradient for sharp contrast on captions while keeping the upper photo completely clear */}
                       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#1F1629]/95 via-[#1F1629]/55 to-transparent transition-opacity duration-300 group-hover:opacity-95" />
@@ -201,12 +197,15 @@ export function FeaturedGallerySection(): React.ReactElement {
 
         {/* Modal 1: Album Folder Lightbox Dialog (Multiple Photos in Event) */}
         <Dialog open={Boolean(activeAlbum)} onOpenChange={() => setActiveAlbum(null)}>
-          <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-[#2D2238] border border-white/20 text-white p-6 sm:p-8 rounded-2xl shadow-2xl">
+          <DialogContent
+            data-lenis-prevent
+            className="max-w-5xl max-h-[88vh] overflow-y-auto bg-[#2D2238] border border-white/20 text-white p-6 sm:p-8 rounded-2xl shadow-2xl custom-scrollbar overscroll-contain"
+          >
             <DialogTitle className="sr-only">{activeAlbum?.title || "Event Album Gallery"}</DialogTitle>
 
             {activeAlbum ? (
               <div>
-                <div className="flex items-start justify-between border-b border-white/15 pb-4">
+                <div className="sticky top-0 z-20 -mt-2 bg-[#2D2238]/95 backdrop-blur-md flex items-start justify-between border-b border-white/15 pb-4 pt-2">
                   <div>
                     <span className="text-xs font-semibold text-[#D4AF37] uppercase tracking-wider">
                       {activeAlbum.category} • Album Gallery
@@ -239,10 +238,6 @@ export function FeaturedGallerySection(): React.ReactElement {
                         src={resolveRenderableImageSrc(ph.imageSrc)}
                         alt={ph.title}
                         className="w-full h-auto block object-cover transition duration-500 group-hover:scale-105"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src =
-                            "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80";
-                        }}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 transition duration-300 group-hover:opacity-100 flex items-end p-3 text-xs text-white font-medium">
                         {ph.title}
@@ -268,10 +263,6 @@ export function FeaturedGallerySection(): React.ReactElement {
                   src={resolveRenderableImageSrc(activeLightboxPhoto.imageSrc)}
                   alt={activeLightboxPhoto.alt}
                   className="max-h-[75vh] w-full rounded-xl object-contain mx-auto"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src =
-                      "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80";
-                  }}
                 />
                 <div className="mt-4 text-left px-2 flex items-center justify-between">
                   <div>

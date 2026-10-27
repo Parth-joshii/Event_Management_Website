@@ -162,49 +162,11 @@ interface ContentState {
 export const useContentStore = create<ContentState>()(
   persist(
     (set, get) => ({
-      events: [
-        {
-          id: "ev-1",
-          title: "Riya & Aman Royal Wedding",
-          category: "Royal Wedding",
-          description: "A grand palace wedding featuring a glass mandap and 10,000+ floral elements.",
-          date: "2026-02-14",
-          location: "Udaipur Palace",
-          imageSrc: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80",
-          imageAlt: "Riya and Aman Royal Palace Wedding"
-        },
-        {
-          id: "ev-2",
-          title: "Aster Corporate Annual Meet",
-          category: "Corporate Production",
-          description: "High-impact stage production with dynamic LED walls and executive hospitality.",
-          date: "2026-01-20",
-          location: "JW Marriott Mumbai",
-          imageSrc: "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80",
-          imageAlt: "Aster Corporate Stage Production"
-        }
-      ],
+      events: [],
       photos: [],
       videos: [],
       inquiries: [],
-      reviews: [
-        {
-          id: "rev-1",
-          authorName: "Vikram & Ananya Mehta",
-          roleOrEvent: "Royal Wedding Client, Udaipur",
-          rating: 5,
-          comment: "Shree Velora transformed our wedding into an absolute fairytale. Every decor detail and stage execution was regal beyond words.",
-          avatarSrc: "/images/testimonials-[#1].jpg"
-        },
-        {
-          id: "rev-2",
-          authorName: "Sanjay Singhania",
-          roleOrEvent: "Corporate Gala Host, Mumbai",
-          rating: 5,
-          comment: "Flawless professionalism, magnificent venue lighting, and seamless coordination. Our high-profile corporate delegates were deeply impressed.",
-          avatarSrc: "/images/testimonials-[#2].jpg"
-        }
-      ],
+      reviews: [],
       aboutCards: defaultAboutCards,
       isAuthenticated: false,
       isDbSyncing: false,
@@ -251,9 +213,13 @@ export const useContentStore = create<ContentState>()(
       },
 
       deleteReview: async (id) => {
+        const targetReview = get().reviews.find((r) => r.id === id);
+        const author = targetReview?.authorName || "";
         set({ reviews: get().reviews.filter((r) => r.id !== id) });
         try {
-          await fetch(`/api/reviews?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+          const params = new URLSearchParams({ id });
+          if (author) params.append("author", author);
+          await fetch(`/api/reviews?${params.toString()}`, { method: "DELETE" });
         } catch (e) {
           console.error("Failed to delete review:", e);
         }
@@ -273,31 +239,18 @@ export const useContentStore = create<ContentState>()(
           ]);
 
           if (photosRes?.ok && Array.isArray(photosRes.data)) {
-            if (photosRes.data.length > 0) {
-              set({ photos: dedupePhotosByImageSrc(photosRes.data) });
-            } else if (localPhotos.length > 0) {
-              await fetch("/api/photos", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(localPhotos)
-              }).catch(() => null);
-
-              const refreshedPhotos = await fetch("/api/photos").then((r) => r.json()).catch(() => null);
-              if (refreshedPhotos?.ok && Array.isArray(refreshedPhotos.data) && refreshedPhotos.data.length > 0) {
-                set({ photos: dedupePhotosByImageSrc(refreshedPhotos.data) });
-              }
-            }
+            set({ photos: dedupePhotosByImageSrc(photosRes.data) });
           }
-          if (videosRes?.ok && Array.isArray(videosRes.data) && videosRes.data.length > 0) {
+          if (videosRes?.ok && Array.isArray(videosRes.data)) {
             set({ videos: videosRes.data });
           }
-          if (eventsRes?.ok && Array.isArray(eventsRes.data) && eventsRes.data.length > 0) {
+          if (eventsRes?.ok && Array.isArray(eventsRes.data)) {
             set({ events: eventsRes.data });
           }
-          if (inquiriesRes?.ok && Array.isArray(inquiriesRes.data) && inquiriesRes.data.length > 0) {
+          if (inquiriesRes?.ok && Array.isArray(inquiriesRes.data)) {
             set({ inquiries: inquiriesRes.data });
           }
-          if (reviewsRes?.ok && Array.isArray(reviewsRes.data) && reviewsRes.data.length > 0) {
+          if (reviewsRes?.ok && Array.isArray(reviewsRes.data)) {
             set({ reviews: reviewsRes.data });
           }
           if (aboutRes?.ok && Array.isArray(aboutRes.data) && aboutRes.data.length > 0) {
@@ -440,9 +393,13 @@ export const useContentStore = create<ContentState>()(
       },
 
       deletePhoto: async (id) => {
-        set({ photos: get().photos.filter((ph) => ph.id !== id) });
+        const targetPhoto = get().photos.find((ph) => ph.id === id);
+        const imageSrc = targetPhoto?.imageSrc || "";
+        set({ photos: get().photos.filter((ph) => ph.id !== id && (!imageSrc || ph.imageSrc !== imageSrc)) });
         try {
-          await fetch(`/api/photos?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+          const params = new URLSearchParams({ id });
+          if (imageSrc) params.append("src", imageSrc);
+          await fetch(`/api/photos?${params.toString()}`, { method: "DELETE" });
         } catch (e) {
           console.error("Failed to delete photo:", e);
         }
@@ -527,13 +484,7 @@ export const useContentStore = create<ContentState>()(
     {
       name: "velora-admin-content-storage",
       partialize: (state) => ({
-        isAuthenticated: state.isAuthenticated,
-        events: state.events,
-        photos: state.photos,
-        videos: state.videos,
-        inquiries: state.inquiries,
-        reviews: state.reviews,
-        aboutCards: state.aboutCards
+        isAuthenticated: state.isAuthenticated
       })
     }
   )
