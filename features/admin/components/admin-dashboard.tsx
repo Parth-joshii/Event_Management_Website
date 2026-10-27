@@ -126,6 +126,7 @@ export function AdminDashboard(): React.ReactElement {
     cloudName: string | null;
   } | null>(null);
   const [isUploadingPhotos, setIsUploadingPhotos] = React.useState(false);
+  const [isSavingPhoto, setIsSavingPhoto] = React.useState(false);
   const [uploadProgressText, setUploadProgressText] = React.useState("");
   const [isUploadingEventCover, setIsUploadingEventCover] = React.useState(false);
   const [isUploadingVideo, setIsUploadingVideo] = React.useState(false);
@@ -193,39 +194,57 @@ export function AdminDashboard(): React.ReactElement {
   // Handle single or bulk photo submission
   const handleAddPhotoSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const matchedEvent = events.find((ev) => ev.id === selectedEventId);
-    const targetEventTitle = matchedEvent ? matchedEvent.title : "";
+    if (isSavingPhoto || isUploadingPhotos) return;
 
-    if (photoImagesList.length > 1) {
-      const bulkItems = photoImagesList.map((src, idx) => ({
-        title: photoTitle ? `${photoTitle} #${idx + 1}` : matchedEvent ? `${matchedEvent.title} Photo #${idx + 1}` : `Photo #${idx + 1}`,
-        category: photoCategory || matchedEvent?.category || "General",
-        eventId: selectedEventId,
-        eventTitle: targetEventTitle,
-        isFeatured: isFeaturedPhoto && idx === 0,
-        imageSrc: src,
-        alt: photoTitle || targetEventTitle || "Event Photo"
-      }));
-      await useContentStore.getState().addMultiplePhotos(bulkItems);
-    } else {
-      const src = photoImagesList[0] || photoImageSrc || "/images/gallery/wedding-stage.jpg";
-      const title = photoTitle.trim() || matchedEvent?.title || "Event Photo";
-      await addPhoto({
-        title,
-        category: photoCategory || matchedEvent?.category || "General",
-        eventId: selectedEventId,
-        eventTitle: targetEventTitle,
-        isFeatured: isFeaturedPhoto,
-        imageSrc: src,
-        alt: title
-      });
+    if (photoImagesList.length === 0 && (!photoImageSrc || photoImageSrc === "/images/gallery/wedding-stage.jpg")) {
+      toast.error("Please choose or upload a photo first.");
+      return;
     }
 
-    setPhotoTitle("");
-    setPhotoImagesList([]);
-    setSelectedEventId("");
-    setIsFeaturedPhoto(false);
-    setAddPhotoOpen(false);
+    setIsSavingPhoto(true);
+    try {
+      const matchedEvent = events.find((ev) => ev.id === selectedEventId);
+      const targetEventTitle = matchedEvent ? matchedEvent.title : "";
+
+      if (photoImagesList.length > 1) {
+        const bulkItems = photoImagesList.map((src, idx) => ({
+          title: photoTitle ? `${photoTitle} #${idx + 1}` : matchedEvent ? `${matchedEvent.title} Photo #${idx + 1}` : `Photo #${idx + 1}`,
+          category: photoCategory || matchedEvent?.category || "General",
+          eventId: selectedEventId,
+          eventTitle: targetEventTitle,
+          isFeatured: isFeaturedPhoto && idx === 0,
+          imageSrc: src,
+          alt: photoTitle || targetEventTitle || "Event Photo"
+        }));
+        await useContentStore.getState().addMultiplePhotos(bulkItems);
+        toast.success(`✓ Published ${bulkItems.length} photos to gallery!`);
+      } else {
+        const src = photoImagesList[0] || photoImageSrc || "/images/gallery/wedding-stage.jpg";
+        const title = photoTitle.trim() || matchedEvent?.title || "Event Photo";
+        await addPhoto({
+          title,
+          category: photoCategory || matchedEvent?.category || "General",
+          eventId: selectedEventId,
+          eventTitle: targetEventTitle,
+          isFeatured: isFeaturedPhoto,
+          imageSrc: src,
+          alt: title
+        });
+        toast.success("✓ Saved photo to gallery!");
+      }
+
+      setPhotoTitle("");
+      setPhotoImagesList([]);
+      setPhotoImageSrc("/images/gallery/wedding-stage.jpg");
+      setSelectedEventId("");
+      setIsFeaturedPhoto(false);
+      setAddPhotoOpen(false);
+    } catch (err) {
+      console.error("Failed to save photo:", err);
+      toast.error("Failed to save photo to gallery.");
+    } finally {
+      setIsSavingPhoto(false);
+    }
   };
 
   const handleAddVideoSubmit = async (e: React.FormEvent) => {
@@ -1070,12 +1089,19 @@ export function AdminDashboard(): React.ReactElement {
                       >
                         Cancel
                       </button>
-                      <GradientButton type="submit" disabled={isUploadingPhotos}>
-                        {isUploadingPhotos
-                          ? "Uploading to Cloudinary..."
-                          : photoImagesList.length > 1
-                          ? `Publish ${photoImagesList.length} Photos`
-                          : "Upload & Save Photo"}
+                      <GradientButton type="submit" disabled={isUploadingPhotos || isSavingPhoto}>
+                        {isSavingPhoto ? (
+                          <span className="flex items-center gap-1.5">
+                            <Loader2 className="size-3.5 animate-spin" />
+                            Saving to Gallery...
+                          </span>
+                        ) : isUploadingPhotos ? (
+                          "Uploading to Cloudinary..."
+                        ) : photoImagesList.length > 1 ? (
+                          `Save & Publish ${photoImagesList.length} Photos`
+                        ) : (
+                          "Save Photo to Gallery"
+                        )}
                       </GradientButton>
                     </div>
                   </form>
