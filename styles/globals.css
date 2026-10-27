@@ -124,24 +124,3 @@
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(212, 175, 55, 0.85);
 }
-
-/* Infinite continuous luxury marquee banner */
-@keyframes marquee-scroll {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-.animate-marquee-smooth {
-  display: flex;
-  width: max-content;
-  animation: marquee-scroll 40s linear infinite;
-  will-change: transform;
-}
-
-.animate-marquee-smooth:hover {
-  animation-play-state: paused;
-}

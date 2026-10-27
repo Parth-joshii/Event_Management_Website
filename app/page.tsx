@@ -2,17 +2,11 @@ import type { Metadata } from "next";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
 import { JsonLd } from "@/components/layout/json-ld";
-import { HeroSection } from "@/components/sections/hero-section";
-import { ScrollMarqueeBanner } from "@/components/sections/scroll-marquee-banner";
 import { AboutPreview } from "@/components/sections/about-preview";
-import { StatsSection } from "@/components/sections/stats-section";
-import { ServicesSection } from "@/components/sections/services-section";
-import { EventCategoriesSection } from "@/components/sections/event-categories-section";
-import { FeaturedGallerySection } from "@/components/sections/featured-gallery-section";
-import { ProcessTimelineSection } from "@/components/sections/process-timeline-section";
-import { TestimonialsSection } from "@/components/sections/testimonials-section";
-import { ContactPreviewSection } from "@/components/sections/contact-preview-section";
 import { CtaSection } from "@/components/sections/cta-section";
+import { FeaturedGallerySection } from "@/components/sections/featured-gallery-section";
+import { HeroSection } from "@/components/sections/hero-section";
+import { TestimonialsSection } from "@/components/sections/testimonials-section";
 import { siteConfig } from "@/config/site";
 import { optionalPublicAsset } from "@/lib/public-assets";
 import { createHomepageJsonLd } from "@/utils/seo";
@@ -39,15 +33,11 @@ export const metadata: Metadata = {
   }
 };
 
-/** Renders the complete flagship luxury landing page. */
+/** Renders the complete premium landing page. */
 export default function HomePage(): React.ReactElement {
   const logoSrc = optionalPublicAsset("/logos/logo.png");
-  const desktopHeroVideoSrc =
-    optionalPublicAsset("/videos/landing-page.mp4") ??
-    optionalPublicAsset("/videos/hero-desktop.mp4");
-  const mobileHeroVideoSrc =
-    optionalPublicAsset("/videos/landing-page.mp4") ??
-    optionalPublicAsset("/videos/hero-mobile.mp4");
+  const desktopHeroVideoSrc = optionalPublicAsset("/videos/landing-page.mp4") ?? optionalPublicAsset("/videos/hero-desktop.mp4");
+  const mobileHeroVideoSrc = optionalPublicAsset("/videos/landing-page.mp4") ?? optionalPublicAsset("/videos/hero-mobile.mp4");
 
   return (
     <>
@@ -58,16 +48,10 @@ export default function HomePage(): React.ReactElement {
           desktopVideoSrc={desktopHeroVideoSrc}
           mobileVideoSrc={mobileHeroVideoSrc}
         />
-        <ScrollMarqueeBanner />
         <AboutPreview />
-        <StatsSection />
-        <ServicesSection />
         <FeaturedGallerySection />
-        <EventCategoriesSection />
-        <ProcessTimelineSection />
-        <TestimonialsSection />
-        <ContactPreviewSection />
         <CtaSection />
+        <TestimonialsSection />
       </main>
       <Footer />
     </>
