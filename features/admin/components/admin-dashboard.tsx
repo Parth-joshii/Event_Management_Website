@@ -22,7 +22,6 @@ import {
   AlertCircle,
   Loader2,
   Type,
-  FileText,
   RotateCcw,
   Save
 } from "lucide-react";
@@ -1717,18 +1716,20 @@ export function AdminDashboard(): React.ReactElement {
 
             {/* Sub-Navigation for Sections */}
             <div className="flex flex-wrap gap-2 rounded-xl bg-[#FAF7FF] p-2 border border-[#EBDCFB]">
-              {[
-                { id: "hero", label: "Hero Banner" },
-                { id: "about", label: "About & Highlights" },
-                { id: "events", label: "Signature Events" },
-                { id: "testimonials", label: "Client Testimonials" },
-                { id: "cta", label: "Consultation & CTA" },
-                { id: "contact", label: "Contact Info & WhatsApp" }
-              ].map((subTab) => (
+              {(
+                [
+                  { id: "hero", label: "Hero Banner" },
+                  { id: "about", label: "About & Highlights" },
+                  { id: "events", label: "Signature Events" },
+                  { id: "testimonials", label: "Client Testimonials" },
+                  { id: "cta", label: "Consultation & CTA" },
+                  { id: "contact", label: "Contact Info & WhatsApp" }
+                ] as const
+              ).map((subTab) => (
                 <button
                   key={subTab.id}
                   type="button"
-                  onClick={() => setCmsActiveSubTab(subTab.id as any)}
+                  onClick={() => setCmsActiveSubTab(subTab.id)}
                   className={`rounded-lg px-4 py-2 text-xs font-semibold transition cursor-pointer ${
                     cmsActiveSubTab === subTab.id
                       ? "bg-[#2D2238] text-white shadow-sm"

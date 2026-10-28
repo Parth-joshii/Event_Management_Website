@@ -295,7 +295,6 @@ export const useContentStore = create<ContentState>()(
       fetchFromDatabase: async () => {
         set({ isDbSyncing: true });
         try {
-          const localPhotos = get().photos;
           const [photosRes, videosRes, eventsRes, inquiriesRes, reviewsRes, aboutRes, contentRes] = await Promise.all([
             fetch("/api/photos").then((r) => r.json()).catch(() => null),
             fetch("/api/videos").then((r) => r.json()).catch(() => null),

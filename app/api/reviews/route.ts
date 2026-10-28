@@ -9,13 +9,24 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
-function serializeReview(review: any) {
+interface RawReview {
+  _id?: { toString: () => string };
+  id?: string;
+  authorName?: string;
+  roleOrEvent?: string;
+  rating?: number | string;
+  comment?: string;
+  avatarSrc?: string;
+  createdAt?: Date | string;
+}
+
+function serializeReview(review: RawReview) {
   return {
     id: review._id?.toString?.() || review.id || "",
-    authorName: review.authorName,
+    authorName: review.authorName || "Valued Client",
     roleOrEvent: review.roleOrEvent || "Luxury Celebration Client",
     rating: Number(review.rating) || 5,
-    comment: review.comment,
+    comment: review.comment || "",
     avatarSrc: review.avatarSrc || "",
     createdAt: review.createdAt || new Date().toISOString()
   };
@@ -25,7 +36,7 @@ function serializeReview(review: any) {
 export async function GET(): Promise<NextResponse> {
   try {
     await connectToDatabase();
-    let reviews = await ReviewModel.find({}).sort({ createdAt: -1 }).lean();
+    const reviews = await ReviewModel.find({}).sort({ createdAt: -1 }).lean();
 
     if (reviews && reviews.length > 0) {
       return NextResponse.json({

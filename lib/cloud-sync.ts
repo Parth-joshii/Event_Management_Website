@@ -4,6 +4,8 @@
  * across all devices worldwide without requiring any manual database setup.
  */
 
+import type { SiteContentData } from "@/types/site-content";
+
 const CLOUD_BIN_ID = "66c1f100e41b4d34e42358bc"; // Public shared cloud sync bin for Shree Velora Events
 const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${CLOUD_BIN_ID}`;
 
@@ -52,7 +54,7 @@ export interface CloudStoreData {
     avatarSrc?: string;
   }>;
   aboutCards: AboutCardItem[];
-  siteContent?: import("@/types/site-content").SiteContentData;
+  siteContent?: SiteContentData;
 }
 
 const defaultAboutCards: AboutCardItem[] = [
