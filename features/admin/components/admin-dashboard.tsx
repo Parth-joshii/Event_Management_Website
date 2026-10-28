@@ -528,8 +528,8 @@ export function AdminDashboard(): React.ReactElement {
           </div>
         </div>
 
-        {/* 4 Small Bento Quick Counter Cards */}
-        <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {/* 5 Small Bento Quick Counter Cards */}
+        <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <div
             onClick={() => setActiveTab("events")}
             className="group rounded-2xl border border-[#EBDCFB] bg-white p-4 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-[#D4AF37] hover:shadow-md cursor-pointer"
@@ -572,6 +572,17 @@ export function AdminDashboard(): React.ReactElement {
               <Star className="size-4 text-[#D4AF37] fill-[#D4AF37]" />
             </div>
             <p className="font-display mt-2 text-2xl font-bold text-[#2D2238]">{reviews.length}</p>
+          </div>
+
+          <div
+            onClick={() => setActiveTab("site-cms")}
+            className="group rounded-2xl border border-[#D4AF37]/60 bg-gradient-to-br from-[#FAF7FF] to-white p-4 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-[#D4AF37] hover:shadow-md cursor-pointer ring-1 ring-[#D4AF37]/30"
+          >
+            <div className="flex items-center justify-between text-[#5c4b6e]">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#2D2238]">Website Copy CMS</span>
+              <Type className="size-4 text-[#D4AF37]" />
+            </div>
+            <p className="font-display mt-2 text-2xl font-bold text-[#2D2238]">6 Sections</p>
           </div>
         </div>
 
