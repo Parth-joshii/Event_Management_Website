@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { Clock3, Mail, MapPin, MessageCircle, Phone, WandSparkles } from "lucide-react";
 import { MagneticButton } from "@/components/animations/magnetic-button";
@@ -5,14 +7,8 @@ import { Reveal } from "@/components/animations/reveal";
 import { Container } from "@/components/layout/container";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { siteConfig } from "@/config/site";
-
+import { useContentStore } from "@/stores/content-store";
 import type { LucideIcon } from "lucide-react";
-
-const whatsappMessage = "Hi Shree Velora Event's, I want to plan an event.";
-
-const whatsappHref = `https://wa.me/${siteConfig.contact.whatsappNumber}?text=${encodeURIComponent(
-  whatsappMessage
-)}`;
 
 interface ContactCardItem {
   readonly href?: string;
@@ -21,33 +17,50 @@ interface ContactCardItem {
   readonly value: string;
 }
 
-const contactCards: readonly ContactCardItem[] = [
-  {
-    href: `tel:${siteConfig.contact.phone.replace(/\s/g, "")}`,
-    icon: Phone,
-    label: "Direct Phone",
-    value: siteConfig.contact.phone
-  },
-  {
-    href: `mailto:${siteConfig.contact.email}`,
-    icon: Mail,
-    label: "Email Inquiry",
-    value: siteConfig.contact.email
-  },
-  {
-    icon: MapPin,
-    label: "Service Location",
-    value: siteConfig.contact.location
-  },
-  {
-    icon: Clock3,
-    label: "Business Hours",
-    value: siteConfig.contact.businessHours
-  }
-];
-
 /** Renders the unified luxury CTA and Private Consultation section. */
 export function CtaSection(): React.ReactElement {
+  const { siteContent } = useContentStore();
+
+  const cta = siteContent?.ctaSection || {
+    eyebrow: "Your Celebration, Beautifully Imagined",
+    title: "Let Us Create Something Truly Unforgettable",
+    description:
+      "Share your vision and allow our team to compose a tailored celebration proposal, considered budget, and distinctive design direction.",
+    ctaPrimaryText: "Begin Your Journey",
+    ctaSecondaryText: "WhatsApp Us"
+  };
+
+  const contact = siteContent?.contact || siteConfig.contact;
+
+  const whatsappMessage = "Hi Shree Velora Event's, I want to plan an event.";
+  const whatsappHref = `https://wa.me/${contact.whatsappNumber || siteConfig.contact.whatsappNumber}?text=${encodeURIComponent(
+    whatsappMessage
+  )}`;
+
+  const contactCards: readonly ContactCardItem[] = [
+    {
+      href: `tel:${(contact.phone || siteConfig.contact.phone).replace(/\s/g, "")}`,
+      icon: Phone,
+      label: "Direct Phone",
+      value: contact.phone || siteConfig.contact.phone
+    },
+    {
+      href: `mailto:${contact.email || siteConfig.contact.email}`,
+      icon: Mail,
+      label: "Email Inquiry",
+      value: contact.email || siteConfig.contact.email
+    },
+    {
+      icon: MapPin,
+      label: "Service Location",
+      value: contact.location || siteConfig.contact.location
+    },
+    {
+      icon: Clock3,
+      label: "Business Hours",
+      value: contact.businessHours || siteConfig.contact.businessHours
+    }
+  ];
   return (
     <section
       id="customize"
@@ -58,21 +71,20 @@ export function CtaSection(): React.ReactElement {
         <Reveal>
           <div className="mx-auto max-w-4xl text-center">
             <p className="text-sm font-semibold tracking-[0.24em] text-[#D4AF37] uppercase">
-              Your Celebration, Beautifully Imagined
+              {cta.eyebrow}
             </p>
             <h2 className="font-display mt-5 text-4xl font-semibold tracking-normal text-balance sm:text-6xl">
-              Let Us Create Something Truly Unforgettable
+              {cta.title}
             </h2>
             <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-white/74 sm:text-lg">
-              Share your vision and allow our team to compose a tailored celebration
-              proposal, considered budget, and distinctive design direction.
+              {cta.description}
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <MagneticButton>
                 <GradientButton asChild tone="light">
                   <Link href="#contact">
                     <WandSparkles aria-hidden="true" className="size-4" />
-                    Begin Your Journey
+                    {cta.ctaPrimaryText || "Begin Your Journey"}
                   </Link>
                 </GradientButton>
               </MagneticButton>
@@ -80,7 +92,7 @@ export function CtaSection(): React.ReactElement {
                 <GradientButton asChild>
                   <a href={whatsappHref} rel="noreferrer" target="_blank">
                     <MessageCircle aria-hidden="true" className="size-4" />
-                    WhatsApp Us
+                    {cta.ctaSecondaryText || "WhatsApp Us"}
                   </a>
                 </GradientButton>
               </MagneticButton>

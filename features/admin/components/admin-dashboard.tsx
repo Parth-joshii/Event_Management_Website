@@ -20,7 +20,11 @@ import {
   Cloud,
   CheckCircle2,
   AlertCircle,
-  Loader2
+  Loader2,
+  Type,
+  FileText,
+  RotateCcw,
+  Save
 } from "lucide-react";
 import { toast } from "sonner";
 import { useContentStore, type InquiryItem } from "@/stores/content-store";
@@ -77,6 +81,9 @@ export function AdminDashboard(): React.ReactElement {
     deleteReview,
     aboutCards,
     updateAboutCardImage,
+    siteContent,
+    updateSiteContent,
+    resetSiteContent,
     fetchFromDatabase,
     addEvent,
     deleteEvent,
@@ -98,6 +105,58 @@ export function AdminDashboard(): React.ReactElement {
   const [addVideoOpen, setAddVideoOpen] = React.useState(false);
   const [addReviewOpen, setAddReviewOpen] = React.useState(false);
 
+  // CMS Website Text State
+  const [cmsHero, setCmsHero] = React.useState(siteContent.hero);
+  const [cmsAbout, setCmsAbout] = React.useState(siteContent.about);
+  const [cmsEvents, setCmsEvents] = React.useState(siteContent.eventsSection);
+  const [cmsTestimonials, setCmsTestimonials] = React.useState(siteContent.testimonialsSection);
+  const [cmsCta, setCmsCta] = React.useState(siteContent.ctaSection);
+  const [cmsContact, setCmsContact] = React.useState(siteContent.contact);
+  const [isSavingCms, setIsSavingCms] = React.useState(false);
+  const [cmsActiveSubTab, setCmsActiveSubTab] = React.useState<
+    "hero" | "about" | "events" | "testimonials" | "cta" | "contact"
+  >("hero");
+
+  React.useEffect(() => {
+    if (siteContent) {
+      setCmsHero(siteContent.hero);
+      setCmsAbout(siteContent.about);
+      setCmsEvents(siteContent.eventsSection);
+      setCmsTestimonials(siteContent.testimonialsSection);
+      setCmsCta(siteContent.ctaSection);
+      setCmsContact(siteContent.contact);
+    }
+  }, [siteContent]);
+
+  const handleSaveAllCms = async () => {
+    setIsSavingCms(true);
+    const res = await updateSiteContent({
+      hero: cmsHero,
+      about: cmsAbout,
+      eventsSection: cmsEvents,
+      testimonialsSection: cmsTestimonials,
+      ctaSection: cmsCta,
+      contact: cmsContact
+    });
+    setIsSavingCms(false);
+    if (res?.ok) {
+      toast.success("Website copy updated & synced live!");
+    } else {
+      toast.error(res?.error || "Failed to update content");
+    }
+  };
+
+  const handleResetCms = async () => {
+    if (window.confirm("Reset all text copy on the website back to original defaults?")) {
+      setIsSavingCms(true);
+      const res = await resetSiteContent();
+      setIsSavingCms(false);
+      if (res?.ok) {
+        toast.success("Website copy reset to defaults");
+      }
+    }
+  };
+
   // New Review Form state
   const [revAuthorName, setRevAuthorName] = React.useState("");
   const [revRole, setRevRole] = React.useState("Luxury Event Client");
@@ -108,16 +167,21 @@ export function AdminDashboard(): React.ReactElement {
     e.preventDefault();
     if (!revAuthorName.trim() || !revComment.trim()) return;
 
-    await addReview({
+    const res = await addReview({
       authorName: revAuthorName.trim(),
       roleOrEvent: revRole.trim() || "Luxury Event Client",
       rating: revRating,
       comment: revComment.trim()
     });
 
-    setRevAuthorName("");
-    setRevComment("");
-    setAddReviewOpen(false);
+    if (res?.ok) {
+      toast.success("Review saved to database");
+      setRevAuthorName("");
+      setRevComment("");
+      setAddReviewOpen(false);
+    } else {
+      toast.error(res?.error || "Failed to save review");
+    }
   };
 
   // Cloudinary status & upload state
@@ -520,6 +584,7 @@ export function AdminDashboard(): React.ReactElement {
             <TabsTrigger value="about-cards">About Cards Photos</TabsTrigger>
             <TabsTrigger value="reviews">Manage Reviews</TabsTrigger>
             <TabsTrigger value="inquiries">Client Inquiries</TabsTrigger>
+            <TabsTrigger value="site-cms">Website Text CMS</TabsTrigger>
           </TabsList>
 
           {/* TAB 1: MANAGE EVENTS */}
@@ -1591,6 +1656,481 @@ export function AdminDashboard(): React.ReactElement {
                   </div>
                 </div>
               ))}
+            </div>
+          </TabsContent>
+
+          {/* TAB 7: LIVE SITE CONTENT CMS */}
+          <TabsContent value="site-cms" className="space-y-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-2xl border border-[#EBDCFB] bg-white p-6 shadow-sm">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="font-display text-2xl font-bold text-[#2D2238]">Website Copy & Content CMS</h2>
+                  <span className="rounded-full bg-[#EBDCFB] px-2.5 py-0.5 text-[10px] font-bold text-[#7d5ea1] uppercase tracking-wider">
+                    Live Dynamic
+                  </span>
+                </div>
+                <p className="mt-1 text-sm text-[#5c4b6e]">
+                  Edit any text line, title, subheading, button label, or contact detail across the website. Saves to MongoDB & Cloud CDN.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={handleResetCms}
+                  disabled={isSavingCms}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-gray-300 bg-white px-3.5 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition cursor-pointer disabled:opacity-50"
+                >
+                  <RotateCcw className="size-3.5" />
+                  Reset to Defaults
+                </button>
+                <GradientButton
+                  onClick={handleSaveAllCms}
+                  disabled={isSavingCms}
+                  type="button"
+                >
+                  {isSavingCms ? (
+                    <>
+                      <Loader2 className="size-4 animate-spin" />
+                      Saving Live...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="size-4" />
+                      Save All Changes
+                    </>
+                  )}
+                </GradientButton>
+              </div>
+            </div>
+
+            {/* Sub-Navigation for Sections */}
+            <div className="flex flex-wrap gap-2 rounded-xl bg-[#FAF7FF] p-2 border border-[#EBDCFB]">
+              {[
+                { id: "hero", label: "Hero Banner" },
+                { id: "about", label: "About & Highlights" },
+                { id: "events", label: "Signature Events" },
+                { id: "testimonials", label: "Client Testimonials" },
+                { id: "cta", label: "Consultation & CTA" },
+                { id: "contact", label: "Contact Info & WhatsApp" }
+              ].map((subTab) => (
+                <button
+                  key={subTab.id}
+                  type="button"
+                  onClick={() => setCmsActiveSubTab(subTab.id as any)}
+                  className={`rounded-lg px-4 py-2 text-xs font-semibold transition cursor-pointer ${
+                    cmsActiveSubTab === subTab.id
+                      ? "bg-[#2D2238] text-white shadow-sm"
+                      : "bg-white text-[#5c4b6e] hover:bg-[#EBDCFB]/50 hover:text-[#2D2238] border border-[#EBDCFB]"
+                  }`}
+                >
+                  {subTab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Sub-Tab 1: HERO BANNER */}
+            {cmsActiveSubTab === "hero" && (
+              <div className="rounded-2xl border border-[#EBDCFB] bg-white p-6 shadow-sm space-y-5">
+                <div className="border-b border-[#EBDCFB] pb-4">
+                  <h3 className="font-bold text-lg text-[#2D2238]">Hero Landing Screen</h3>
+                  <p className="text-xs text-[#5c4b6e]">The primary headline and tagline visitors see immediately when landing on the website.</p>
+                </div>
+
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <div className="sm:col-span-2">
+                    <Label htmlFor="hero-badge">Eyebrow Badge Text</Label>
+                    <Input
+                      id="hero-badge"
+                      value={cmsHero.badge}
+                      onChange={(e) => setCmsHero({ ...cmsHero, badge: e.target.value })}
+                      placeholder="e.g. Crafting Extraordinary Celebrations"
+                      className="mt-1"
+                    />
+                    <p className="mt-1 text-[11px] text-gray-500">Floating pill badge above the main brand title.</p>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="hero-title">Main Hero Title</Label>
+                    <Input
+                      id="hero-title"
+                      value={cmsHero.title}
+                      onChange={(e) => setCmsHero({ ...cmsHero, title: e.target.value })}
+                      placeholder="e.g. Shree Velora Event's"
+                      className="mt-1 font-semibold"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="hero-tagline">Tagline / Subheading</Label>
+                    <Input
+                      id="hero-tagline"
+                      value={cmsHero.tagline}
+                      onChange={(e) => setCmsHero({ ...cmsHero, tagline: e.target.value })}
+                      placeholder="e.g. Where Moments Become the Masterpiece"
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="hero-cta1">Primary CTA Button Label</Label>
+                    <Input
+                      id="hero-cta1"
+                      value={cmsHero.ctaPrimaryText}
+                      onChange={(e) => setCmsHero({ ...cmsHero, ctaPrimaryText: e.target.value })}
+                      placeholder="e.g. Design Your Celebration"
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="hero-cta2">Secondary CTA Button Label</Label>
+                    <Input
+                      id="hero-cta2"
+                      value={cmsHero.ctaSecondaryText}
+                      onChange={(e) => setCmsHero({ ...cmsHero, ctaSecondaryText: e.target.value })}
+                      placeholder="e.g. Explore Our Works"
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Sub-Tab 2: ABOUT & HIGHLIGHTS */}
+            {cmsActiveSubTab === "about" && (
+              <div className="rounded-2xl border border-[#EBDCFB] bg-white p-6 shadow-sm space-y-6">
+                <div className="border-b border-[#EBDCFB] pb-4">
+                  <h3 className="font-bold text-lg text-[#2D2238]">About Section & Highlight Cards</h3>
+                  <p className="text-xs text-[#5c4b6e]">Brand description and the 4 signature value cards.</p>
+                </div>
+
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <div>
+                    <Label htmlFor="about-eyebrow">Eyebrow</Label>
+                    <Input
+                      id="about-eyebrow"
+                      value={cmsAbout.eyebrow}
+                      onChange={(e) => setCmsAbout({ ...cmsAbout, eyebrow: e.target.value })}
+                      placeholder="e.g. About Shree Velora"
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="about-title">Section Title</Label>
+                    <Input
+                      id="about-title"
+                      value={cmsAbout.title}
+                      onChange={(e) => setCmsAbout({ ...cmsAbout, title: e.target.value })}
+                      placeholder="e.g. Signature Events, Flawlessly Executed"
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <Label htmlFor="about-desc">Description Paragraph</Label>
+                    <Textarea
+                      id="about-desc"
+                      value={cmsAbout.description}
+                      onChange={(e) => setCmsAbout({ ...cmsAbout, description: e.target.value })}
+                      rows={2}
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+
+                <div className="border-t border-[#EBDCFB] pt-4">
+                  <h4 className="font-bold text-sm text-[#2D2238] mb-3">4 Signature Highlight Cards</h4>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {cmsAbout.cards.map((card, idx) => (
+                      <div key={card.id || idx} className="rounded-xl border border-[#EBDCFB] bg-[#FAF7FF] p-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-[#D4AF37]">{card.number || `0${idx + 1}`}</span>
+                          <span className="text-[10px] text-gray-500 font-mono">Card {idx + 1}</span>
+                        </div>
+                        <div>
+                          <Label htmlFor={`card-title-${idx}`}>Card Title</Label>
+                          <Input
+                            id={`card-title-${idx}`}
+                            value={card.title}
+                            onChange={(e) => {
+                              const updated = [...cmsAbout.cards];
+                              updated[idx] = { ...card, title: e.target.value };
+                              setCmsAbout({ ...cmsAbout, cards: updated });
+                            }}
+                            className="mt-1 bg-white text-xs font-semibold"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor={`card-desc-${idx}`}>Card Description</Label>
+                          <Textarea
+                            id={`card-desc-${idx}`}
+                            value={card.description}
+                            onChange={(e) => {
+                              const updated = [...cmsAbout.cards];
+                              updated[idx] = { ...card, description: e.target.value };
+                              setCmsAbout({ ...cmsAbout, cards: updated });
+                            }}
+                            rows={2}
+                            className="mt-1 bg-white text-xs"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Sub-Tab 3: SIGNATURE EVENTS */}
+            {cmsActiveSubTab === "events" && (
+              <div className="rounded-2xl border border-[#EBDCFB] bg-white p-6 shadow-sm space-y-5">
+                <div className="border-b border-[#EBDCFB] pb-4">
+                  <h3 className="font-bold text-lg text-[#2D2238]">Signature Occasions Header</h3>
+                  <p className="text-xs text-[#5c4b6e]">Controls the heading text above the event category cards.</p>
+                </div>
+
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <div>
+                    <Label htmlFor="events-eyebrow">Eyebrow</Label>
+                    <Input
+                      id="events-eyebrow"
+                      value={cmsEvents.eyebrow}
+                      onChange={(e) => setCmsEvents({ ...cmsEvents, eyebrow: e.target.value })}
+                      placeholder="e.g. Signature Occasions"
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="events-title">Title</Label>
+                    <Input
+                      id="events-title"
+                      value={cmsEvents.title}
+                      onChange={(e) => setCmsEvents({ ...cmsEvents, title: e.target.value })}
+                      placeholder="e.g. Distinctive Experiences For Every Celebration"
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <Label htmlFor="events-desc">Description</Label>
+                    <Textarea
+                      id="events-desc"
+                      value={cmsEvents.description}
+                      onChange={(e) => setCmsEvents({ ...cmsEvents, description: e.target.value })}
+                      rows={2}
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Sub-Tab 4: CLIENT TESTIMONIALS */}
+            {cmsActiveSubTab === "testimonials" && (
+              <div className="rounded-2xl border border-[#EBDCFB] bg-white p-6 shadow-sm space-y-5">
+                <div className="border-b border-[#EBDCFB] pb-4">
+                  <h3 className="font-bold text-lg text-[#2D2238]">Client Stories Header</h3>
+                  <p className="text-xs text-[#5c4b6e]">Controls the heading text above the reviews and testimonial cards.</p>
+                </div>
+
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <div>
+                    <Label htmlFor="test-eyebrow">Eyebrow</Label>
+                    <Input
+                      id="test-eyebrow"
+                      value={cmsTestimonials.eyebrow}
+                      onChange={(e) => setCmsTestimonials({ ...cmsTestimonials, eyebrow: e.target.value })}
+                      placeholder="e.g. Client Stories"
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="test-title">Title</Label>
+                    <Input
+                      id="test-title"
+                      value={cmsTestimonials.title}
+                      onChange={(e) => setCmsTestimonials({ ...cmsTestimonials, title: e.target.value })}
+                      placeholder="e.g. Celebrations Remembered, Trust Earned"
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <Label htmlFor="test-desc">Description</Label>
+                    <Textarea
+                      id="test-desc"
+                      value={cmsTestimonials.description}
+                      onChange={(e) => setCmsTestimonials({ ...cmsTestimonials, description: e.target.value })}
+                      rows={2}
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Sub-Tab 5: CONSULTATION & CTA */}
+            {cmsActiveSubTab === "cta" && (
+              <div className="rounded-2xl border border-[#EBDCFB] bg-white p-6 shadow-sm space-y-5">
+                <div className="border-b border-[#EBDCFB] pb-4">
+                  <h3 className="font-bold text-lg text-[#2D2238]">Consultation & Bottom CTA Banner</h3>
+                  <p className="text-xs text-[#5c4b6e]">Banner asking visitors to begin their personal consultation and celebration planning.</p>
+                </div>
+
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <div>
+                    <Label htmlFor="cta-eyebrow">Eyebrow</Label>
+                    <Input
+                      id="cta-eyebrow"
+                      value={cmsCta.eyebrow}
+                      onChange={(e) => setCmsCta({ ...cmsCta, eyebrow: e.target.value })}
+                      placeholder="e.g. Your Celebration, Beautifully Imagined"
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="cta-title">Title</Label>
+                    <Input
+                      id="cta-title"
+                      value={cmsCta.title}
+                      onChange={(e) => setCmsCta({ ...cmsCta, title: e.target.value })}
+                      placeholder="e.g. Let Us Create Something Truly Unforgettable"
+                      className="mt-1 font-semibold"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <Label htmlFor="cta-desc">Description</Label>
+                    <Textarea
+                      id="cta-desc"
+                      value={cmsCta.description}
+                      onChange={(e) => setCmsCta({ ...cmsCta, description: e.target.value })}
+                      rows={2}
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="cta-btn1">Primary Button Label</Label>
+                    <Input
+                      id="cta-btn1"
+                      value={cmsCta.ctaPrimaryText}
+                      onChange={(e) => setCmsCta({ ...cmsCta, ctaPrimaryText: e.target.value })}
+                      placeholder="e.g. Begin Your Journey"
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="cta-btn2">WhatsApp Button Label</Label>
+                    <Input
+                      id="cta-btn2"
+                      value={cmsCta.ctaSecondaryText}
+                      onChange={(e) => setCmsCta({ ...cmsCta, ctaSecondaryText: e.target.value })}
+                      placeholder="e.g. WhatsApp Us"
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Sub-Tab 6: CONTACT INFO & WHATSAPP */}
+            {cmsActiveSubTab === "contact" && (
+              <div className="rounded-2xl border border-[#EBDCFB] bg-white p-6 shadow-sm space-y-5">
+                <div className="border-b border-[#EBDCFB] pb-4">
+                  <h3 className="font-bold text-lg text-[#2D2238]">Direct Contact, Phone & WhatsApp</h3>
+                  <p className="text-xs text-[#5c4b6e]">
+                    Controls phone numbers, WhatsApp click-to-chat links, email, hours, and addresses across the entire website and floating widget.
+                  </p>
+                </div>
+
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <div>
+                    <Label htmlFor="contact-phone">Display Phone Number</Label>
+                    <Input
+                      id="contact-phone"
+                      value={cmsContact.phone}
+                      onChange={(e) => setCmsContact({ ...cmsContact, phone: e.target.value })}
+                      placeholder="e.g. +91 99770 24666"
+                      className="mt-1 font-mono"
+                    />
+                    <p className="mt-1 text-[11px] text-gray-500">Shown in cards, headers, and footer.</p>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="contact-wa">WhatsApp Number (Digits only, with country code)</Label>
+                    <Input
+                      id="contact-wa"
+                      value={cmsContact.whatsappNumber}
+                      onChange={(e) => setCmsContact({ ...cmsContact, whatsappNumber: e.target.value.replace(/\D/g, "") })}
+                      placeholder="e.g. 919977024666"
+                      className="mt-1 font-mono"
+                    />
+                    <p className="mt-1 text-[11px] text-gray-500">Used for direct WhatsApp wa.me links.</p>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="contact-email">Inquiry Email Address</Label>
+                    <Input
+                      id="contact-email"
+                      type="email"
+                      value={cmsContact.email}
+                      onChange={(e) => setCmsContact({ ...cmsContact, email: e.target.value })}
+                      placeholder="e.g. shreeveloraevents@gmail.com"
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="contact-hours">Business Hours</Label>
+                    <Input
+                      id="contact-hours"
+                      value={cmsContact.businessHours}
+                      onChange={(e) => setCmsContact({ ...cmsContact, businessHours: e.target.value })}
+                      placeholder="e.g. Monday to Sunday, 9:00 AM - 8:00 PM"
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <Label htmlFor="contact-loc">Service / Headquarters Location</Label>
+                    <Input
+                      id="contact-loc"
+                      value={cmsContact.location}
+                      onChange={(e) => setCmsContact({ ...cmsContact, location: e.target.value })}
+                      placeholder="e.g. India"
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Bottom Save Bar */}
+            <div className="flex justify-end pt-4 border-t border-[#EBDCFB]">
+              <GradientButton
+                onClick={handleSaveAllCms}
+                disabled={isSavingCms}
+                type="button"
+              >
+                {isSavingCms ? (
+                  <>
+                    <Loader2 className="size-4 animate-spin" />
+                    Saving Changes...
+                  </>
+                ) : (
+                  <>
+                    <Save className="size-4" />
+                    Save All Changes
+                  </>
+                )}
+              </GradientButton>
             </div>
           </TabsContent>
         </Tabs>

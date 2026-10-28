@@ -3,6 +3,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { convertDriveUrlToDirectLink } from "@/lib/utils";
+import { defaultSiteContent, type SiteContentData } from "@/types/site-content";
 
 export interface EventItem {
   id: string;
@@ -127,12 +128,16 @@ interface ContentState {
   inquiries: InquiryItem[];
   reviews: ReviewItem[];
   aboutCards: AboutCardItem[];
+  siteContent: SiteContentData;
   isAuthenticated: boolean;
   isDbSyncing: boolean;
 
   fetchFromDatabase: () => Promise<void>;
   login: (password: string) => boolean;
   logout: () => void;
+
+  updateSiteContent: (updatedData: Partial<SiteContentData>) => Promise<{ ok: boolean; error?: string }>;
+  resetSiteContent: () => Promise<{ ok: boolean; error?: string }>;
 
   addEvent: (eventData: Omit<EventItem, "id">) => Promise<void>;
   updateEvent: (id: string, updatedData: Partial<EventItem>) => void;
@@ -149,7 +154,7 @@ interface ContentState {
   addVideo: (videoData: Omit<VideoItem, "id">) => Promise<void>;
   deleteVideo: (id: string) => Promise<void>;
 
-  addReview: (reviewData: Omit<ReviewItem, "id">) => Promise<void>;
+  addReview: (reviewData: Omit<ReviewItem, "id">) => Promise<{ ok: boolean; error?: string }>;
   deleteReview: (id: string) => Promise<void>;
 
   updateAboutCardImage: (id: string, imageSrc: string) => Promise<void>;
@@ -168,8 +173,66 @@ export const useContentStore = create<ContentState>()(
       inquiries: [],
       reviews: [],
       aboutCards: defaultAboutCards,
+      siteContent: defaultSiteContent,
       isAuthenticated: false,
       isDbSyncing: false,
+
+      updateSiteContent: async (updatedData) => {
+        const current = get().siteContent;
+        const merged: SiteContentData = {
+          ...current,
+          ...updatedData,
+          hero: { ...current.hero, ...(updatedData.hero || {}) },
+          about: {
+            ...current.about,
+            ...(updatedData.about || {}),
+            cards: updatedData.about?.cards || current.about.cards
+          },
+          eventsSection: { ...current.eventsSection, ...(updatedData.eventsSection || {}) },
+          testimonialsSection: { ...current.testimonialsSection, ...(updatedData.testimonialsSection || {}) },
+          ctaSection: { ...current.ctaSection, ...(updatedData.ctaSection || {}) },
+          contact: { ...current.contact, ...(updatedData.contact || {}) }
+        };
+
+        set({ siteContent: merged });
+
+        try {
+          const res = await fetch("/api/site-content", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(merged)
+          });
+          const data = await res.json().catch(() => null);
+          if (res.ok && data?.ok) {
+            if (data.data) {
+              set({ siteContent: data.data });
+            }
+            return { ok: true };
+          }
+          return { ok: false, error: data?.message || "Failed to persist site content" };
+        } catch (e) {
+          console.error("Failed to sync site content:", e);
+          return { ok: false, error: e instanceof Error ? e.message : "Network error" };
+        }
+      },
+
+      resetSiteContent: async () => {
+        set({ siteContent: defaultSiteContent });
+        try {
+          const res = await fetch("/api/site-content", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(defaultSiteContent)
+          });
+          const data = await res.json().catch(() => null);
+          if (res.ok && data?.ok) {
+            return { ok: true };
+          }
+          return { ok: false, error: "Failed to reset site content" };
+        } catch {
+          return { ok: false, error: "Network error" };
+        }
+      },
 
       updateAboutCardImage: async (id: string, imageSrc: string) => {
         const directSrc = convertDriveUrlToDirectLink(imageSrc);
@@ -202,13 +265,17 @@ export const useContentStore = create<ContentState>()(
             body: JSON.stringify(reviewData)
           });
           const data = await res.json().catch(() => null);
-          if (data?.ok && data.data?.id) {
+          if (res.ok && data?.ok && data.data?.id) {
             set({
               reviews: get().reviews.map((r) => (r.id === localId ? { ...r, id: data.data.id } : r))
             });
+            return { ok: true };
           }
+          console.error("Failed to persist review:", data?.message);
+          return { ok: false, error: data?.message || "Failed to persist review" };
         } catch (e) {
           console.error("Failed to persist review:", e);
+          return { ok: false, error: e instanceof Error ? e.message : "Network error" };
         }
       },
 
@@ -229,13 +296,14 @@ export const useContentStore = create<ContentState>()(
         set({ isDbSyncing: true });
         try {
           const localPhotos = get().photos;
-          const [photosRes, videosRes, eventsRes, inquiriesRes, reviewsRes, aboutRes] = await Promise.all([
+          const [photosRes, videosRes, eventsRes, inquiriesRes, reviewsRes, aboutRes, contentRes] = await Promise.all([
             fetch("/api/photos").then((r) => r.json()).catch(() => null),
             fetch("/api/videos").then((r) => r.json()).catch(() => null),
             fetch("/api/events").then((r) => r.json()).catch(() => null),
             fetch("/api/inquiries").then((r) => r.json()).catch(() => null),
             fetch("/api/reviews").then((r) => r.json()).catch(() => null),
-            fetch("/api/about").then((r) => r.json()).catch(() => null)
+            fetch("/api/about").then((r) => r.json()).catch(() => null),
+            fetch("/api/site-content").then((r) => r.json()).catch(() => null)
           ]);
 
           if (photosRes?.ok && Array.isArray(photosRes.data)) {
@@ -251,10 +319,17 @@ export const useContentStore = create<ContentState>()(
             set({ inquiries: inquiriesRes.data });
           }
           if (reviewsRes?.ok && Array.isArray(reviewsRes.data)) {
-            set({ reviews: reviewsRes.data });
+            if (reviewsRes.data.length > 0) {
+              set({ reviews: reviewsRes.data });
+            } else if (get().reviews.length === 0) {
+              set({ reviews: [] });
+            }
           }
           if (aboutRes?.ok && Array.isArray(aboutRes.data) && aboutRes.data.length > 0) {
             set({ aboutCards: aboutRes.data });
+          }
+          if (contentRes?.ok && contentRes.data) {
+            set({ siteContent: contentRes.data });
           }
         } catch (e) {
           console.error("Failed to sync store with API:", e);
@@ -484,7 +559,9 @@ export const useContentStore = create<ContentState>()(
     {
       name: "velora-admin-content-storage",
       partialize: (state) => ({
-        isAuthenticated: state.isAuthenticated
+        isAuthenticated: state.isAuthenticated,
+        reviews: state.reviews,
+        siteContent: state.siteContent
       })
     }
   )

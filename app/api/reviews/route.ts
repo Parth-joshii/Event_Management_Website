@@ -3,6 +3,8 @@ import mongoose from "mongoose";
 import { connectToDatabase } from "@/lib/mongodb";
 import { ReviewModel } from "@/models/Review";
 
+import { getCloudData, saveCloudData } from "@/lib/cloud-sync";
+
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -15,27 +17,45 @@ function serializeReview(review: any) {
     rating: Number(review.rating) || 5,
     comment: review.comment,
     avatarSrc: review.avatarSrc || "",
-    createdAt: review.createdAt
+    createdAt: review.createdAt || new Date().toISOString()
   };
 }
 
-/** GET /api/reviews - Fetch all client reviews persisted in MongoDB */
+/** GET /api/reviews - Fetch all client reviews persisted in MongoDB with cloud fallback */
 export async function GET(): Promise<NextResponse> {
   try {
     await connectToDatabase();
     let reviews = await ReviewModel.find({}).sort({ createdAt: -1 }).lean();
 
-    return NextResponse.json({
-      ok: true,
-      data: reviews.map((r) => serializeReview(r))
-    });
+    if (reviews && reviews.length > 0) {
+      return NextResponse.json({
+        ok: true,
+        data: reviews.map((r) => serializeReview(r))
+      });
+    }
+
+    // If MongoDB has no reviews yet, check cloud backup
+    const cloud = await getCloudData().catch(() => null);
+    if (cloud?.reviews && cloud.reviews.length > 0) {
+      return NextResponse.json({ ok: true, data: cloud.reviews });
+    }
+
+    return NextResponse.json({ ok: true, data: [] });
   } catch (error) {
+    console.warn("MongoDB review fetch warning, checking cloud sync fallback:", error);
+    try {
+      const cloud = await getCloudData().catch(() => null);
+      if (cloud?.reviews && cloud.reviews.length > 0) {
+        return NextResponse.json({ ok: true, data: cloud.reviews });
+      }
+    } catch {}
+
     const message = error instanceof Error ? error.message : "Failed to fetch reviews";
     return NextResponse.json({ ok: false, message, data: [] }, { status: 500 });
   }
 }
 
-/** POST /api/reviews - Add a new review and persist to MongoDB */
+/** POST /api/reviews - Add a new review and persist to MongoDB & Cloud Sync */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const body = (await request.json().catch(() => null)) || {};
@@ -45,16 +65,49 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ ok: false, message: "Author name and comment are required" }, { status: 400 });
     }
 
-    await connectToDatabase();
-    const created = await ReviewModel.create({
+    const reviewData = {
       authorName: authorName.trim(),
       roleOrEvent: roleOrEvent ? roleOrEvent.trim() : "Luxury Event Client",
       rating: Number(rating) || 5,
       comment: comment.trim(),
       avatarSrc: avatarSrc || ""
-    });
+    };
 
-    return NextResponse.json({ ok: true, data: serializeReview(created) });
+    let serialized: ReturnType<typeof serializeReview> | null = null;
+
+    // 1. Persist to MongoDB
+    try {
+      await connectToDatabase();
+      const created = await ReviewModel.create(reviewData);
+      serialized = serializeReview(created);
+    } catch (mongoErr) {
+      console.warn("MongoDB review save failed, using cloud-sync fallback:", mongoErr);
+    }
+
+    // 2. Dual-save to shared cloud storage as backup
+    try {
+      const cloud = await getCloudData();
+      const existingReviews = cloud.reviews || [];
+      const itemToSave = serialized || {
+        id: `rev-${Date.now()}`,
+        ...reviewData,
+        createdAt: new Date().toISOString()
+      };
+      await saveCloudData({
+        reviews: [itemToSave, ...existingReviews.filter((r) => r.id !== itemToSave.id)]
+      });
+      if (!serialized) {
+        serialized = itemToSave;
+      }
+    } catch (cloudErr) {
+      console.warn("Cloud sync review backup warning:", cloudErr);
+    }
+
+    if (!serialized) {
+      throw new Error("Failed to save review to storage");
+    }
+
+    return NextResponse.json({ ok: true, data: serialized });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to save review";
     return NextResponse.json({ ok: false, message }, { status: 500 });

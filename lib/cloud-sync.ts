@@ -52,6 +52,7 @@ export interface CloudStoreData {
     avatarSrc?: string;
   }>;
   aboutCards: AboutCardItem[];
+  siteContent?: import("@/types/site-content").SiteContentData;
 }
 
 const defaultAboutCards: AboutCardItem[] = [

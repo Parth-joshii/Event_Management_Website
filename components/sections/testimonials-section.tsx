@@ -10,13 +10,22 @@ import { GradientButton } from "@/components/ui/gradient-button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 import { useContentStore } from "@/stores/content-store";
 
 /** Renders client testimonials connected directly to MongoDB reviews collection. */
 export function TestimonialsSection(): React.ReactElement {
-  const { reviews, addReview, fetchFromDatabase } = useContentStore();
+  const { reviews, addReview, siteContent, fetchFromDatabase } = useContentStore();
   const [showForm, setShowForm] = React.useState(false);
   const [submitted, setSubmitted] = React.useState(false);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+
+  const testSection = siteContent?.testimonialsSection || {
+    eyebrow: "Client Stories",
+    title: "Celebrations Remembered, Trust Earned",
+    description:
+      "Words from families, brands, and hosts who entrusted Shree Velora with their most meaningful occasions."
+  };
 
   const [formName, setFormName] = React.useState("");
   const [formEvent, setFormEvent] = React.useState("");
@@ -29,24 +38,31 @@ export function TestimonialsSection(): React.ReactElement {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formName.trim() || !formReview.trim()) return;
+    if (!formName.trim() || !formReview.trim() || isSubmitting) return;
 
-    await addReview({
+    setIsSubmitting(true);
+    const result = await addReview({
       authorName: formName.trim(),
       roleOrEvent: formEvent.trim() || "Luxury Celebration Client",
       rating: formRating,
       comment: formReview.trim()
     });
+    setIsSubmitting(false);
 
-    setSubmitted(true);
-    setFormName("");
-    setFormEvent("");
-    setFormRating(5);
-    setFormReview("");
-    setTimeout(() => {
-      setSubmitted(false);
-      setShowForm(false);
-    }, 2500);
+    if (result?.ok) {
+      setSubmitted(true);
+      toast.success("Thank you! Your review has been saved to the database.");
+      setFormName("");
+      setFormEvent("");
+      setFormRating(5);
+      setFormReview("");
+      setTimeout(() => {
+        setSubmitted(false);
+        setShowForm(false);
+      }, 2500);
+    } else {
+      toast.error(result?.error || "Could not save review. Please try again.");
+    }
   };
 
   return (
@@ -56,9 +72,9 @@ export function TestimonialsSection(): React.ReactElement {
           <div className="flex flex-col items-center justify-between gap-6 md:flex-row md:items-end">
             <SectionHeading
               align="left"
-              eyebrow="Client Stories"
-              title="Celebrations Remembered, Trust Earned"
-              description="Words from families, brands, and hosts who entrusted Shree Velora with their most meaningful occasions."
+              eyebrow={testSection.eyebrow}
+              title={testSection.title}
+              description={testSection.description}
             />
             <GradientButton
               onClick={() => setShowForm(!showForm)}
@@ -146,7 +162,9 @@ export function TestimonialsSection(): React.ReactElement {
                   </div>
 
                   <div className="flex justify-end gap-3 pt-2">
-                    <GradientButton type="submit">Submit Review</GradientButton>
+                    <GradientButton disabled={isSubmitting} type="submit">
+                      {isSubmitting ? "Submitting..." : "Submit Review"}
+                    </GradientButton>
                   </div>
                 </div>
               )}

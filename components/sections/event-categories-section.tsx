@@ -12,9 +12,16 @@ import { resolveRenderableImageSrc } from "@/lib/utils";
 
 /** Renders interactive event category preview cards synced with Admin store & MongoDB. */
 export function EventCategoriesSection(): React.ReactElement {
-  const { events, photos, fetchFromDatabase } = useContentStore();
+  const { events, photos, siteContent, fetchFromDatabase } = useContentStore();
   const [selectedEvent, setSelectedEvent] = React.useState<EventItem | null>(null);
   const [activePhotoLightbox, setActivePhotoLightbox] = React.useState<PhotoItem | null>(null);
+
+  const evSection = siteContent?.eventsSection || {
+    eyebrow: "Signature Occasions",
+    title: "Distinctive Experiences For Every Celebration",
+    description:
+      "Click on any event below to explore all photos, decor highlights, and luxury stage setups created by Shree Velora Event's."
+  };
 
   React.useEffect(() => {
     void fetchFromDatabase();
@@ -39,9 +46,9 @@ export function EventCategoriesSection(): React.ReactElement {
       <Container>
         <Reveal>
           <SectionHeading
-            eyebrow="Signature Occasions"
-            title="Distinctive Experiences For Every Celebration"
-            description="Click on any event below to explore all photos, decor highlights, and luxury stage setups created by Shree Velora Event's."
+            eyebrow={evSection.eyebrow}
+            title={evSection.title}
+            description={evSection.description}
           />
         </Reveal>
 

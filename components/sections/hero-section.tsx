@@ -9,6 +9,8 @@ import { Container } from "@/components/layout/container";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { siteConfig } from "@/config/site";
 
+import { useContentStore } from "@/stores/content-store";
+
 interface HeroSectionProps {
   readonly desktopVideoSrc?: string;
   readonly mobileVideoSrc?: string;
@@ -19,6 +21,15 @@ export function HeroSection({
   desktopVideoSrc,
   mobileVideoSrc
 }: HeroSectionProps): React.ReactElement {
+  const { siteContent } = useContentStore();
+  const hero = siteContent?.hero || {
+    badge: "Crafting Extraordinary Celebrations",
+    title: siteConfig.name,
+    tagline: siteConfig.tagline,
+    ctaPrimaryText: "Design Your Celebration",
+    ctaSecondaryText: "Explore Our Works"
+  };
+
   return (
     <section
       id="home"
@@ -31,13 +42,13 @@ export function HeroSection({
       <Container className="relative z-10 flex min-h-screen items-center justify-center pt-2 pb-24 -translate-y-12 sm:pt-10 sm:-translate-y-10 lg:-translate-y-16">
         <Reveal className="mx-auto max-w-6xl text-center">
           <p className="mx-auto mb-2.5 inline-flex items-center gap-1.5 rounded-full border border-white/30 bg-white/10 px-2.5 py-0.5 text-[8px] sm:text-[9px] font-semibold tracking-[0.22em] text-[#EBDCFB]/90 uppercase backdrop-blur shadow-sm">
-            Crafting Extraordinary Celebrations
+            {hero.badge || "Crafting Extraordinary Celebrations"}
           </p>
           <h1 className="font-display text-5xl font-black leading-[0.95] tracking-tight text-balance sm:text-8xl lg:text-[7.5rem] xl:text-[8.5rem] text-white drop-shadow-[0_8px_30px_rgba(0,0,0,0.8)]">
-            {siteConfig.name}
+            {hero.title || siteConfig.name}
           </h1>
           <p className="mx-auto mt-3 max-w-2xl text-xs font-normal tracking-wide text-balance text-[#EBDCFB]/80 sm:text-sm lg:text-base">
-            {siteConfig.tagline}
+            {hero.tagline || siteConfig.tagline}
           </p>
 
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
@@ -45,7 +56,7 @@ export function HeroSection({
               <GradientButton asChild>
                 <Link href="/customize" className="inline-flex items-center gap-2">
                   <WandSparkles aria-hidden="true" className="size-4" />
-                  Design Your Celebration
+                  {hero.ctaPrimaryText || "Design Your Celebration"}
                 </Link>
               </GradientButton>
             </MagneticButton>
@@ -54,7 +65,7 @@ export function HeroSection({
               <GradientButton asChild tone="light">
                 <Link href="/gallery" className="inline-flex items-center gap-2">
                   <Images aria-hidden="true" className="size-4" />
-                  Explore Our Works
+                  {hero.ctaSecondaryText || "Explore Our Works"}
                   <ArrowRight aria-hidden="true" className="size-4" />
                 </Link>
               </GradientButton>

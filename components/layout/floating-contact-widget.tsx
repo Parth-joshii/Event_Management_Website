@@ -3,15 +3,21 @@
 import * as React from "react";
 import { MessageCircle, Phone, Sparkles, X } from "lucide-react";
 import { siteConfig } from "@/config/site";
+import { useContentStore } from "@/stores/content-store";
 
 /** Renders a luxury floating quick-contact widget for direct WhatsApp & Phone inquiries. */
 export function FloatingContactWidget(): React.ReactElement {
   const [isOpen, setIsOpen] = React.useState(false);
+  const { siteContent } = useContentStore();
 
-  const whatsappHref = `https://wa.me/${siteConfig.contact.whatsappNumber}?text=${encodeURIComponent(
+  const contact = siteContent?.contact || siteConfig.contact;
+  const whatsappNumber = contact.whatsappNumber || siteConfig.contact.whatsappNumber;
+  const phone = contact.phone || siteConfig.contact.phone;
+
+  const whatsappHref = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
     "Hi Shree Velora Event's, I am interested in planning an upcoming luxury event and would like to discuss decor and services."
   )}`;
-  const phoneHref = `tel:${siteConfig.contact.phone.replace(/\s/g, "")}`;
+  const phoneHref = `tel:${phone.replace(/\s/g, "")}`;
 
   return (
     <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-3 select-none">

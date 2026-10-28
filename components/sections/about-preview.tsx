@@ -36,12 +36,22 @@ const defaultHighlights = [
 
 /** Renders the concise brand introduction and highlight cards with customizable background images & ultra-premium layout. */
 export function AboutPreview(): React.ReactElement {
-  const { aboutCards, fetchFromDatabase } = useContentStore();
+  const { aboutCards, siteContent, fetchFromDatabase } = useContentStore();
+
+  const about = siteContent?.about || {
+    eyebrow: "About Shree Velora",
+    title: "Signature Events, Flawlessly Executed",
+    description:
+      "Shree Velora Event's brings creative direction, luxury decor, and seamless coordination to royal weddings and grand celebrations.",
+    cards: defaultHighlights
+  };
 
   // Sync latest cloud data on client mount
   React.useEffect(() => {
     void fetchFromDatabase();
   }, [fetchFromDatabase]);
+
+  const cardsToRender = about.cards && about.cards.length > 0 ? about.cards : defaultHighlights;
 
   return (
     <section
@@ -52,20 +62,20 @@ export function AboutPreview(): React.ReactElement {
       <Container>
         <Reveal>
           <SectionHeading
-            eyebrow="About Shree Velora"
-            title="Signature Events, Flawlessly Executed"
-            description="Shree Velora Event's brings creative direction, luxury decor, and seamless coordination to royal weddings and grand celebrations."
+            eyebrow={about.eyebrow}
+            title={about.title}
+            description={about.description}
           />
         </Reveal>
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {defaultHighlights.map((defaultItem, index) => {
-            const storeCard = aboutCards?.find((c) => c.id === defaultItem.id);
-            const title = storeCard?.title || defaultItem.title;
-            const description = storeCard?.description || defaultItem.description;
+          {cardsToRender.map((item, index) => {
+            const storeCard = aboutCards?.find((c) => c.id === item.id);
+            const title = item.title || storeCard?.title;
+            const description = item.description || storeCard?.description;
             const bgImage = storeCard?.imageSrc;
 
             return (
-              <Reveal delay={index * 0.05} key={defaultItem.id}>
+              <Reveal delay={index * 0.05} key={item.id}>
                 <LuxuryCard
                   className="group relative flex h-full min-h-[240px] flex-col justify-between overflow-hidden rounded-xl border-t-2 border-t-[#D4AF37]/80 border-x border-b border-purple-900/10 bg-white/90 p-7 shadow-[0_16px_50px_rgba(45,34,56,0.06)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1.5 hover:border-t-[#D4AF37] hover:shadow-[0_24px_70px_rgba(212,175,55,0.2)]"
                   style={
@@ -92,7 +102,7 @@ export function AboutPreview(): React.ReactElement {
                           : "text-[#D4AF37]/60 group-hover:text-[#D4AF37]"
                       }`}
                     >
-                      {defaultItem.number}
+                      {item.number}
                     </span>
                     <span
                       className={`h-0.5 w-6 rounded-full transition-all duration-300 group-hover:w-12 ${
