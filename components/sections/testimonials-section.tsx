@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useContentStore } from "@/stores/content-store";
+import { resolveRenderableImageSrc } from "@/lib/utils";
 
 /** Renders client testimonials connected directly to MongoDB reviews collection. */
 export function TestimonialsSection(): React.ReactElement {
@@ -66,7 +67,17 @@ export function TestimonialsSection(): React.ReactElement {
   };
 
   return (
-    <section id="testimonials" className="bg-[#FAF7FF] py-24 sm:py-28">
+    <section id="testimonials" className="relative isolate overflow-hidden bg-[#FAF7FF] py-24 sm:py-28">
+      {testSection.backgroundImageUrl ? (
+        <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-10">
+          <img
+            src={resolveRenderableImageSrc(testSection.backgroundImageUrl)}
+            alt="Testimonials Background Ambient"
+            className="size-full object-cover"
+            loading="lazy"
+          />
+        </div>
+      ) : null}
       <Container>
         <Reveal>
           <div className="flex flex-col items-center justify-between gap-6 md:flex-row md:items-end">

@@ -2,12 +2,15 @@
 
 import Link from "next/link";
 import { Clock3, Mail, MapPin, MessageCircle, Phone, WandSparkles } from "lucide-react";
+import { GoldenParticles } from "@/components/animations/golden-particles";
 import { MagneticButton } from "@/components/animations/magnetic-button";
 import { Reveal } from "@/components/animations/reveal";
+import { TiltCard } from "@/components/animations/tilt-card";
 import { Container } from "@/components/layout/container";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { siteConfig } from "@/config/site";
 import { useContentStore } from "@/stores/content-store";
+import { resolveRenderableImageSrc } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
 
 interface ContactCardItem {
@@ -17,7 +20,10 @@ interface ContactCardItem {
   readonly value: string;
 }
 
-/** Renders the unified luxury CTA and Private Consultation section. */
+const BALLROOM_BG_IMAGE =
+  "https://res.cloudinary.com/rwmkoctu/image/upload/f_auto,q_auto,w_1600,c_limit/v1793126363/shree_velora/gallery/zcxilfdmfoz84szbqmwj.jpg";
+
+/** Renders the unified luxury CTA and Private Consultation section with Royal Palace banquet backdrop. */
 export function CtaSection(): React.ReactElement {
   const { siteContent } = useContentStore();
 
@@ -51,6 +57,7 @@ export function CtaSection(): React.ReactElement {
       value: contact.email || siteConfig.contact.email
     },
     {
+      href: `https://maps.google.com/?q=${encodeURIComponent(contact.location || siteConfig.contact.location)}`,
       icon: MapPin,
       label: "Service Location",
       value: contact.location || siteConfig.contact.location
@@ -61,22 +68,38 @@ export function CtaSection(): React.ReactElement {
       value: contact.businessHours || siteConfig.contact.businessHours
     }
   ];
+
   return (
     <section
       id="customize"
-      className="relative isolate overflow-hidden bg-[#2D2238] py-24 text-white sm:py-28"
+      className="relative isolate overflow-hidden bg-[#241B2D] py-28 text-white sm:py-32"
     >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_18%,rgba(191,162,219,0.32),transparent_32%),radial-gradient(circle_at_78%_72%,rgba(212,175,55,0.22),transparent_30%)]" />
+      {/* Royal Palace Ballroom Background Image (Dynamic Admin CMS & Cloudinary) */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={resolveRenderableImageSrc(cta.backgroundImageUrl || BALLROOM_BG_IMAGE)}
+        alt="Royal Banquet Celebration"
+        className="pointer-events-none absolute inset-0 size-full object-cover object-center scale-105 brightness-50 contrast-110"
+        loading="lazy"
+      />
+
+      {/* Atmospheric royal purple & obsidian overlay gradients */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#241B2D]/94 via-[#2D2238]/85 to-[#181020]/96" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(191,162,219,0.3),transparent_40%),radial-gradient(circle_at_80%_80%,rgba(212,175,55,0.22),transparent_38%)]" />
+
+      {/* Golden dust floating particles */}
+      <GoldenParticles count={20} className="opacity-75" />
+
       <Container className="relative z-10">
         <Reveal>
           <div className="mx-auto max-w-4xl text-center">
             <p className="text-sm font-semibold tracking-[0.24em] text-[#D4AF37] uppercase">
               {cta.eyebrow}
             </p>
-            <h2 className="font-display mt-5 text-4xl font-semibold tracking-normal text-balance sm:text-6xl">
+            <h2 className="font-display mt-5 text-4xl font-semibold tracking-normal text-balance sm:text-6xl text-white drop-shadow-md">
               {cta.title}
             </h2>
-            <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-white/74 sm:text-lg">
+            <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-white/80 sm:text-lg">
               {cta.description}
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
@@ -102,7 +125,7 @@ export function CtaSection(): React.ReactElement {
 
         {/* Integrated Private Consultation Details */}
         <Reveal delay={0.12}>
-          <div className="mt-20 border-t border-white/15 pt-16">
+          <div className="mt-20 border-t border-[#D4AF37]/20 pt-16">
             <div className="mx-auto max-w-2xl text-center">
               <p className="text-xs font-semibold tracking-[0.2em] text-[#D4AF37] uppercase">
                 Private Consultation
@@ -119,15 +142,25 @@ export function CtaSection(): React.ReactElement {
               {contactCards.map((item) => {
                 const Icon = item.icon;
                 const cardContent = (
-                  <div className="h-full rounded-xl border border-white/15 bg-white/8 p-6 text-left transition hover:border-[#D4AF37] hover:bg-white/12 backdrop-blur">
-                    <Icon aria-hidden="true" className="size-5 text-[#D4AF37]" />
-                    <p className="mt-4 text-xs font-semibold tracking-[0.16em] text-white/60 uppercase">
-                      {item.label}
-                    </p>
-                    <p className="mt-1 text-sm font-semibold text-white">
-                      {item.value}
-                    </p>
-                  </div>
+                  <TiltCard
+                    key={item.label}
+                    maxTilt={6}
+                    scale={1.03}
+                    glareOpacity={0.2}
+                    className="h-full"
+                  >
+                    <div className="h-full rounded-2xl border border-white/15 bg-white/10 p-6 text-left shadow-lg backdrop-blur-md transition-all duration-300 hover:border-[#D4AF37] hover:bg-white/15">
+                      <div className="flex size-10 items-center justify-center rounded-xl bg-[#D4AF37]/15 border border-[#D4AF37]/30">
+                        <Icon aria-hidden="true" className="size-5 text-[#D4AF37]" />
+                      </div>
+                      <p className="mt-4 text-xs font-semibold tracking-[0.16em] text-white/60 uppercase">
+                        {item.label}
+                      </p>
+                      <p className="mt-1 text-sm font-semibold text-white">
+                        {item.value}
+                      </p>
+                    </div>
+                  </TiltCard>
                 );
 
                 return item.href ? (
@@ -135,6 +168,8 @@ export function CtaSection(): React.ReactElement {
                     className="block focus-visible:ring-2 focus-visible:ring-[#D4AF37] focus-visible:outline-none"
                     href={item.href}
                     key={item.label}
+                    target={item.href.startsWith("http") ? "_blank" : undefined}
+                    rel={item.href.startsWith("http") ? "noopener noreferrer" : undefined}
                   >
                     {cardContent}
                   </a>

@@ -7,6 +7,7 @@ import { CtaSection } from "@/components/sections/cta-section";
 import { FeaturedGallerySection } from "@/components/sections/featured-gallery-section";
 import { HeroSection } from "@/components/sections/hero-section";
 import { TestimonialsSection } from "@/components/sections/testimonials-section";
+import { VenueMarquee } from "@/components/showcase/venue-marquee";
 import { siteConfig } from "@/config/site";
 import { optionalPublicAsset } from "@/lib/public-assets";
 import { createHomepageJsonLd } from "@/utils/seo";
@@ -38,7 +39,7 @@ const CLOUDINARY_HERO_DESKTOP_VIDEO =
 const CLOUDINARY_HERO_MOBILE_VIDEO =
   "https://res.cloudinary.com/rwmkoctu/video/upload/v1793428708/shree_velora/videos/hero_mobile_video.mp4";
 
-/** Renders the complete premium landing page with Cloudinary Video CDN. */
+/** Renders the complete premium landing page with Cloudinary Video CDN and Royal Venue Marquee. */
 export default function HomePage(): React.ReactElement {
   const logoSrc = optionalPublicAsset("/logos/logo.png");
   const desktopHeroVideoSrc =
@@ -59,6 +60,7 @@ export default function HomePage(): React.ReactElement {
           desktopVideoSrc={desktopHeroVideoSrc}
           mobileVideoSrc={mobileHeroVideoSrc}
         />
+        <VenueMarquee />
         <AboutPreview />
         <FeaturedGallerySection />
         <CtaSection />

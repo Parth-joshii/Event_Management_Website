@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ArrowDown, ArrowRight, Images, WandSparkles } from "lucide-react";
+import { GoldenParticles } from "@/components/animations/golden-particles";
 import { MagneticButton } from "@/components/animations/magnetic-button";
 import { Reveal } from "@/components/animations/reveal";
 import { ScrollVideo } from "@/components/animations/scroll-video";
@@ -22,7 +23,7 @@ interface HeroSectionProps {
   readonly mobileVideoSrc?: string;
 }
 
-/** Renders the cinematic landing hero with direct navigation into the main experiences. */
+/** Renders the cinematic landing hero with Cloudinary Video, floating gold dust particles & direct navigation. */
 export function HeroSection({
   desktopVideoSrc,
   mobileVideoSrc
@@ -36,8 +37,9 @@ export function HeroSection({
     ctaSecondaryText: "Explore Our Works"
   };
 
-  const finalDesktopVideo = desktopVideoSrc || DEFAULT_CDN_DESKTOP_VIDEO;
-  const finalMobileVideo = mobileVideoSrc || DEFAULT_CDN_MOBILE_VIDEO;
+  const finalDesktopVideo = hero.desktopVideoUrl || desktopVideoSrc || DEFAULT_CDN_DESKTOP_VIDEO;
+  const finalMobileVideo = hero.mobileVideoUrl || mobileVideoSrc || DEFAULT_CDN_MOBILE_VIDEO;
+  const finalPoster = hero.posterImageUrl || DEFAULT_CDN_POSTER;
 
   return (
     <section
@@ -47,10 +49,15 @@ export function HeroSection({
       <ScrollVideo
         desktopSrc={finalDesktopVideo}
         mobileSrc={finalMobileVideo}
-        poster={DEFAULT_CDN_POSTER}
+        poster={finalPoster}
       />
+
+      {/* Atmospheric dark gradient overlays */}
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(45,34,56,0.55)_0%,rgba(45,34,56,0.58)_42%,rgba(45,34,56,0.9)_100%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_24%_20%,rgba(191,162,219,0.32),transparent_30%),radial-gradient(circle_at_78%_28%,rgba(212,175,55,0.24),transparent_26%)]" />
+
+      {/* Floating golden dust & bokeh sparkles */}
+      <GoldenParticles count={22} className="opacity-80" />
 
       <Container className="relative z-10 flex min-h-screen items-center justify-center pt-2 pb-24 -translate-y-12 sm:pt-10 sm:-translate-y-10 lg:-translate-y-16">
         <Reveal className="mx-auto max-w-6xl text-center">

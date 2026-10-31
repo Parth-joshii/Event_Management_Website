@@ -80,6 +80,7 @@ export function AdminDashboard(): React.ReactElement {
     deleteReview,
     aboutCards,
     updateAboutCardImage,
+    updateSectionBackground,
     siteContent,
     updateSiteContent,
     resetSiteContent,
@@ -591,7 +592,7 @@ export function AdminDashboard(): React.ReactElement {
             <TabsTrigger value="events">Manage Events</TabsTrigger>
             <TabsTrigger value="photos">Manage Photos</TabsTrigger>
             <TabsTrigger value="videos">Manage Videos</TabsTrigger>
-            <TabsTrigger value="about-cards">About Cards Photos</TabsTrigger>
+            <TabsTrigger value="about-cards">Background Photos & Media</TabsTrigger>
             <TabsTrigger value="reviews">Manage Reviews</TabsTrigger>
             <TabsTrigger value="inquiries">Client Inquiries</TabsTrigger>
             <TabsTrigger value="site-cms">Website Text CMS</TabsTrigger>
@@ -1446,48 +1447,66 @@ export function AdminDashboard(): React.ReactElement {
             </div>
           </TabsContent>
 
-          {/* TAB 5: MANAGE ABOUT CARDS */}
-          <TabsContent value="about-cards" className="space-y-6">
+          {/* TAB 5: MANAGE BACKGROUND PHOTOS & MEDIA */}
+          <TabsContent value="about-cards" className="space-y-10">
             <div>
               <h2 className="font-display text-2xl font-bold text-[#2D2238]">
-                About Shree Velora Cards Background Photos
+                Website Background Photos & Media
               </h2>
               <p className="text-sm text-[#5c4b6e]">
-                Upload or set background photos for each of the 4 signature cards displayed in the &quot;About Shree Velora&quot; section on the client website.
+                Upload, change, or customize all full-bleed section background photos, hero media, and signature About cards across the entire website.
               </p>
             </div>
 
-            <div className="grid gap-6 sm:grid-cols-2">
-              {(aboutCards || []).map((card) => (
-                <div
-                  key={card.id}
-                  className="flex flex-col justify-between rounded-xl border border-[#EBDCFB] bg-white p-6 shadow-sm"
-                >
+            {/* PART A: FULL-BLEED SECTION BACKGROUNDS */}
+            <div className="space-y-4">
+              <div className="border-b border-[#EBDCFB] pb-3">
+                <h3 className="font-display text-lg font-bold text-[#2D2238]">
+                  1. Section Background Photos & Media
+                </h3>
+                <p className="text-xs text-[#5c4b6e]">
+                  Manage the atmospheric background photos that frame key experiences on the homepage.
+                </p>
+              </div>
+
+              <div className="grid gap-6 sm:grid-cols-2">
+                {/* 1. CTA SECTION BACKGROUND */}
+                <div className="flex flex-col justify-between rounded-xl border border-[#EBDCFB] bg-white p-6 shadow-sm">
                   <div>
                     <div className="flex items-center justify-between">
-                      <h3 className="text-lg font-bold text-[#2D2238]">{card.title}</h3>
-                      <span className="rounded-full bg-[#EBDCFB] px-2.5 py-1 text-xs font-semibold text-[#7d5ea1]">
-                        {card.id}
+                      <h4 className="text-base font-bold text-[#2D2238]">
+                        CTA & Consultation Banner
+                      </h4>
+                      <span className="rounded-full bg-[#EBDCFB] px-2.5 py-0.5 text-xs font-semibold text-[#7d5ea1]">
+                        Section #customize
                       </span>
                     </div>
-                    <p className="mt-1 text-xs text-[#5c4b6e]">{card.description}</p>
+                    <p className="mt-1 text-xs text-[#5c4b6e]">
+                      Full-bleed palace ballroom background photo displayed behind the &quot;Let Us Create Something Truly Unforgettable&quot; consultation banner.
+                    </p>
 
-                    {/* Background Image Preview */}
-                    <div className="relative mt-4 flex h-44 w-full items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
-                      {card.imageSrc ? (
-                        <ResponsiveImage
-                          alt={card.title}
-                          className="size-full"
-                          fallbackClassName="bg-slate-100"
-                          imageClassName="object-cover"
-                          sizes="100vw"
-                          src={resolveRenderableImageSrc(card.imageSrc)}
-                          title={card.title}
-                        />
+                    {/* Background Preview */}
+                    <div className="relative mt-4 flex h-48 w-full items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-900">
+                      {siteContent.ctaSection?.backgroundImageUrl ? (
+                        <>
+                          <ResponsiveImage
+                            alt="CTA Section Background"
+                            className="size-full"
+                            fallbackClassName="bg-slate-900"
+                            imageClassName="object-cover brightness-60"
+                            sizes="100vw"
+                            src={resolveRenderableImageSrc(siteContent.ctaSection.backgroundImageUrl)}
+                            title="CTA Background"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-[#241B2D]/80 to-transparent pointer-events-none" />
+                          <span className="absolute bottom-2 left-2 rounded bg-black/60 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur">
+                            Live Backdrop Preview
+                          </span>
+                        </>
                       ) : (
                         <div className="p-4 text-center text-slate-400">
                           <ImageIcon className="mx-auto mb-1 size-8 opacity-40" />
-                          <span className="text-xs font-medium">No background photo set</span>
+                          <span className="text-xs font-medium">Default Royal Banquet Photo</span>
                         </div>
                       )}
                     </div>
@@ -1496,7 +1515,7 @@ export function AdminDashboard(): React.ReactElement {
                   <div className="mt-5 space-y-3">
                     <div>
                       <Label className="text-xs font-semibold text-slate-700">
-                        Upload Photo File
+                        Upload New Background Photo
                       </Label>
                       <Input
                         type="file"
@@ -1506,13 +1525,13 @@ export function AdminDashboard(): React.ReactElement {
                           const file = e.target.files?.[0];
                           if (!file) return;
                           try {
-                            toast.loading("Uploading to Cloudinary...", { id: `card-upload-${card.id}` });
-                            const res = await uploadFileToCloudinary(file, { folder: "shree_velora/about" });
-                            updateAboutCardImage(card.id, res.url);
-                            toast.success("Card photo uploaded to Cloudinary CDN!", { id: `card-upload-${card.id}` });
+                            toast.loading("Uploading background to Cloudinary CDN...", { id: "cta-bg-upload" });
+                            const res = await uploadFileToCloudinary(file, { folder: "shree_velora/backgrounds" });
+                            await updateSectionBackground("cta", res.url);
+                            toast.success("CTA background photo updated on website!", { id: "cta-bg-upload" });
                           } catch (err) {
                             const msg = err instanceof Error ? err.message : "Failed to upload photo";
-                            toast.error(msg, { id: `card-upload-${card.id}` });
+                            toast.error(msg, { id: "cta-bg-upload" });
                           }
                         }}
                       />
@@ -1525,25 +1544,412 @@ export function AdminDashboard(): React.ReactElement {
                       <div className="mt-1 flex gap-2">
                         <Input
                           type="text"
-                          placeholder="https://... or /images/..."
-                          value={card.imageSrc || ""}
-                          onChange={(e) => updateAboutCardImage(card.id, e.target.value)}
-                          className="text-xs"
+                          placeholder="https://res.cloudinary.com/..."
+                          value={siteContent.ctaSection?.backgroundImageUrl || ""}
+                          onChange={(e) => void updateSectionBackground("cta", e.target.value)}
+                          className="text-xs font-mono"
                         />
-                        {card.imageSrc ? (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            void updateSectionBackground(
+                              "cta",
+                              "https://res.cloudinary.com/rwmkoctu/image/upload/v1793126363/shree_velora/gallery/zcxilfdmfoz84szbqmwj.jpg"
+                            )
+                          }
+                          className="whitespace-nowrap rounded-md border border-[#D4AF37]/50 bg-[#D4AF37]/10 px-3 py-1 text-xs font-semibold text-[#8a6d1a] hover:bg-[#D4AF37]/20 transition cursor-pointer"
+                          title="Reset to Royal Banquet Ballroom default photo"
+                        >
+                          Default
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. HERO SECTION POSTER & MEDIA */}
+                <div className="flex flex-col justify-between rounded-xl border border-[#EBDCFB] bg-white p-6 shadow-sm">
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-base font-bold text-[#2D2238]">
+                        Hero Video Poster & Video Sources
+                      </h4>
+                      <span className="rounded-full bg-[#EBDCFB] px-2.5 py-0.5 text-xs font-semibold text-[#7d5ea1]">
+                        Section #home
+                      </span>
+                    </div>
+                    <p className="mt-1 text-xs text-[#5c4b6e]">
+                      Cinematic video poster displayed immediately while the hero background video streams.
+                    </p>
+
+                    {/* Poster Preview */}
+                    <div className="relative mt-4 flex h-48 w-full items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-900">
+                      {siteContent.hero?.posterImageUrl ? (
+                        <>
+                          <ResponsiveImage
+                            alt="Hero Poster Background"
+                            className="size-full"
+                            fallbackClassName="bg-slate-900"
+                            imageClassName="object-cover brightness-75"
+                            sizes="100vw"
+                            src={resolveRenderableImageSrc(siteContent.hero.posterImageUrl)}
+                            title="Hero Poster"
+                          />
+                          <span className="absolute bottom-2 left-2 rounded bg-black/60 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur">
+                            Video Poster Preview
+                          </span>
+                        </>
+                      ) : (
+                        <div className="p-4 text-center text-slate-400">
+                          <ImageIcon className="mx-auto mb-1 size-8 opacity-40" />
+                          <span className="text-xs font-medium">Default Hero Video Poster</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="mt-5 space-y-3">
+                    <div>
+                      <Label className="text-xs font-semibold text-slate-700">
+                        Upload New Poster Photo
+                      </Label>
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        className="mt-1 text-xs cursor-pointer"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          try {
+                            toast.loading("Uploading hero poster to Cloudinary...", { id: "hero-poster-upload" });
+                            const res = await uploadFileToCloudinary(file, { folder: "shree_velora/hero" });
+                            await updateSectionBackground("heroPoster", res.url);
+                            toast.success("Hero poster updated on website!", { id: "hero-poster-upload" });
+                          } catch (err) {
+                            const msg = err instanceof Error ? err.message : "Failed to upload poster";
+                            toast.error(msg, { id: "hero-poster-upload" });
+                          }
+                        }}
+                      />
+                    </div>
+
+                    <div>
+                      <Label className="text-xs font-semibold text-slate-700">
+                        Poster Image URL
+                      </Label>
+                      <Input
+                        type="text"
+                        placeholder="https://res.cloudinary.com/..."
+                        value={siteContent.hero?.posterImageUrl || ""}
+                        onChange={(e) => void updateSectionBackground("heroPoster", e.target.value)}
+                        className="mt-1 text-xs font-mono"
+                      />
+                    </div>
+
+                    <div className="grid gap-2 sm:grid-cols-2 pt-1 border-t border-slate-100">
+                      <div>
+                        <Label className="text-[11px] font-semibold text-slate-600">
+                          Desktop Video CDN URL
+                        </Label>
+                        <Input
+                          type="text"
+                          placeholder="https://res.cloudinary.com/...mp4"
+                          value={siteContent.hero?.desktopVideoUrl || ""}
+                          onChange={(e) => void updateSectionBackground("heroDesktopVideo", e.target.value)}
+                          className="mt-1 text-xs font-mono"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-[11px] font-semibold text-slate-600">
+                          Mobile Video CDN URL
+                        </Label>
+                        <Input
+                          type="text"
+                          placeholder="https://res.cloudinary.com/...mp4"
+                          value={siteContent.hero?.mobileVideoUrl || ""}
+                          onChange={(e) => void updateSectionBackground("heroMobileVideo", e.target.value)}
+                          className="mt-1 text-xs font-mono"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. ABOUT SECTION AMBIENT BACKGROUND */}
+                <div className="flex flex-col justify-between rounded-xl border border-[#EBDCFB] bg-white p-6 shadow-sm">
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-base font-bold text-[#2D2238]">
+                        About Section Ambient Background
+                      </h4>
+                      <span className="rounded-full bg-[#EBDCFB] px-2.5 py-0.5 text-xs font-semibold text-[#7d5ea1]">
+                        Section #about
+                      </span>
+                    </div>
+                    <p className="mt-1 text-xs text-[#5c4b6e]">
+                      Optional background motif or palace texture layered behind the About Shree Velora introduction.
+                    </p>
+
+                    {/* Preview */}
+                    <div className="relative mt-4 flex h-36 w-full items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+                      {siteContent.about?.backgroundImageUrl ? (
+                        <ResponsiveImage
+                          alt="About Section Background"
+                          className="size-full"
+                          fallbackClassName="bg-slate-50"
+                          imageClassName="object-cover"
+                          sizes="100vw"
+                          src={resolveRenderableImageSrc(siteContent.about.backgroundImageUrl)}
+                          title="About Background"
+                        />
+                      ) : (
+                        <div className="p-4 text-center text-slate-400">
+                          <ImageIcon className="mx-auto mb-1 size-7 opacity-40" />
+                          <span className="text-xs font-medium">Using Soft Royal Gradient (No image)</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="mt-5 space-y-3">
+                    <div>
+                      <Label className="text-xs font-semibold text-slate-700">
+                        Upload Ambient Background Photo
+                      </Label>
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        className="mt-1 text-xs cursor-pointer"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          try {
+                            toast.loading("Uploading to Cloudinary...", { id: "about-bg-upload" });
+                            const res = await uploadFileToCloudinary(file, { folder: "shree_velora/about" });
+                            await updateSectionBackground("aboutBg", res.url);
+                            toast.success("About ambient background updated!", { id: "about-bg-upload" });
+                          } catch (err) {
+                            const msg = err instanceof Error ? err.message : "Failed to upload";
+                            toast.error(msg, { id: "about-bg-upload" });
+                          }
+                        }}
+                      />
+                    </div>
+
+                    <div>
+                      <Label className="text-xs font-semibold text-slate-700">
+                        Or Image URL
+                      </Label>
+                      <div className="mt-1 flex gap-2">
+                        <Input
+                          type="text"
+                          placeholder="https://res.cloudinary.com/..."
+                          value={siteContent.about?.backgroundImageUrl || ""}
+                          onChange={(e) => void updateSectionBackground("aboutBg", e.target.value)}
+                          className="text-xs font-mono"
+                        />
+                        {siteContent.about?.backgroundImageUrl ? (
                           <button
                             type="button"
-                            onClick={() => updateAboutCardImage(card.id, "")}
+                            onClick={() => void updateSectionBackground("aboutBg", "")}
                             className="rounded-md border border-rose-200 bg-rose-50 px-3 py-1 text-xs font-medium text-rose-600 hover:bg-rose-100 transition cursor-pointer"
                           >
-                            Remove
+                            Clear
                           </button>
                         ) : null}
                       </div>
                     </div>
                   </div>
                 </div>
-              ))}
+
+                {/* 4. TESTIMONIALS SECTION AMBIENT BACKGROUND */}
+                <div className="flex flex-col justify-between rounded-xl border border-[#EBDCFB] bg-white p-6 shadow-sm">
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-base font-bold text-[#2D2238]">
+                        Client Reviews & Testimonials Background
+                      </h4>
+                      <span className="rounded-full bg-[#EBDCFB] px-2.5 py-0.5 text-xs font-semibold text-[#7d5ea1]">
+                        Section #testimonials
+                      </span>
+                    </div>
+                    <p className="mt-1 text-xs text-[#5c4b6e]">
+                      Optional background backdrop layered behind the client feedback and rating cards.
+                    </p>
+
+                    {/* Preview */}
+                    <div className="relative mt-4 flex h-36 w-full items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+                      {siteContent.testimonialsSection?.backgroundImageUrl ? (
+                        <ResponsiveImage
+                          alt="Testimonials Section Background"
+                          className="size-full"
+                          fallbackClassName="bg-slate-50"
+                          imageClassName="object-cover"
+                          sizes="100vw"
+                          src={resolveRenderableImageSrc(siteContent.testimonialsSection.backgroundImageUrl)}
+                          title="Testimonials Background"
+                        />
+                      ) : (
+                        <div className="p-4 text-center text-slate-400">
+                          <ImageIcon className="mx-auto mb-1 size-7 opacity-40" />
+                          <span className="text-xs font-medium">Using Soft Lavender Backdrop (No image)</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="mt-5 space-y-3">
+                    <div>
+                      <Label className="text-xs font-semibold text-slate-700">
+                        Upload Ambient Background Photo
+                      </Label>
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        className="mt-1 text-xs cursor-pointer"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          try {
+                            toast.loading("Uploading to Cloudinary...", { id: "test-bg-upload" });
+                            const res = await uploadFileToCloudinary(file, { folder: "shree_velora/testimonials" });
+                            await updateSectionBackground("testimonialsBg", res.url);
+                            toast.success("Testimonials background updated!", { id: "test-bg-upload" });
+                          } catch (err) {
+                            const msg = err instanceof Error ? err.message : "Failed to upload";
+                            toast.error(msg, { id: "test-bg-upload" });
+                          }
+                        }}
+                      />
+                    </div>
+
+                    <div>
+                      <Label className="text-xs font-semibold text-slate-700">
+                        Or Image URL
+                      </Label>
+                      <div className="mt-1 flex gap-2">
+                        <Input
+                          type="text"
+                          placeholder="https://res.cloudinary.com/..."
+                          value={siteContent.testimonialsSection?.backgroundImageUrl || ""}
+                          onChange={(e) => void updateSectionBackground("testimonialsBg", e.target.value)}
+                          className="text-xs font-mono"
+                        />
+                        {siteContent.testimonialsSection?.backgroundImageUrl ? (
+                          <button
+                            type="button"
+                            onClick={() => void updateSectionBackground("testimonialsBg", "")}
+                            className="rounded-md border border-rose-200 bg-rose-50 px-3 py-1 text-xs font-medium text-rose-600 hover:bg-rose-100 transition cursor-pointer"
+                          >
+                            Clear
+                          </button>
+                        ) : null}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* PART B: ABOUT SHREE VELORA CARDS BACKGROUND PHOTOS */}
+            <div className="space-y-4 pt-4 border-t border-[#EBDCFB]">
+              <div className="border-b border-[#EBDCFB] pb-3">
+                <h3 className="font-display text-lg font-bold text-[#2D2238]">
+                  2. About Shree Velora Cards Background Photos (4 Signature Cards)
+                </h3>
+                <p className="text-xs text-[#5c4b6e]">
+                  Upload or set background photos for each of the 4 signature cards displayed in the &quot;About Shree Velora&quot; section on the client website.
+                </p>
+              </div>
+
+              <div className="grid gap-6 sm:grid-cols-2">
+                {(aboutCards || []).map((card) => (
+                  <div
+                    key={card.id}
+                    className="flex flex-col justify-between rounded-xl border border-[#EBDCFB] bg-white p-6 shadow-sm"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-lg font-bold text-[#2D2238]">{card.title}</h4>
+                        <span className="rounded-full bg-[#EBDCFB] px-2.5 py-1 text-xs font-semibold text-[#7d5ea1]">
+                          {card.id}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-xs text-[#5c4b6e]">{card.description}</p>
+
+                      {/* Background Image Preview */}
+                      <div className="relative mt-4 flex h-44 w-full items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
+                        {card.imageSrc ? (
+                          <ResponsiveImage
+                            alt={card.title}
+                            className="size-full"
+                            fallbackClassName="bg-slate-100"
+                            imageClassName="object-cover"
+                            sizes="100vw"
+                            src={resolveRenderableImageSrc(card.imageSrc)}
+                            title={card.title}
+                          />
+                        ) : (
+                          <div className="p-4 text-center text-slate-400">
+                            <ImageIcon className="mx-auto mb-1 size-8 opacity-40" />
+                            <span className="text-xs font-medium">No background photo set</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="mt-5 space-y-3">
+                      <div>
+                        <Label className="text-xs font-semibold text-slate-700">
+                          Upload Photo File
+                        </Label>
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          className="mt-1 text-xs cursor-pointer"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            try {
+                              toast.loading("Uploading to Cloudinary...", { id: `card-upload-${card.id}` });
+                              const res = await uploadFileToCloudinary(file, { folder: "shree_velora/about" });
+                              updateAboutCardImage(card.id, res.url);
+                              toast.success("Card photo uploaded to Cloudinary CDN!", { id: `card-upload-${card.id}` });
+                            } catch (err) {
+                              const msg = err instanceof Error ? err.message : "Failed to upload photo";
+                              toast.error(msg, { id: `card-upload-${card.id}` });
+                            }
+                          }}
+                        />
+                      </div>
+
+                      <div>
+                        <Label className="text-xs font-semibold text-slate-700">
+                          Or Image URL
+                        </Label>
+                        <div className="mt-1 flex gap-2">
+                          <Input
+                            type="text"
+                            placeholder="https://... or /images/..."
+                            value={card.imageSrc || ""}
+                            onChange={(e) => updateAboutCardImage(card.id, e.target.value)}
+                            className="text-xs"
+                          />
+                          {card.imageSrc ? (
+                            <button
+                              type="button"
+                              onClick={() => updateAboutCardImage(card.id, "")}
+                              className="rounded-md border border-rose-200 bg-rose-50 px-3 py-1 text-xs font-medium text-rose-600 hover:bg-rose-100 transition cursor-pointer"
+                            >
+                              Remove
+                            </button>
+                          ) : null}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </TabsContent>
 
@@ -2127,6 +2533,49 @@ export function AdminDashboard(): React.ReactElement {
                       placeholder="e.g. WhatsApp Us"
                       className="mt-1"
                     />
+                  </div>
+
+                  <div className="sm:col-span-2 pt-2 border-t border-[#EBDCFB]/70 space-y-2">
+                    <Label htmlFor="cta-bg-url">CTA Section Background Photo</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="cta-bg-url"
+                        value={cmsCta.backgroundImageUrl || ""}
+                        onChange={(e) => setCmsCta({ ...cmsCta, backgroundImageUrl: e.target.value })}
+                        placeholder="https://res.cloudinary.com/..."
+                        className="text-xs"
+                      />
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        className="text-xs max-w-[140px] cursor-pointer"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          try {
+                            toast.loading("Uploading to Cloudinary...", { id: "cms-cta-bg-upload" });
+                            const res = await uploadFileToCloudinary(file, { folder: "shree_velora/backgrounds" });
+                            setCmsCta({ ...cmsCta, backgroundImageUrl: res.url });
+                            toast.success("Background photo uploaded!", { id: "cms-cta-bg-upload" });
+                          } catch (err) {
+                            toast.error("Upload failed", { id: "cms-cta-bg-upload" });
+                          }
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setCmsCta({
+                            ...cmsCta,
+                            backgroundImageUrl:
+                              "https://res.cloudinary.com/rwmkoctu/image/upload/v1793126363/shree_velora/gallery/zcxilfdmfoz84szbqmwj.jpg"
+                          })
+                        }
+                        className="rounded-md border border-[#D4AF37]/40 bg-[#D4AF37]/10 px-3 py-1 text-xs font-semibold text-[#8a6d1a] hover:bg-[#D4AF37]/20 transition"
+                      >
+                        Default
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

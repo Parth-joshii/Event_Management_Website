@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Reveal } from "@/components/animations/reveal";
+import { TiltCard } from "@/components/animations/tilt-card";
 import { Container } from "@/components/layout/container";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { LuxuryCard } from "@/components/ui/luxury-card";
@@ -39,7 +40,7 @@ const defaultHighlights = [
   }
 ];
 
-/** Renders the concise brand introduction and highlight cards with customizable background images & ultra-premium layout. */
+/** Renders the concise brand introduction and highlight cards with customizable background images, 3D tilt & royal ornamental layout. */
 export function AboutPreview(): React.ReactElement {
   const { aboutCards, siteContent, fetchFromDatabase } = useContentStore();
 
@@ -61,10 +62,30 @@ export function AboutPreview(): React.ReactElement {
   return (
     <section
       id="about"
-      className="relative overflow-hidden bg-[linear-gradient(180deg,#FAF7FF_0%,#F5EDFF_100%)] py-16 sm:py-24"
+      className="relative overflow-hidden bg-[linear-gradient(180deg,#FAF7FF_0%,#F5EDFF_50%,#FAF7FF_100%)] py-20 sm:py-28"
     >
-      <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[#2D2238] to-transparent opacity-10" />
-      <Container>
+      {/* Decorative ambient background glows & subtle royal palace motif */}
+      {about.backgroundImageUrl ? (
+        <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-10">
+          <img
+            src={resolveRenderableImageSrc(about.backgroundImageUrl)}
+            alt="About Background Ambient"
+            className="size-full object-cover"
+            loading="lazy"
+          />
+        </div>
+      ) : null}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-[#2D2238]/10 to-transparent" />
+      <div className="pointer-events-none absolute -left-48 top-1/4 size-96 rounded-full bg-[#EBDCFB]/60 blur-3xl" />
+      <div className="pointer-events-none absolute -right-48 bottom-1/4 size-96 rounded-full bg-[#D4AF37]/15 blur-3xl" />
+
+      {/* Subtle royal geometric pattern overlay */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 opacity-[0.035] bg-[radial-gradient(#2D2238_1px,transparent_1px)] [background-size:24px_24px]"
+      />
+
+      <Container className="relative z-10">
         <Reveal>
           <SectionHeading
             eyebrow={about.eyebrow}
@@ -72,7 +93,8 @@ export function AboutPreview(): React.ReactElement {
             description={about.description}
           />
         </Reveal>
-        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+
+        <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {cardsToRender.map((item, index) => {
             const storeCard = aboutCards?.find((c) => c.id === item.id);
             const title = item.title || storeCard?.title;
@@ -81,63 +103,65 @@ export function AboutPreview(): React.ReactElement {
             const renderableBg = rawBg ? resolveRenderableImageSrc(rawBg) : "";
 
             return (
-              <Reveal delay={index * 0.05} key={item.id}>
-                <LuxuryCard
-                  className={`group relative flex h-full min-h-[250px] flex-col justify-between overflow-hidden rounded-xl border-t-2 border-t-[#D4AF37]/80 border-x border-b border-purple-900/10 p-7 shadow-[0_16px_50px_rgba(45,34,56,0.06)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1.5 hover:border-t-[#D4AF37] hover:shadow-[0_24px_70px_rgba(212,175,55,0.2)] ${
-                    renderableBg ? "bg-[#181020]" : "bg-white/90"
-                  }`}
-                >
-                  {/* Background Photo & Luxury Dark Gradient Overlay */}
-                  {renderableBg && (
-                    <>
-                      <img
-                        src={renderableBg}
-                        alt={title || "About Shree Velora Card"}
-                        className="absolute inset-0 size-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                        loading="lazy"
+              <Reveal delay={index * 0.08} key={item.id}>
+                <TiltCard maxTilt={8} scale={1.03} glareOpacity={0.25} className="h-full">
+                  <LuxuryCard
+                    className={`group relative flex h-full min-h-[270px] flex-col justify-between overflow-hidden rounded-2xl border-t-2 border-t-[#D4AF37]/80 border-x border-b border-purple-900/10 p-7 shadow-[0_16px_50px_rgba(45,34,56,0.06)] backdrop-blur-md transition-all duration-300 hover:border-t-[#D4AF37] hover:shadow-[0_24px_70px_rgba(212,175,55,0.22)] ${
+                      renderableBg ? "bg-[#181020]" : "bg-white/90"
+                    }`}
+                  >
+                    {/* Background Photo & Luxury Dark Gradient Overlay */}
+                    {renderableBg && (
+                      <>
+                        <img
+                          src={renderableBg}
+                          alt={title || "About Shree Velora Card"}
+                          className="absolute inset-0 size-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                          loading="lazy"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#181020]/95 via-[#181020]/75 to-[#181020]/45 backdrop-brightness-90 transition-opacity duration-300 group-hover:from-[#181020]/98 group-hover:via-[#181020]/85" />
+                      </>
+                    )}
+
+                    {/* Header / Number Tag */}
+                    <div className="relative z-10 flex items-center justify-between">
+                      <span
+                        className={`font-display text-2xl font-bold tracking-widest transition-colors duration-300 ${
+                          renderableBg
+                            ? "text-[#D4AF37]"
+                            : "text-[#D4AF37]/60 group-hover:text-[#D4AF37]"
+                        }`}
+                      >
+                        {item.number}
+                      </span>
+                      <span
+                        className={`h-0.5 w-6 rounded-full transition-all duration-300 group-hover:w-12 ${
+                          renderableBg ? "bg-[#D4AF37]" : "bg-[#D4AF37]/50 group-hover:bg-[#D4AF37]"
+                        }`}
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#181020]/95 via-[#181020]/75 to-[#181020]/45 backdrop-brightness-90 transition-opacity duration-300 group-hover:from-[#181020]/98 group-hover:via-[#181020]/85" />
-                    </>
-                  )}
+                    </div>
 
-                  {/* Header / Number Tag */}
-                  <div className="relative z-10 flex items-center justify-between">
-                    <span
-                      className={`font-display text-2xl font-bold tracking-widest transition-colors duration-300 ${
-                        renderableBg
-                          ? "text-[#D4AF37]"
-                          : "text-[#D4AF37]/60 group-hover:text-[#D4AF37]"
-                      }`}
-                    >
-                      {item.number}
-                    </span>
-                    <span
-                      className={`h-0.5 w-6 rounded-full transition-all duration-300 group-hover:w-12 ${
-                        renderableBg ? "bg-[#D4AF37]" : "bg-[#D4AF37]/50 group-hover:bg-[#D4AF37]"
-                      }`}
-                    />
-                  </div>
-
-                  {/* Content (Title & Description) */}
-                  <div className="relative z-10 mt-6 flex flex-1 flex-col justify-end">
-                    <h3
-                      className={`font-display text-xl font-bold tracking-wide transition-colors duration-300 ${
-                        renderableBg
-                          ? "text-white drop-shadow-md"
-                          : "text-[#2D2238] group-hover:text-[#2D2238]"
-                      }`}
-                    >
-                      {title}
-                    </h3>
-                    <p
-                      className={`mt-3 text-xs leading-6 tracking-wide transition-colors duration-300 ${
-                        renderableBg ? "text-zinc-200" : "text-[#5c4b6e]"
-                      }`}
-                    >
-                      {description}
-                    </p>
-                  </div>
-                </LuxuryCard>
+                    {/* Content (Title & Description) */}
+                    <div className="relative z-10 mt-6 flex flex-1 flex-col justify-end">
+                      <h3
+                        className={`font-display text-xl font-bold tracking-wide transition-colors duration-300 ${
+                          renderableBg
+                            ? "text-white drop-shadow-md"
+                            : "text-[#2D2238] group-hover:text-[#2D2238]"
+                        }`}
+                      >
+                        {title}
+                      </h3>
+                      <p
+                        className={`mt-3 text-xs leading-6 tracking-wide transition-colors duration-300 ${
+                          renderableBg ? "text-zinc-200" : "text-[#5c4b6e]"
+                        }`}
+                      >
+                        {description}
+                      </p>
+                    </div>
+                  </LuxuryCard>
+                </TiltCard>
               </Reveal>
             );
           })}

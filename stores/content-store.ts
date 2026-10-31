@@ -323,6 +323,10 @@ interface ContentState {
   deleteReview: (id: string) => Promise<void>;
 
   updateAboutCardImage: (id: string, imageSrc: string) => Promise<void>;
+  updateSectionBackground: (
+    section: "cta" | "heroPoster" | "heroDesktopVideo" | "heroMobileVideo" | "aboutBg" | "testimonialsBg",
+    url: string
+  ) => Promise<{ ok: boolean; error?: string }>;
 
   addInquiry: (inquiryData: Omit<InquiryItem, "id" | "createdAt" | "status">) => void;
   updateInquiryStatus: (id: string, status: InquiryItem["status"]) => Promise<void>;
@@ -428,6 +432,57 @@ export const useContentStore = create<ContentState>()(
           });
         } catch (e) {
           console.error("Failed to sync about card image to cloud:", e);
+        }
+      },
+
+      updateSectionBackground: async (section, url) => {
+        const directUrl = convertDriveUrlToDirectLink(url);
+        const current = get().siteContent;
+        const updatedHero = { ...current.hero };
+        const updatedCta = { ...current.ctaSection };
+        const updatedAbout = { ...current.about };
+        const updatedTestimonials = { ...current.testimonialsSection };
+
+        if (section === "cta") {
+          updatedCta.backgroundImageUrl = directUrl;
+        } else if (section === "heroPoster") {
+          updatedHero.posterImageUrl = directUrl;
+        } else if (section === "heroDesktopVideo") {
+          updatedHero.desktopVideoUrl = directUrl;
+        } else if (section === "heroMobileVideo") {
+          updatedHero.mobileVideoUrl = directUrl;
+        } else if (section === "aboutBg") {
+          updatedAbout.backgroundImageUrl = directUrl;
+        } else if (section === "testimonialsBg") {
+          updatedTestimonials.backgroundImageUrl = directUrl;
+        }
+
+        const updatedSiteContent: SiteContentData = {
+          ...current,
+          hero: updatedHero,
+          ctaSection: updatedCta,
+          about: updatedAbout,
+          testimonialsSection: updatedTestimonials
+        };
+
+        set({ siteContent: updatedSiteContent });
+
+        try {
+          const res = await fetch("/api/site-content", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(updatedSiteContent)
+          });
+          const data = await res.json().catch(() => null);
+          if (res.ok && data?.ok) {
+            if (data.data) {
+              set({ siteContent: data.data });
+            }
+            return { ok: true };
+          }
+          return { ok: false, error: data?.message || "Failed to persist background photo" };
+        } catch (err) {
+          return { ok: false, error: err instanceof Error ? err.message : "Network error" };
         }
       },
 

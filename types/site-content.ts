@@ -13,22 +13,28 @@ export interface SiteContentData {
     tagline: string;
     ctaPrimaryText: string;
     ctaSecondaryText: string;
+    desktopVideoUrl?: string;
+    mobileVideoUrl?: string;
+    posterImageUrl?: string;
   };
   about: {
     eyebrow: string;
     title: string;
     description: string;
+    backgroundImageUrl?: string;
     cards: HighlightCardContent[];
   };
   eventsSection: {
     eyebrow: string;
     title: string;
     description: string;
+    backgroundImageUrl?: string;
   };
   testimonialsSection: {
     eyebrow: string;
     title: string;
     description: string;
+    backgroundImageUrl?: string;
   };
   ctaSection: {
     eyebrow: string;
@@ -36,6 +42,7 @@ export interface SiteContentData {
     description: string;
     ctaPrimaryText: string;
     ctaSecondaryText: string;
+    backgroundImageUrl?: string;
   };
   contact: {
     phone: string;
@@ -52,41 +59,52 @@ export const defaultSiteContent: SiteContentData = {
     title: "Shree Velora Event's",
     tagline: "Where Moments Become the Masterpiece",
     ctaPrimaryText: "Design Your Celebration",
-    ctaSecondaryText: "Explore Our Works"
+    ctaSecondaryText: "Explore Our Works",
+    desktopVideoUrl:
+      "https://res.cloudinary.com/rwmkoctu/video/upload/v1793428703/shree_velora/videos/hero_desktop_video.mp4",
+    mobileVideoUrl:
+      "https://res.cloudinary.com/rwmkoctu/video/upload/v1793428708/shree_velora/videos/hero_mobile_video.mp4",
+    posterImageUrl:
+      "https://res.cloudinary.com/rwmkoctu/video/upload/v1793428703/shree_velora/videos/hero_desktop_video.jpg"
   },
   about: {
     eyebrow: "About Shree Velora",
     title: "Signature Events, Flawlessly Executed",
     description:
       "Shree Velora Event's brings creative direction, luxury decor, and seamless coordination to royal weddings and grand celebrations.",
+    backgroundImageUrl: "",
     cards: [
       {
         id: "bespoke-design",
         number: "01",
         title: "Bespoke Design",
         description: "Tailored themes, atmospheric lighting, and luxury stage installations.",
-        imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793385048/shree_velora/about/diklrziwqbjvwhkm99vt.jpg"
+        imageSrc:
+          "https://res.cloudinary.com/rwmkoctu/image/upload/v1793385048/shree_velora/about/diklrziwqbjvwhkm99vt.jpg"
       },
       {
         id: "flawless-execution",
         number: "02",
         title: "Flawless Execution",
         description: "Seamless vendor management and attentive on-day coordination.",
-        imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793385061/shree_velora/about/ryd7tzoa7dm5amkx6ne5.jpg"
+        imageSrc:
+          "https://res.cloudinary.com/rwmkoctu/image/upload/v1793385061/shree_velora/about/ryd7tzoa7dm5amkx6ne5.jpg"
       },
       {
         id: "curated-network",
         number: "03",
         title: "Curated Network",
         description: "Exclusive access to top-tier venues, artists, and production masters.",
-        imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793385074/shree_velora/about/zzryvnbb59enkedgocky.jpg"
+        imageSrc:
+          "https://res.cloudinary.com/rwmkoctu/image/upload/v1793385074/shree_velora/about/zzryvnbb59enkedgocky.jpg"
       },
       {
         id: "transparent-pricing",
         number: "04",
         title: "Transparent Pricing",
         description: "Clear line-item quotes and real-time budget management.",
-        imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793385092/shree_velora/about/vx3ensckhdh1xsvit46v.jpg"
+        imageSrc:
+          "https://res.cloudinary.com/rwmkoctu/image/upload/v1793385092/shree_velora/about/vx3ensckhdh1xsvit46v.jpg"
       }
     ]
   },
@@ -94,13 +112,15 @@ export const defaultSiteContent: SiteContentData = {
     eyebrow: "Signature Occasions",
     title: "Distinctive Experiences For Every Celebration",
     description:
-      "Click on any event below to explore all photos, decor highlights, and luxury stage setups created by Shree Velora Event's."
+      "Click on any event below to explore all photos, decor highlights, and luxury stage setups created by Shree Velora Event's.",
+    backgroundImageUrl: ""
   },
   testimonialsSection: {
     eyebrow: "Client Stories",
     title: "Celebrations Remembered, Trust Earned",
     description:
-      "Words from families, brands, and hosts who entrusted Shree Velora with their most meaningful occasions."
+      "Words from families, brands, and hosts who entrusted Shree Velora with their most meaningful occasions.",
+    backgroundImageUrl: ""
   },
   ctaSection: {
     eyebrow: "Your Celebration, Beautifully Imagined",
@@ -108,7 +128,9 @@ export const defaultSiteContent: SiteContentData = {
     description:
       "Share your vision and allow our team to compose a tailored celebration proposal, considered budget, and distinctive design direction.",
     ctaPrimaryText: "Begin Your Journey",
-    ctaSecondaryText: "WhatsApp Us"
+    ctaSecondaryText: "WhatsApp Us",
+    backgroundImageUrl:
+      "https://res.cloudinary.com/rwmkoctu/image/upload/v1793126363/shree_velora/gallery/zcxilfdmfoz84szbqmwj.jpg"
   },
   contact: {
     phone: "+91 99770 24666",

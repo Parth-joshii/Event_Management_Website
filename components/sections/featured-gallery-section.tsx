@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Images, Maximize2, X } from "lucide-react";
 import { Reveal } from "@/components/animations/reveal";
+import { TiltCard } from "@/components/animations/tilt-card";
 import { Container } from "@/components/layout/container";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { Badge } from "@/components/ui/badge";
@@ -143,52 +144,54 @@ export function FeaturedGallerySection(): React.ReactElement {
             {filteredItems.map((item, index) => (
               <div key={item.id || item.title} className="mb-6 break-inside-avoid">
                 <Reveal delay={index * 0.04}>
-                  <article
-                    onClick={() => {
-                      if (item.photos.length > 1) {
-                        setActiveAlbum(item);
-                      } else {
-                        setActiveLightboxPhoto(item.photos[0] || null);
-                      }
-                    }}
-                    className="group relative w-full cursor-pointer overflow-hidden rounded-2xl border border-white/80 bg-[#1E1428] shadow-[0_20px_60px_rgba(45,34,56,0.14)] transition-all duration-500 hover:-translate-y-1.5 hover:shadow-[0_28px_80px_rgba(45,34,56,0.28)] hover:border-[#D4AF37]/60"
-                  >
-                    {/* Natural Image Box - Automatically adapts to photo's natural aspect ratio */}
-                    <div className="relative w-full overflow-hidden bg-[#181122]">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        alt={item.alt || item.title}
-                        className="w-full h-auto block object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                        src={resolveRenderableImageSrc(item.imageSrc)}
-                        loading="lazy"
-                      />
-                      {/* Targeted bottom gradient for sharp contrast on captions while keeping the upper photo completely clear */}
-                      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#1F1629]/95 via-[#1F1629]/55 to-transparent transition-opacity duration-300 group-hover:opacity-95" />
-                    </div>
+                  <TiltCard maxTilt={5} scale={1.01} glareOpacity={0.16}>
+                    <article
+                      onClick={() => {
+                        if (item.photos.length > 1) {
+                          setActiveAlbum(item);
+                        } else {
+                          setActiveLightboxPhoto(item.photos[0] || null);
+                        }
+                      }}
+                      className="group relative w-full cursor-pointer overflow-hidden rounded-2xl border border-white/80 bg-[#1E1428] shadow-[0_20px_60px_rgba(45,34,56,0.14)] transition-all duration-500 hover:-translate-y-1.5 hover:shadow-[0_28px_80px_rgba(45,34,56,0.28)] hover:border-[#D4AF37]/60"
+                    >
+                      {/* Natural Image Box - Automatically adapts to photo's natural aspect ratio */}
+                      <div className="relative w-full overflow-hidden bg-[#181122]">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          alt={item.alt || item.title}
+                          className="w-full h-auto block object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                          src={resolveRenderableImageSrc(item.imageSrc)}
+                          loading="lazy"
+                        />
+                        {/* Targeted bottom gradient for sharp contrast on captions while keeping the upper photo completely clear */}
+                        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#1F1629]/95 via-[#1F1629]/55 to-transparent transition-opacity duration-300 group-hover:opacity-95" />
+                      </div>
 
-                    {/* Album Photo Count Badge */}
-                    {item.photoCount > 1 ? (
-                      <span className="absolute top-3.5 left-3.5 z-10 inline-flex items-center gap-1.5 rounded-full border border-[#D4AF37]/60 bg-[#1E1428]/90 px-3 py-1 text-xs font-semibold text-[#D4AF37] backdrop-blur-md shadow-lg">
-                        <Images className="size-3.5" />
-                        {item.photoCount} Photos
-                      </span>
-                    ) : null}
+                      {/* Album Photo Count Badge */}
+                      {item.photoCount > 1 ? (
+                        <span className="absolute top-3.5 left-3.5 z-10 inline-flex items-center gap-1.5 rounded-full border border-[#D4AF37]/60 bg-[#1E1428]/90 px-3 py-1 text-xs font-semibold text-[#D4AF37] backdrop-blur-md shadow-lg">
+                          <Images className="size-3.5" />
+                          {item.photoCount} Photos
+                        </span>
+                      ) : null}
 
-                    {/* Hover overlay zoom button */}
-                    <div className="absolute top-3.5 right-3.5 z-10 flex size-9 items-center justify-center rounded-full bg-black/40 text-white opacity-0 backdrop-blur-md transition duration-300 group-hover:opacity-100 shadow-md">
-                      <Maximize2 className="size-4 text-[#D4AF37]" />
-                    </div>
+                      {/* Hover overlay zoom button */}
+                      <div className="absolute top-3.5 right-3.5 z-10 flex size-9 items-center justify-center rounded-full bg-black/40 text-white opacity-0 backdrop-blur-md transition duration-300 group-hover:opacity-100 shadow-md">
+                        <Maximize2 className="size-4 text-[#D4AF37]" />
+                      </div>
 
-                    {/* Bottom Caption and Category */}
-                    <div className="absolute inset-x-0 bottom-0 z-10 p-5 text-white">
-                      <Badge className="border-[#D4AF37]/60 bg-[#D4AF37]/20 text-[10px] font-semibold uppercase tracking-wider text-[#D4AF37]">
-                        {item.category}
-                      </Badge>
-                      <h3 className="mt-1.5 text-lg sm:text-xl font-bold font-display leading-snug drop-shadow text-white">
-                        {item.title}
-                      </h3>
-                    </div>
-                  </article>
+                      {/* Bottom Caption and Category */}
+                      <div className="absolute inset-x-0 bottom-0 z-10 p-5 text-white">
+                        <Badge className="border-[#D4AF37]/60 bg-[#D4AF37]/20 text-[10px] font-semibold uppercase tracking-wider text-[#D4AF37]">
+                          {item.category}
+                        </Badge>
+                        <h3 className="mt-1.5 text-lg sm:text-xl font-bold font-display leading-snug drop-shadow text-white">
+                          {item.title}
+                        </h3>
+                      </div>
+                    </article>
+                  </TiltCard>
                 </Reveal>
               </div>
             ))}
