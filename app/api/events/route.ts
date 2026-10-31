@@ -21,7 +21,7 @@ function serializeEvent(ev: any) {
   };
 }
 
-export const defaultCloudinaryEvents = [
+const defaultCloudinaryEvents = [
   {
     id: "event-cdn-1",
     title: "Grand Palace Royal Wedding",

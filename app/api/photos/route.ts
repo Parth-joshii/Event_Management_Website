@@ -10,7 +10,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
-export const defaultCloudinaryPhotos = [
+const defaultCloudinaryPhotos = [
   {
     id: "photo-cdn-1",
     title: "Luxury Mandap Ceremony",
