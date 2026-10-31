@@ -8,8 +8,14 @@ import { ScrollVideo } from "@/components/animations/scroll-video";
 import { Container } from "@/components/layout/container";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { siteConfig } from "@/config/site";
-
 import { useContentStore } from "@/stores/content-store";
+
+const DEFAULT_CDN_DESKTOP_VIDEO =
+  "https://res.cloudinary.com/rwmkoctu/video/upload/v1793428703/shree_velora/videos/hero_desktop_video.mp4";
+const DEFAULT_CDN_MOBILE_VIDEO =
+  "https://res.cloudinary.com/rwmkoctu/video/upload/v1793428708/shree_velora/videos/hero_mobile_video.mp4";
+const DEFAULT_CDN_POSTER =
+  "https://res.cloudinary.com/rwmkoctu/video/upload/v1793428703/shree_velora/videos/hero_desktop_video.jpg";
 
 interface HeroSectionProps {
   readonly desktopVideoSrc?: string;
@@ -30,12 +36,19 @@ export function HeroSection({
     ctaSecondaryText: "Explore Our Works"
   };
 
+  const finalDesktopVideo = desktopVideoSrc || DEFAULT_CDN_DESKTOP_VIDEO;
+  const finalMobileVideo = mobileVideoSrc || DEFAULT_CDN_MOBILE_VIDEO;
+
   return (
     <section
       id="home"
       className="relative isolate flex min-h-screen overflow-hidden bg-[#2D2238] text-white"
     >
-      <ScrollVideo desktopSrc={desktopVideoSrc} mobileSrc={mobileVideoSrc} />
+      <ScrollVideo
+        desktopSrc={finalDesktopVideo}
+        mobileSrc={finalMobileVideo}
+        poster={DEFAULT_CDN_POSTER}
+      />
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(45,34,56,0.55)_0%,rgba(45,34,56,0.58)_42%,rgba(45,34,56,0.9)_100%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_24%_20%,rgba(191,162,219,0.32),transparent_30%),radial-gradient(circle_at_78%_28%,rgba(212,175,55,0.24),transparent_26%)]" />
 

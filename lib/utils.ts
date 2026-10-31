@@ -95,10 +95,25 @@ export function isDriveImageUrl(url: string): boolean {
   }
 }
 
+/** Injects Cloudinary CDN optimization parameters (f_auto, q_auto, resizing) into Cloudinary URLs. */
+export function optimizeCloudinaryUrl(url: string, params = "f_auto,q_auto,w_1200,c_limit"): string {
+  if (!url || typeof url !== "string" || !url.includes("res.cloudinary.com")) return url;
+  if (url.includes("/video/upload/")) {
+    if (url.includes("/video/upload/q_auto") || url.includes("/video/upload/f_auto")) return url;
+    return url.replace("/video/upload/", "/video/upload/q_auto,f_auto/");
+  }
+  if (url.includes("/image/upload/f_auto") || url.includes("/image/upload/q_auto")) return url;
+  return url.replace("/image/upload/", `/image/upload/${params}/`);
+}
+
 /** Resolves an image source into a browser-friendly URL for preview and gallery rendering. */
 export function resolveRenderableImageSrc(src: string): string {
   const trimmed = convertDriveUrlToDirectLink(src.trim());
   if (!trimmed) return trimmed;
+
+  if (trimmed.includes("res.cloudinary.com")) {
+    return optimizeCloudinaryUrl(trimmed);
+  }
 
   if (
     trimmed.startsWith("data:") ||

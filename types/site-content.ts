@@ -3,6 +3,7 @@ export interface HighlightCardContent {
   number: string;
   title: string;
   description: string;
+  imageSrc?: string;
 }
 
 export interface SiteContentData {
@@ -63,25 +64,29 @@ export const defaultSiteContent: SiteContentData = {
         id: "bespoke-design",
         number: "01",
         title: "Bespoke Design",
-        description: "Tailored themes, atmospheric lighting, and luxury stage installations."
+        description: "Tailored themes, atmospheric lighting, and luxury stage installations.",
+        imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793385048/shree_velora/about/diklrziwqbjvwhkm99vt.jpg"
       },
       {
         id: "flawless-execution",
         number: "02",
         title: "Flawless Execution",
-        description: "Seamless vendor management and attentive on-day coordination."
+        description: "Seamless vendor management and attentive on-day coordination.",
+        imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793385061/shree_velora/about/ryd7tzoa7dm5amkx6ne5.jpg"
       },
       {
         id: "curated-network",
         number: "03",
         title: "Curated Network",
-        description: "Exclusive access to top-tier venues, artists, and production masters."
+        description: "Exclusive access to top-tier venues, artists, and production masters.",
+        imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793385074/shree_velora/about/zzryvnbb59enkedgocky.jpg"
       },
       {
         id: "transparent-pricing",
         number: "04",
         title: "Transparent Pricing",
-        description: "Clear line-item quotes and real-time budget management."
+        description: "Clear line-item quotes and real-time budget management.",
+        imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793385092/shree_velora/about/vx3ensckhdh1xsvit46v.jpg"
       }
     ]
   },

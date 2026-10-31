@@ -3,12 +3,123 @@ import mongoose from "mongoose";
 import { connectToDatabase } from "@/lib/mongodb";
 import { dedupePhotosByImageSrc } from "@/lib/photo-utils";
 import { convertDriveUrlToDirectLink } from "@/lib/utils";
-import { deleteFromCloudinary, extractCloudinaryPublicId } from "@/lib/cloudinary";
+import { deleteFromCloudinary, extractCloudinaryPublicId, cloudinary, isCloudinaryConfigured } from "@/lib/cloudinary";
 import { PhotoModel } from "@/models/Photo";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
+
+export const defaultCloudinaryPhotos = [
+  {
+    id: "photo-cdn-1",
+    title: "Luxury Mandap Ceremony",
+    category: "Wedding",
+    imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793126449/shree_velora/gallery/xaliutr0efuaabmv6svt.jpg",
+    alt: "Luxury Mandap Ceremony",
+    isFeatured: true,
+    storage: "cloudinary"
+  },
+  {
+    id: "photo-cdn-2",
+    title: "Royal Grand Stage Decor",
+    category: "Wedding",
+    imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793126367/shree_velora/gallery/cmputxcgdjsl7cxzg5zt.jpg",
+    alt: "Royal Grand Stage Decor",
+    isFeatured: true,
+    storage: "cloudinary"
+  },
+  {
+    id: "photo-cdn-3",
+    title: "Atmospheric Candlelight Banquet",
+    category: "Reception",
+    imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793126363/shree_velora/gallery/zcxilfdmfoz84szbqmwj.jpg",
+    alt: "Atmospheric Candlelight Banquet",
+    isFeatured: true,
+    storage: "cloudinary"
+  },
+  {
+    id: "photo-cdn-4",
+    title: "Floral Ceiling Installation",
+    category: "Decoration",
+    imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793126360/shree_velora/gallery/oqn3j3ufct2ct7paes3p.jpg",
+    alt: "Floral Ceiling Installation",
+    isFeatured: true,
+    storage: "cloudinary"
+  },
+  {
+    id: "photo-cdn-5",
+    title: "Golden Sangeet Celebration",
+    category: "Sangeet",
+    imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793125774/shree_velora/gallery/ncqdipt7pfj1iyy5frar.jpg",
+    alt: "Golden Sangeet Celebration",
+    isFeatured: false,
+    storage: "cloudinary"
+  },
+  {
+    id: "photo-cdn-6",
+    title: "Signature Floral Archway",
+    category: "Decoration",
+    imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793125772/shree_velora/gallery/fhhdpkbgbsdifycy1ffc.jpg",
+    alt: "Signature Floral Archway",
+    isFeatured: false,
+    storage: "cloudinary"
+  },
+  {
+    id: "photo-cdn-7",
+    title: "Opulent Crystal Reception Setup",
+    category: "Reception",
+    imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793125767/shree_velora/gallery/s3atwoby6zs9sqswzwsj.jpg",
+    alt: "Opulent Crystal Reception Setup",
+    isFeatured: false,
+    storage: "cloudinary"
+  },
+  {
+    id: "photo-cdn-8",
+    title: "Ambient Evening Lighting",
+    category: "Lighting",
+    imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793125764/shree_velora/gallery/fiwymz8hhvmkkqutbf2l.jpg",
+    alt: "Ambient Evening Lighting",
+    isFeatured: false,
+    storage: "cloudinary"
+  },
+  {
+    id: "photo-cdn-9",
+    title: "Sunlit Haldi Traditional Courtyard",
+    category: "Haldi",
+    imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793125762/shree_velora/gallery/gc5rcprgzvuerpjryexr.jpg",
+    alt: "Sunlit Haldi Traditional Courtyard",
+    isFeatured: false,
+    storage: "cloudinary"
+  },
+  {
+    id: "photo-cdn-10",
+    title: "Mehndi Lounge Seating",
+    category: "Mehndi",
+    imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793125759/shree_velora/gallery/b9wr20tbethfq6eesijr.jpg",
+    alt: "Mehndi Lounge Seating",
+    isFeatured: false,
+    storage: "cloudinary"
+  },
+  {
+    id: "photo-cdn-11",
+    title: "Grand Entrance Walkway",
+    category: "Decoration",
+    imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793125758/shree_velora/gallery/c9mnofumdoz6m5plamvi.jpg",
+    alt: "Grand Entrance Walkway",
+    isFeatured: false,
+    storage: "cloudinary"
+  },
+  {
+    id: "photo-cdn-12",
+    title: "Devotional Spiritual Stage",
+    category: "Religious",
+    imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793125756/shree_velora/gallery/dvyhcjddvshljrxm8hdt.jpg",
+    alt: "Devotional Spiritual Stage",
+    isFeatured: false,
+    storage: "cloudinary"
+  }
+];
 
 type PhotoPayload = {
   id?: string;
@@ -51,20 +162,26 @@ function serializePhoto(photo: {
   };
 }
 
-/** GET /api/photos - Fetch photos from MongoDB so every browser sees the same gallery */
+/** GET /api/photos - Fetch photos from MongoDB with Cloudinary CDN fallback */
 export async function GET(): Promise<NextResponse> {
   try {
     await connectToDatabase();
     const photos = await PhotoModel.find({}).sort({ isFeatured: -1, createdAt: -1 }).lean();
 
-    return NextResponse.json({
-      ok: true,
-      data: dedupePhotosByImageSrc(photos.map((photo) => serializePhoto(photo)))
-    });
+    if (photos && photos.length > 0) {
+      return NextResponse.json({
+        ok: true,
+        data: dedupePhotosByImageSrc(photos.map((photo) => serializePhoto(photo)))
+      });
+    }
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to fetch photos";
-    return NextResponse.json({ ok: false, message }, { status: 500 });
+    console.warn("MongoDB photos fetch fallback to Cloudinary CDN defaults:", error);
   }
+
+  return NextResponse.json({
+    ok: true,
+    data: defaultCloudinaryPhotos
+  });
 }
 
 async function saveSinglePhoto(body: PhotoPayload): Promise<NextResponse> {

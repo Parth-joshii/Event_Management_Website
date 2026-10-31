@@ -6,31 +6,36 @@ import { Container } from "@/components/layout/container";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { LuxuryCard } from "@/components/ui/luxury-card";
 import { useContentStore } from "@/stores/content-store";
+import { resolveRenderableImageSrc } from "@/lib/utils";
 
 const defaultHighlights = [
   {
     id: "bespoke-design",
     number: "01",
     description: "Tailored themes, atmospheric lighting, and luxury stage installations.",
-    title: "Bespoke Design"
+    title: "Bespoke Design",
+    imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793385048/shree_velora/about/diklrziwqbjvwhkm99vt.jpg"
   },
   {
     id: "flawless-execution",
     number: "02",
     description: "Seamless vendor management and attentive on-day coordination.",
-    title: "Flawless Execution"
+    title: "Flawless Execution",
+    imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793385061/shree_velora/about/ryd7tzoa7dm5amkx6ne5.jpg"
   },
   {
     id: "curated-network",
     number: "03",
     description: "Exclusive access to top-tier venues, artists, and production masters.",
-    title: "Curated Network"
+    title: "Curated Network",
+    imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793385074/shree_velora/about/zzryvnbb59enkedgocky.jpg"
   },
   {
     id: "transparent-pricing",
     number: "04",
     description: "Clear line-item quotes and real-time budget management.",
-    title: "Transparent Pricing"
+    title: "Transparent Pricing",
+    imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793385092/shree_velora/about/vx3ensckhdh1xsvit46v.jpg"
   }
 ];
 
@@ -46,7 +51,7 @@ export function AboutPreview(): React.ReactElement {
     cards: defaultHighlights
   };
 
-  // Sync latest cloud data on client mount
+  // Sync latest cloud and database records on client mount
   React.useEffect(() => {
     void fetchFromDatabase();
   }, [fetchFromDatabase]);
@@ -72,32 +77,34 @@ export function AboutPreview(): React.ReactElement {
             const storeCard = aboutCards?.find((c) => c.id === item.id);
             const title = item.title || storeCard?.title;
             const description = item.description || storeCard?.description;
-            const bgImage = storeCard?.imageSrc;
+            const rawBg = item.imageSrc || storeCard?.imageSrc || "";
+            const renderableBg = rawBg ? resolveRenderableImageSrc(rawBg) : "";
 
             return (
               <Reveal delay={index * 0.05} key={item.id}>
                 <LuxuryCard
-                  className="group relative flex h-full min-h-[240px] flex-col justify-between overflow-hidden rounded-xl border-t-2 border-t-[#D4AF37]/80 border-x border-b border-purple-900/10 bg-white/90 p-7 shadow-[0_16px_50px_rgba(45,34,56,0.06)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1.5 hover:border-t-[#D4AF37] hover:shadow-[0_24px_70px_rgba(212,175,55,0.2)]"
-                  style={
-                    bgImage
-                      ? {
-                          backgroundImage: `url(${bgImage})`,
-                          backgroundPosition: "center",
-                          backgroundSize: "cover"
-                        }
-                      : undefined
-                  }
+                  className={`group relative flex h-full min-h-[250px] flex-col justify-between overflow-hidden rounded-xl border-t-2 border-t-[#D4AF37]/80 border-x border-b border-purple-900/10 p-7 shadow-[0_16px_50px_rgba(45,34,56,0.06)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1.5 hover:border-t-[#D4AF37] hover:shadow-[0_24px_70px_rgba(212,175,55,0.2)] ${
+                    renderableBg ? "bg-[#181020]" : "bg-white/90"
+                  }`}
                 >
-                  {/* Overlay if background image exists */}
-                  {bgImage && (
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#1b1424]/95 via-[#1b1424]/75 to-[#1b1424]/45 backdrop-brightness-90 transition-opacity duration-300 group-hover:from-[#1b1424]/98 group-hover:via-[#1b1424]/85" />
+                  {/* Background Photo & Luxury Dark Gradient Overlay */}
+                  {renderableBg && (
+                    <>
+                      <img
+                        src={renderableBg}
+                        alt={title || "About Shree Velora Card"}
+                        className="absolute inset-0 size-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                        loading="lazy"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#181020]/95 via-[#181020]/75 to-[#181020]/45 backdrop-brightness-90 transition-opacity duration-300 group-hover:from-[#181020]/98 group-hover:via-[#181020]/85" />
+                    </>
                   )}
 
                   {/* Header / Number Tag */}
                   <div className="relative z-10 flex items-center justify-between">
                     <span
                       className={`font-display text-2xl font-bold tracking-widest transition-colors duration-300 ${
-                        bgImage
+                        renderableBg
                           ? "text-[#D4AF37]"
                           : "text-[#D4AF37]/60 group-hover:text-[#D4AF37]"
                       }`}
@@ -106,7 +113,7 @@ export function AboutPreview(): React.ReactElement {
                     </span>
                     <span
                       className={`h-0.5 w-6 rounded-full transition-all duration-300 group-hover:w-12 ${
-                        bgImage ? "bg-[#D4AF37]" : "bg-[#D4AF37]/50 group-hover:bg-[#D4AF37]"
+                        renderableBg ? "bg-[#D4AF37]" : "bg-[#D4AF37]/50 group-hover:bg-[#D4AF37]"
                       }`}
                     />
                   </div>
@@ -115,7 +122,7 @@ export function AboutPreview(): React.ReactElement {
                   <div className="relative z-10 mt-6 flex flex-1 flex-col justify-end">
                     <h3
                       className={`font-display text-xl font-bold tracking-wide transition-colors duration-300 ${
-                        bgImage
+                        renderableBg
                           ? "text-white drop-shadow-md"
                           : "text-[#2D2238] group-hover:text-[#2D2238]"
                       }`}
@@ -124,7 +131,7 @@ export function AboutPreview(): React.ReactElement {
                     </h3>
                     <p
                       className={`mt-3 text-xs leading-6 tracking-wide transition-colors duration-300 ${
-                        bgImage ? "text-zinc-200" : "text-[#5c4b6e]"
+                        renderableBg ? "text-zinc-200" : "text-[#5c4b6e]"
                       }`}
                     >
                       {description}

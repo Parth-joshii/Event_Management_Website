@@ -78,25 +78,190 @@ const defaultAboutCards: AboutCardItem[] = [
     id: "bespoke-design",
     title: "Bespoke Design",
     description: "Tailored themes, atmospheric lighting, and luxury stage installations.",
-    imageSrc: ""
+    imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793385048/shree_velora/about/diklrziwqbjvwhkm99vt.jpg"
   },
   {
     id: "flawless-execution",
     title: "Flawless Execution",
     description: "Seamless vendor management and attentive on-day coordination.",
-    imageSrc: ""
+    imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793385061/shree_velora/about/ryd7tzoa7dm5amkx6ne5.jpg"
   },
   {
     id: "curated-network",
     title: "Curated Network",
     description: "Exclusive access to top-tier venues, artists, and production masters.",
-    imageSrc: ""
+    imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793385074/shree_velora/about/zzryvnbb59enkedgocky.jpg"
   },
   {
     id: "transparent-pricing",
     title: "Transparent Pricing",
     description: "Clear line-item quotes and real-time budget management.",
-    imageSrc: ""
+    imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793385092/shree_velora/about/vx3ensckhdh1xsvit46v.jpg"
+  }
+];
+
+export const defaultCloudinaryVideos: VideoItem[] = [
+  {
+    id: "vid-1",
+    title: "Luxury Event Celebration Hero",
+    category: "Hero",
+    videoSrc: "https://res.cloudinary.com/rwmkoctu/video/upload/v1793428703/shree_velora/videos/hero_desktop_video.mp4",
+    posterSrc: "https://res.cloudinary.com/rwmkoctu/video/upload/v1793428703/shree_velora/videos/hero_desktop_video.jpg",
+    description: "Main background video for landing page hero section served via Cloudinary Video CDN"
+  }
+];
+
+export const defaultCloudinaryEvents: EventItem[] = [
+  {
+    id: "event-cdn-1",
+    title: "Grand Palace Royal Wedding",
+    category: "Luxury Wedding",
+    description: "Multi-day royal palace wedding curation with customized lighting, mandap, and orchestral management.",
+    date: "2026-02-14",
+    location: "Udaipur / Jaipur",
+    imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793125961/shree_velora/events/o2mqlwi6fcttlsborqme.jpg",
+    imageAlt: "Grand Palace Royal Wedding"
+  },
+  {
+    id: "event-cdn-2",
+    title: "Celebration Sangeet & Musical Night",
+    category: "Sangeet",
+    description: "High-octane sound, moving beams, LED staging, and celebrity performance coordination.",
+    date: "2026-03-20",
+    location: "Mumbai",
+    imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793125293/shree_velora/events/fjj93bilnqooccvcudo0.jpg",
+    imageAlt: "Celebration Sangeet & Musical Night"
+  },
+  {
+    id: "event-cdn-3",
+    title: "Golden Reception Banquet",
+    category: "Reception",
+    description: "Mirrored tables, candlelight pathways, and customized floral chandeliers for 1,200 esteemed guests.",
+    date: "2026-04-10",
+    location: "Delhi NCR",
+    imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793125082/shree_velora/events/mapbmbkq6ekzrnmycbbg.jpg",
+    imageAlt: "Golden Reception Banquet"
+  },
+  {
+    id: "event-cdn-4",
+    title: "Intimate Traditional Haldi & Mehndi",
+    category: "Haldi & Mehndi",
+    description: "Curated marigold canopy, brass detailing, and traditional folk music ensemble.",
+    date: "2026-05-02",
+    location: "Goa",
+    imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793125058/shree_velora/events/rpbat0ealtpbpe1iazfu.jpg",
+    imageAlt: "Intimate Traditional Haldi & Mehndi"
+  }
+];
+
+export const defaultCloudinaryPhotos: PhotoItem[] = [
+  {
+    id: "photo-cdn-1",
+    title: "Luxury Mandap Ceremony",
+    category: "Wedding",
+    imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793126449/shree_velora/gallery/xaliutr0efuaabmv6svt.jpg",
+    alt: "Luxury Mandap Ceremony",
+    isFeatured: true,
+    storage: "cloudinary"
+  },
+  {
+    id: "photo-cdn-2",
+    title: "Royal Grand Stage Decor",
+    category: "Wedding",
+    imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793126367/shree_velora/gallery/cmputxcgdjsl7cxzg5zt.jpg",
+    alt: "Royal Grand Stage Decor",
+    isFeatured: true,
+    storage: "cloudinary"
+  },
+  {
+    id: "photo-cdn-3",
+    title: "Atmospheric Candlelight Banquet",
+    category: "Reception",
+    imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793126363/shree_velora/gallery/zcxilfdmfoz84szbqmwj.jpg",
+    alt: "Atmospheric Candlelight Banquet",
+    isFeatured: true,
+    storage: "cloudinary"
+  },
+  {
+    id: "photo-cdn-4",
+    title: "Floral Ceiling Installation",
+    category: "Decoration",
+    imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793126360/shree_velora/gallery/oqn3j3ufct2ct7paes3p.jpg",
+    alt: "Floral Ceiling Installation",
+    isFeatured: true,
+    storage: "cloudinary"
+  },
+  {
+    id: "photo-cdn-5",
+    title: "Golden Sangeet Celebration",
+    category: "Sangeet",
+    imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793125774/shree_velora/gallery/ncqdipt7pfj1iyy5frar.jpg",
+    alt: "Golden Sangeet Celebration",
+    isFeatured: false,
+    storage: "cloudinary"
+  },
+  {
+    id: "photo-cdn-6",
+    title: "Signature Floral Archway",
+    category: "Decoration",
+    imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793125772/shree_velora/gallery/fhhdpkbgbsdifycy1ffc.jpg",
+    alt: "Signature Floral Archway",
+    isFeatured: false,
+    storage: "cloudinary"
+  },
+  {
+    id: "photo-cdn-7",
+    title: "Opulent Crystal Reception Setup",
+    category: "Reception",
+    imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793125767/shree_velora/gallery/s3atwoby6zs9sqswzwsj.jpg",
+    alt: "Opulent Crystal Reception Setup",
+    isFeatured: false,
+    storage: "cloudinary"
+  },
+  {
+    id: "photo-cdn-8",
+    title: "Ambient Evening Lighting",
+    category: "Lighting",
+    imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793125764/shree_velora/gallery/fiwymz8hhvmkkqutbf2l.jpg",
+    alt: "Ambient Evening Lighting",
+    isFeatured: false,
+    storage: "cloudinary"
+  },
+  {
+    id: "photo-cdn-9",
+    title: "Sunlit Haldi Traditional Courtyard",
+    category: "Haldi",
+    imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793125762/shree_velora/gallery/gc5rcprgzvuerpjryexr.jpg",
+    alt: "Sunlit Haldi Traditional Courtyard",
+    isFeatured: false,
+    storage: "cloudinary"
+  },
+  {
+    id: "photo-cdn-10",
+    title: "Mehndi Lounge Seating",
+    category: "Mehndi",
+    imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793125759/shree_velora/gallery/b9wr20tbethfq6eesijr.jpg",
+    alt: "Mehndi Lounge Seating",
+    isFeatured: false,
+    storage: "cloudinary"
+  },
+  {
+    id: "photo-cdn-11",
+    title: "Grand Entrance Walkway",
+    category: "Decoration",
+    imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793125758/shree_velora/gallery/c9mnofumdoz6m5plamvi.jpg",
+    alt: "Grand Entrance Walkway",
+    isFeatured: false,
+    storage: "cloudinary"
+  },
+  {
+    id: "photo-cdn-12",
+    title: "Devotional Spiritual Stage",
+    category: "Religious",
+    imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793125756/shree_velora/gallery/dvyhcjddvshljrxm8hdt.jpg",
+    alt: "Devotional Spiritual Stage",
+    isFeatured: false,
+    storage: "cloudinary"
   }
 ];
 
@@ -167,9 +332,9 @@ interface ContentState {
 export const useContentStore = create<ContentState>()(
   persist(
     (set, get) => ({
-      events: [],
-      photos: [],
-      videos: [],
+      events: defaultCloudinaryEvents,
+      photos: defaultCloudinaryPhotos,
+      videos: defaultCloudinaryVideos,
       inquiries: [],
       reviews: [],
       aboutCards: defaultAboutCards,
@@ -236,10 +401,23 @@ export const useContentStore = create<ContentState>()(
 
       updateAboutCardImage: async (id: string, imageSrc: string) => {
         const directSrc = convertDriveUrlToDirectLink(imageSrc);
+        const updatedAboutCards = get().aboutCards.map((card) =>
+          card.id === id ? { ...card, imageSrc: directSrc } : card
+        );
+        const currentSiteContent = get().siteContent;
+        const updatedCards = (currentSiteContent.about?.cards || []).map((card) =>
+          card.id === id ? { ...card, imageSrc: directSrc } : card
+        );
+
         set({
-          aboutCards: get().aboutCards.map((card) =>
-            card.id === id ? { ...card, imageSrc: directSrc } : card
-          )
+          aboutCards: updatedAboutCards,
+          siteContent: {
+            ...currentSiteContent,
+            about: {
+              ...currentSiteContent.about,
+              cards: updatedCards
+            }
+          }
         });
 
         try {
@@ -328,7 +506,24 @@ export const useContentStore = create<ContentState>()(
             set({ aboutCards: aboutRes.data });
           }
           if (contentRes?.ok && contentRes.data) {
-            set({ siteContent: contentRes.data });
+            const apiAboutCards = aboutRes?.data || get().aboutCards || [];
+            const mergedCards = (contentRes.data.about?.cards || []).map((c: any) => {
+              const matched = apiAboutCards.find((ac: any) => (ac.id || ac.cardId) === c.id);
+              return {
+                ...c,
+                imageSrc: c.imageSrc || matched?.imageSrc || ""
+              };
+            });
+
+            set({
+              siteContent: {
+                ...contentRes.data,
+                about: {
+                  ...contentRes.data.about,
+                  cards: mergedCards.length > 0 ? mergedCards : contentRes.data.about?.cards
+                }
+              }
+            });
           }
         } catch (e) {
           console.error("Failed to sync store with API:", e);
@@ -560,7 +755,11 @@ export const useContentStore = create<ContentState>()(
       partialize: (state) => ({
         isAuthenticated: state.isAuthenticated,
         reviews: state.reviews,
-        siteContent: state.siteContent
+        siteContent: state.siteContent,
+        aboutCards: state.aboutCards,
+        photos: state.photos,
+        events: state.events,
+        videos: state.videos
       })
     }
   )

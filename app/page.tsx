@@ -33,11 +33,22 @@ export const metadata: Metadata = {
   }
 };
 
-/** Renders the complete premium landing page. */
+const CLOUDINARY_HERO_DESKTOP_VIDEO =
+  "https://res.cloudinary.com/rwmkoctu/video/upload/v1793428703/shree_velora/videos/hero_desktop_video.mp4";
+const CLOUDINARY_HERO_MOBILE_VIDEO =
+  "https://res.cloudinary.com/rwmkoctu/video/upload/v1793428708/shree_velora/videos/hero_mobile_video.mp4";
+
+/** Renders the complete premium landing page with Cloudinary Video CDN. */
 export default function HomePage(): React.ReactElement {
   const logoSrc = optionalPublicAsset("/logos/logo.png");
-  const desktopHeroVideoSrc = optionalPublicAsset("/videos/landing-page.mp4") ?? optionalPublicAsset("/videos/hero-desktop.mp4");
-  const mobileHeroVideoSrc = optionalPublicAsset("/videos/landing-page.mp4") ?? optionalPublicAsset("/videos/hero-mobile.mp4");
+  const desktopHeroVideoSrc =
+    CLOUDINARY_HERO_DESKTOP_VIDEO ??
+    optionalPublicAsset("/videos/landing-page.mp4") ??
+    optionalPublicAsset("/videos/hero-desktop.mp4");
+  const mobileHeroVideoSrc =
+    CLOUDINARY_HERO_MOBILE_VIDEO ??
+    optionalPublicAsset("/videos/landing-page.mp4") ??
+    optionalPublicAsset("/videos/hero-mobile.mp4");
 
   return (
     <>

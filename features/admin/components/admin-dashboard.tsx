@@ -1855,41 +1855,121 @@ export function AdminDashboard(): React.ReactElement {
                 <div className="border-t border-[#EBDCFB] pt-4">
                   <h4 className="font-bold text-sm text-[#2D2238] mb-3">4 Signature Highlight Cards</h4>
                   <div className="grid gap-4 sm:grid-cols-2">
-                    {cmsAbout.cards.map((card, idx) => (
-                      <div key={card.id || idx} className="rounded-xl border border-[#EBDCFB] bg-[#FAF7FF] p-4 space-y-3">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold text-[#D4AF37]">{card.number || `0${idx + 1}`}</span>
-                          <span className="text-[10px] text-gray-500 font-mono">Card {idx + 1}</span>
+                    {cmsAbout.cards.map((card, idx) => {
+                      const matchedStoreCard = aboutCards?.find((c) => c.id === card.id);
+                      const currentImg = card.imageSrc || matchedStoreCard?.imageSrc || "";
+
+                      return (
+                        <div key={card.id || idx} className="rounded-xl border border-[#EBDCFB] bg-[#FAF7FF] p-4 space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold text-[#D4AF37]">{card.number || `0${idx + 1}`}</span>
+                            <span className="text-[10px] text-gray-500 font-mono">Card {idx + 1} ({card.id || "highlight"})</span>
+                          </div>
+
+                          {/* Image preview */}
+                          <div className="relative flex h-28 w-full items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-white">
+                            {currentImg ? (
+                              <ResponsiveImage
+                                alt={card.title}
+                                className="size-full"
+                                fallbackClassName="bg-slate-100"
+                                imageClassName="object-cover"
+                                sizes="50vw"
+                                src={resolveRenderableImageSrc(currentImg)}
+                                title={card.title}
+                              />
+                            ) : (
+                              <div className="p-3 text-center text-slate-400">
+                                <ImageIcon className="mx-auto mb-1 size-5 opacity-40" />
+                                <span className="text-[11px] font-medium">No background photo set</span>
+                              </div>
+                            )}
+                          </div>
+
+                          <div>
+                            <Label htmlFor={`card-title-${idx}`}>Card Title</Label>
+                            <Input
+                              id={`card-title-${idx}`}
+                              value={card.title}
+                              onChange={(e) => {
+                                const updated = [...cmsAbout.cards];
+                                updated[idx] = { ...card, title: e.target.value };
+                                setCmsAbout({ ...cmsAbout, cards: updated });
+                              }}
+                              className="mt-1 bg-white text-xs font-semibold"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor={`card-desc-${idx}`}>Card Description</Label>
+                            <Textarea
+                              id={`card-desc-${idx}`}
+                              value={card.description}
+                              onChange={(e) => {
+                                const updated = [...cmsAbout.cards];
+                                updated[idx] = { ...card, description: e.target.value };
+                                setCmsAbout({ ...cmsAbout, cards: updated });
+                              }}
+                              rows={2}
+                              className="mt-1 bg-white text-xs"
+                            />
+                          </div>
+
+                          <div className="pt-2 border-t border-[#EBDCFB]/70 space-y-2">
+                            <Label className="text-[11px] font-semibold text-slate-700">Card Background Photo</Label>
+                            <Input
+                              type="file"
+                              accept="image/*"
+                              className="text-xs bg-white cursor-pointer"
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                try {
+                                  toast.loading("Uploading to Cloudinary...", { id: `cms-card-upload-${card.id}` });
+                                  const res = await uploadFileToCloudinary(file, { folder: "shree_velora/about" });
+                                  const updated = [...cmsAbout.cards];
+                                  updated[idx] = { ...card, imageSrc: res.url };
+                                  setCmsAbout({ ...cmsAbout, cards: updated });
+                                  await updateAboutCardImage(card.id, res.url);
+                                  toast.success("Card photo uploaded & synced!", { id: `cms-card-upload-${card.id}` });
+                                } catch (err) {
+                                  const msg = err instanceof Error ? err.message : "Failed to upload photo";
+                                  toast.error(msg, { id: `cms-card-upload-${card.id}` });
+                                }
+                              }}
+                            />
+                            <div className="flex gap-2">
+                              <Input
+                                type="text"
+                                placeholder="Paste image URL..."
+                                value={currentImg}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  const updated = [...cmsAbout.cards];
+                                  updated[idx] = { ...card, imageSrc: val };
+                                  setCmsAbout({ ...cmsAbout, cards: updated });
+                                  void updateAboutCardImage(card.id, val);
+                                }}
+                                className="bg-white text-xs"
+                              />
+                              {currentImg ? (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const updated = [...cmsAbout.cards];
+                                    updated[idx] = { ...card, imageSrc: "" };
+                                    setCmsAbout({ ...cmsAbout, cards: updated });
+                                    void updateAboutCardImage(card.id, "");
+                                  }}
+                                  className="rounded-md border border-rose-200 bg-rose-50 px-2 py-1 text-xs text-rose-600 hover:bg-rose-100 transition"
+                                >
+                                  Remove
+                                </button>
+                              ) : null}
+                            </div>
+                          </div>
                         </div>
-                        <div>
-                          <Label htmlFor={`card-title-${idx}`}>Card Title</Label>
-                          <Input
-                            id={`card-title-${idx}`}
-                            value={card.title}
-                            onChange={(e) => {
-                              const updated = [...cmsAbout.cards];
-                              updated[idx] = { ...card, title: e.target.value };
-                              setCmsAbout({ ...cmsAbout, cards: updated });
-                            }}
-                            className="mt-1 bg-white text-xs font-semibold"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor={`card-desc-${idx}`}>Card Description</Label>
-                          <Textarea
-                            id={`card-desc-${idx}`}
-                            value={card.description}
-                            onChange={(e) => {
-                              const updated = [...cmsAbout.cards];
-                              updated[idx] = { ...card, description: e.target.value };
-                              setCmsAbout({ ...cmsAbout, cards: updated });
-                            }}
-                            rows={2}
-                            className="mt-1 bg-white text-xs"
-                          />
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               </div>

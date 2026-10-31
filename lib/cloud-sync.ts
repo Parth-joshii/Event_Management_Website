@@ -58,10 +58,10 @@ export interface CloudStoreData {
 }
 
 const defaultAboutCards: AboutCardItem[] = [
-  { id: "bespoke-design", title: "Bespoke Design", description: "Tailored themes, atmospheric lighting, and luxury stage installations.", imageSrc: "" },
-  { id: "flawless-execution", title: "Flawless Execution", description: "Seamless vendor management and attentive on-day coordination.", imageSrc: "" },
-  { id: "curated-network", title: "Curated Network", description: "Exclusive access to top-tier venues, artists, and production masters.", imageSrc: "" },
-  { id: "transparent-pricing", title: "Transparent Pricing", description: "Clear line-item quotes and real-time budget management.", imageSrc: "" }
+  { id: "bespoke-design", title: "Bespoke Design", description: "Tailored themes, atmospheric lighting, and luxury stage installations.", imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793385048/shree_velora/about/diklrziwqbjvwhkm99vt.jpg" },
+  { id: "flawless-execution", title: "Flawless Execution", description: "Seamless vendor management and attentive on-day coordination.", imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793385061/shree_velora/about/ryd7tzoa7dm5amkx6ne5.jpg" },
+  { id: "curated-network", title: "Curated Network", description: "Exclusive access to top-tier venues, artists, and production masters.", imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793385074/shree_velora/about/zzryvnbb59enkedgocky.jpg" },
+  { id: "transparent-pricing", title: "Transparent Pricing", description: "Clear line-item quotes and real-time budget management.", imageSrc: "https://res.cloudinary.com/rwmkoctu/image/upload/v1793385092/shree_velora/about/vx3ensckhdh1xsvit46v.jpg" }
 ];
 
 // In-memory cache for ultra-fast local server response

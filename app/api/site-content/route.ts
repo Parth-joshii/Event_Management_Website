@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { SiteContentModel } from "@/models/SiteContent";
+import { AboutCardModel } from "@/models/AboutCard";
 import { getCloudData, saveCloudData } from "@/lib/cloud-sync";
 import { defaultSiteContent, type SiteContentData } from "@/types/site-content";
 
@@ -24,7 +25,11 @@ function mergeWithDefaults(saved?: Partial<SiteContentData> | null): SiteContent
       ...(saved.about || {}),
       cards:
         Array.isArray(saved.about?.cards) && saved.about.cards.length > 0
-          ? saved.about.cards
+          ? saved.about.cards.map((c, idx) => ({
+              ...(defaultSiteContent.about.cards[idx] || {}),
+              ...c,
+              imageSrc: c.imageSrc || ""
+            }))
           : defaultSiteContent.about.cards
     },
     eventsSection: {
@@ -53,10 +58,25 @@ export async function GET(): Promise<NextResponse> {
     try {
       await connectToDatabase();
       const doc = await SiteContentModel.findOne({ key: CONTENT_KEY }).lean();
+      const aboutCards = await AboutCardModel.find({}).lean().catch(() => []);
+
       if (doc && doc.data) {
+        const merged = mergeWithDefaults(doc.data as Partial<SiteContentData>);
+
+        // Enrich about.cards with imageSrc from AboutCardModel if missing
+        if (aboutCards.length > 0 && merged.about?.cards) {
+          merged.about.cards = merged.about.cards.map((c) => {
+            const found = aboutCards.find((ac: any) => (ac.cardId || ac.id) === c.id);
+            return {
+              ...c,
+              imageSrc: c.imageSrc || found?.imageSrc || ""
+            };
+          });
+        }
+
         return NextResponse.json({
           ok: true,
-          data: mergeWithDefaults(doc.data as Partial<SiteContentData>)
+          data: merged
         });
       }
     } catch (dbErr) {
@@ -97,6 +117,22 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     let savedToMongo = false;
     try {
       await connectToDatabase();
+
+      // Ensure we preserve existing imageSrc if not provided in incoming body
+      const existingDoc = await SiteContentModel.findOne({ key: CONTENT_KEY }).lean();
+      const existingAboutCards = await AboutCardModel.find({}).lean().catch(() => []);
+
+      if (merged.about?.cards) {
+        merged.about.cards = merged.about.cards.map((newCard) => {
+          const prevCard = existingDoc?.data?.about?.cards?.find((pc: any) => pc.id === newCard.id);
+          const aboutCardDoc = existingAboutCards.find((ac: any) => (ac.cardId || ac.id) === newCard.id);
+          return {
+            ...newCard,
+            imageSrc: newCard.imageSrc || prevCard?.imageSrc || aboutCardDoc?.imageSrc || ""
+          };
+        });
+      }
+
       await SiteContentModel.findOneAndUpdate(
         { key: CONTENT_KEY },
         { $set: { key: CONTENT_KEY, data: merged } },
